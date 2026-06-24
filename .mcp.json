@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/jhbkr/Desktop/Expat-Inclusion-"
+      ],
+      "env": {}
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "pipx",
+      "args": [
+        "run",
+        "mcp-server-fetch"
+      ],
+      "env": {}
+    }
+  }
+}
