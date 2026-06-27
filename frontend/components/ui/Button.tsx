@@ -6,7 +6,6 @@ const variants = {
   primary: "bg-primary text-white hover:bg-primary-dark active:scale-[0.98]",
   outline: "border-2 border-primary text-primary hover:bg-primary-light",
   "outline-white": "border-2 border-white text-white hover:bg-white/10",
-  ghost: "text-primary hover:bg-primary-light",
 } as const;
 
 const sizes = {
