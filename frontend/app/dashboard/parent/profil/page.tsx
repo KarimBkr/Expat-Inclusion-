@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { COMMON_TIMEZONES } from "@/lib/timezones";
-import {
-  getParentProfile,
-  getTaxonomies,
-  saveParentProfile,
-} from "@/services/parent-profile";
+import { getParentProfile, getTaxonomies, saveParentProfile } from "@/services/parent-profile";
 import type { ApiError } from "@/types/auth";
 import type { ParentProfile, Taxonomies } from "@/types/parent-profile";
 
@@ -149,9 +145,7 @@ export default function ParentProfilPage() {
           <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{globalError}</div>
         )}
         {success && (
-          <div className="mb-6 p-3 bg-primary-light text-primary text-sm rounded-lg">
-            {success}
-          </div>
+          <div className="mb-6 p-3 bg-primary-light text-primary text-sm rounded-lg">{success}</div>
         )}
 
         <form onSubmit={handleSubmit} noValidate className="space-y-8">
@@ -215,9 +209,7 @@ export default function ParentProfilPage() {
                 className={inputClass}
                 placeholder="+33 6 12 34 56 78"
               />
-              {fieldErrors.phone && (
-                <p className="mt-1 text-xs text-danger">{fieldErrors.phone}</p>
-              )}
+              {fieldErrors.phone && <p className="mt-1 text-xs text-danger">{fieldErrors.phone}</p>}
             </div>
           </section>
 
@@ -252,7 +244,10 @@ export default function ParentProfilPage() {
             </div>
 
             <div>
-              <label htmlFor="school_level_id" className="block text-sm font-medium text-ink mb-1.5">
+              <label
+                htmlFor="school_level_id"
+                className="block text-sm font-medium text-ink mb-1.5"
+              >
                 Niveau scolaire
               </label>
               <select

@@ -18,7 +18,7 @@ export default function DashboardParentPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (!user || user.role !== "parent") return;
+    if (user?.role !== "parent") return;
     getParentProfile()
       .then((res) => setProfileComplete(res.is_complete))
       .catch(() => setProfileComplete(false));
