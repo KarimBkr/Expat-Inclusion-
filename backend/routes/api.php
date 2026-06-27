@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ParentProfileController;
+use App\Http\Controllers\Api\TaxonomyController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public ────────────────────────────────────────────────────────────────────
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
+Route::get('/taxonomies', [TaxonomyController::class, 'index']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,7 +28,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     // Routes parent uniquement
     Route::middleware('role:parent')->prefix('parent')->group(function (): void {
-        // US-04 et suivants
+        Route::get('/profile', [ParentProfileController::class, 'show']);
+        Route::post('/profile', [ParentProfileController::class, 'store']);
+        Route::put('/profile', [ParentProfileController::class, 'update']);
     });
 
     // Routes AESH uniquement

@@ -38,6 +38,7 @@ backend/public/storage
 *.pem
 *.key
 firebase-service-account.json
+*expat-inclusion-firebase-adminsdk*.json
 
 # ── OS ────────────────────────────────────────────────────────────
 .DS_Store
