@@ -50,7 +50,7 @@ docker compose ps
 ```
 
 Tu dois voir deux conteneurs avec le statut `running` :
-- `mysql` — base de données MySQL 8 sur le port `3306`
+- `mysql` — base de données MySQL 8 sur le port `3307` (host) → `3306` (conteneur)
 - `mailpit` — serveur mail de dev sur le port `8025`
 
 ### Identifiants MySQL (définis dans docker-compose.yml)
@@ -58,7 +58,7 @@ Tu dois voir deux conteneurs avec le statut `running` :
 | Paramètre | Valeur |
 |-----------|--------|
 | Host | `127.0.0.1` |
-| Port | `3306` |
+| Port | `3307` (host) |
 | Base de données | `expat_inclusion` |
 | Utilisateur | `expat` |
 | Mot de passe | `expat` |
@@ -104,7 +104,7 @@ APP_URL=http://localhost:8000
 # Base de données MySQL (Docker)
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=3307
 DB_DATABASE=expat_inclusion
 DB_USERNAME=expat
 DB_PASSWORD=expat
