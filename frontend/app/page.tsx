@@ -13,6 +13,7 @@ import {
   Video,
 } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 
@@ -82,48 +83,60 @@ export default function HomePage() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="bg-card pt-20 pb-28 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-light text-primary text-sm font-semibold rounded-full mb-8">
-            <span className="w-1.5 h-1.5 bg-primary rounded-full" />
-            Réseau AEFE — 30+ pays
+      <section className="bg-card h-hero flex items-center px-4 overflow-hidden">
+        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-8">
+          {/* Texte */}
+          <div>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-light text-primary text-sm font-semibold rounded-full mb-8">
+              <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+              Réseau AEFE — 30+ pays
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-ink mb-6 leading-tight">
+              Un AESH qualifié pour votre enfant,{" "}
+              <span className="text-primary">partout dans le monde</span>
+            </h1>
+
+            <p className="text-lg text-subtle mb-10 leading-relaxed max-w-lg">
+              Expat Inclusion connecte les familles francophones du réseau AEFE avec des
+              accompagnants spécialisés — TSA, TDA/H, troubles Dys, EIP — quel que soit votre pays
+              d&apos;expatriation.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <ButtonLink href="/inscription" size="lg">
+                Trouver un AESH
+              </ButtonLink>
+              <ButtonLink href="/inscription" variant="outline" size="lg">
+                Je suis AESH
+              </ButtonLink>
+            </div>
+
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-subtle">
+              <span className="flex items-center gap-1.5">
+                <Shield size={15} className="text-primary shrink-0" />
+                Profils vérifiés
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Globe size={15} className="text-primary shrink-0" />
+                30+ pays AEFE
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CreditCard size={15} className="text-primary shrink-0" />
+                Paiement sécurisé
+              </span>
+            </div>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-ink mb-6 leading-tight">
-            Un AESH qualifié pour votre enfant,{" "}
-            <span className="text-primary">partout dans le monde</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-subtle max-w-2xl mx-auto mb-10 leading-relaxed">
-            Expat Inclusion connecte les familles francophones du réseau AEFE avec des accompagnants
-            spécialisés — TSA, TDA/H, troubles Dys, EIP — quel que soit votre pays
-            d&apos;expatriation.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-            <ButtonLink href="/inscription" size="lg">
-              Trouver un AESH
-            </ButtonLink>
-            <ButtonLink href="/inscription" variant="outline" size="lg">
-              Je suis AESH
-            </ButtonLink>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 text-sm text-subtle">
-            <span className="flex items-center gap-1.5">
-              <Shield size={15} className="text-primary" />
-              Profils vérifiés par notre équipe
-            </span>
-            <span className="hidden sm:block w-1 h-1 bg-line rounded-full" />
-            <span className="flex items-center gap-1.5">
-              <Globe size={15} className="text-primary" />
-              30+ pays du réseau AEFE
-            </span>
-            <span className="hidden sm:block w-1 h-1 bg-line rounded-full" />
-            <span className="flex items-center gap-1.5">
-              <CreditCard size={15} className="text-primary" />
-              Paiement sécurisé
-            </span>
+          {/* Image — visible uniquement desktop */}
+          <div className="relative hidden lg:block aspect-4/3 w-full rounded-2xl overflow-hidden shadow-xl">
+            <Image
+              src="/hero.png"
+              alt="Famille et accompagnant spécialisé"
+              fill
+              className="object-cover object-center"
+              priority
+            />
           </div>
         </div>
       </section>
@@ -145,7 +158,7 @@ export default function HomePage() {
                 className="bg-card rounded-2xl p-8 border border-line hover:shadow-md transition-shadow duration-200"
               >
                 <div className="flex items-start gap-4 mb-5">
-                  <div className="w-11 h-11 bg-primary-light rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-11 h-11 bg-primary-light rounded-xl flex items-center justify-center shrink-0">
                     <Icon size={20} className="text-primary" />
                   </div>
                   <span className="text-5xl font-bold text-line leading-none pt-0.5 font-heading">
@@ -177,7 +190,7 @@ export default function HomePage() {
               <ul className="flex flex-col gap-3.5 mb-8">
                 {familyPoints.map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-sm text-ink">
-                    <Icon size={16} className="text-primary flex-shrink-0" />
+                    <Icon size={16} className="text-primary shrink-0" />
                     {text}
                   </li>
                 ))}
@@ -201,7 +214,7 @@ export default function HomePage() {
               <ul className="flex flex-col gap-3.5 mb-8">
                 {aeshPoints.map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-sm text-white/90">
-                    <Icon size={16} className="text-white/50 flex-shrink-0" />
+                    <Icon size={16} className="text-white/50 shrink-0" />
                     {text}
                   </li>
                 ))}

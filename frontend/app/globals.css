@@ -40,6 +40,17 @@ p {
   line-height: 1.7;
 }
 
+/* Hauteur du header — source de vérité unique.
+   Si le header change (h-16 → autre), modifier ici seulement. */
+:root {
+  --header-h: 4rem;
+}
+
+/* Hero : viewport exact moins le header. Utilise la variable, pas de valeur en dur. */
+@utility h-hero {
+  height: calc(100svh - var(--header-h));
+}
+
 /* Accordion natif — <details>/<summary> */
 details > summary {
   list-style: none;
