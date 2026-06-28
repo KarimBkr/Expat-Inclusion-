@@ -1,18 +1,28 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { getParentProfile } from "@/services/parent-profile";
 
 export default function DashboardParentPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (loading) return;
     if (!user) router.replace("/connexion");
     else if (user.role !== "parent") router.replace("/dashboard");
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user?.role !== "parent") return;
+    getParentProfile()
+      .then((res) => setProfileComplete(res.is_complete))
+      .catch(() => setProfileComplete(false));
+  }, [user]);
 
   if (loading || !user) {
     return (
@@ -49,6 +59,39 @@ export default function DashboardParentPage() {
           <a href="/verifier-email" className="font-medium underline">
             Vérifier maintenant
           </a>
+        </div>
+      )}
+
+      {profileComplete === false && (
+        <div className="mb-8 p-4 bg-primary-light border border-primary/20 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="font-medium text-ink">Complétez votre profil parent</p>
+            <p className="text-sm text-subtle mt-1">
+              Renseignez votre pays, le brief enfant et vos consentements pour accéder à la
+              recherche d&apos;AESH.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/parent/profil"
+            className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+          >
+            Compléter mon profil
+          </Link>
+        </div>
+      )}
+
+      {profileComplete === true && (
+        <div className="mb-8 flex items-center justify-between p-4 bg-card border border-line rounded-xl">
+          <p className="text-sm text-ink">
+            <span className="inline-block w-2 h-2 rounded-full bg-primary mr-2" />
+            Profil parent complet
+          </p>
+          <Link
+            href="/dashboard/parent/profil"
+            className="text-sm text-primary font-medium hover:underline"
+          >
+            Modifier
+          </Link>
         </div>
       )}
 
