@@ -2,7 +2,9 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 const navLinks = [
   { label: "Concept", href: "/#concept" },
@@ -13,6 +15,14 @@ const navLinks = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  async function handleLogout() {
+    setOpen(false);
+    await logout();
+    router.push("/");
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-card/90 backdrop-blur-sm border-b border-line">
@@ -40,18 +50,38 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/connexion"
-              className="text-sm font-medium text-ink hover:text-primary transition-colors"
-            >
-              Connexion
-            </Link>
-            <Link
-              href="/inscription"
-              className="text-sm font-semibold px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
-            >
-              Inscription
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-medium text-ink hover:text-primary transition-colors"
+                >
+                  Mon tableau de bord
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-sm font-semibold px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
+                >
+                  Se déconnecter
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/connexion"
+                  className="text-sm font-medium text-ink hover:text-primary transition-colors"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/inscription"
+                  className="text-sm font-semibold px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
+                >
+                  Inscription
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -80,20 +110,41 @@ export default function Header() {
               </Link>
             ))}
             <div className="border-t border-line pt-3 mt-2 flex flex-col gap-2">
-              <Link
-                href="/connexion"
-                onClick={() => setOpen(false)}
-                className="py-2 text-sm font-medium text-subtle"
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/inscription"
-                onClick={() => setOpen(false)}
-                className="text-center text-sm font-semibold px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
-              >
-                Inscription
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="py-2 text-sm font-medium text-ink hover:text-primary transition-colors"
+                  >
+                    Mon tableau de bord
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="text-center text-sm font-semibold px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
+                  >
+                    Se déconnecter
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/connexion"
+                    onClick={() => setOpen(false)}
+                    className="py-2 text-sm font-medium text-subtle"
+                  >
+                    Connexion
+                  </Link>
+                  <Link
+                    href="/inscription"
+                    onClick={() => setOpen(false)}
+                    className="text-center text-sm font-semibold px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
+                  >
+                    Inscription
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
