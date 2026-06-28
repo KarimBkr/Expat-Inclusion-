@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AeshProfileController as AdminAeshProfileController;
+use App\Http\Controllers\Api\Admin\TaxonomyController as AdminTaxonomyController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ParentProfileController;
@@ -40,6 +42,16 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     // Routes admin uniquement
     Route::middleware('role:admin')->prefix('admin')->group(function (): void {
-        // US-07 et suivants
+        Route::get('/taxonomies/{type}', [AdminTaxonomyController::class, 'index']);
+        Route::post('/taxonomies/{type}', [AdminTaxonomyController::class, 'store']);
+        Route::put('/taxonomies/{type}/{id}', [AdminTaxonomyController::class, 'update']);
+        Route::delete('/taxonomies/{type}/{id}', [AdminTaxonomyController::class, 'destroy']);
+
+        Route::get('/aesh-profiles', [AdminAeshProfileController::class, 'index']);
+        Route::get('/aesh-profiles/{id}', [AdminAeshProfileController::class, 'show']);
+        Route::post('/aesh-profiles/{id}/approve', [AdminAeshProfileController::class, 'approve']);
+        Route::post('/aesh-profiles/{id}/reject', [AdminAeshProfileController::class, 'reject']);
+        Route::post('/aesh-profiles/{id}/publish', [AdminAeshProfileController::class, 'publish']);
+        Route::post('/aesh-profiles/{id}/notes', [AdminAeshProfileController::class, 'storeNote']);
     });
 });

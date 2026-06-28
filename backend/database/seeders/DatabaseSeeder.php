@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             LanguageSeeder::class,
             SchoolLevelSeeder::class,
             ModalitySeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }
