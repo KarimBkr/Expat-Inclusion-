@@ -2,16 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { register } from "@/services/auth";
 import type { ApiError } from "@/types/auth";
 
 export default function InscriptionPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [role, setRole] = useState<"parent" | "aesh">("parent");
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
+
+  useEffect(() => {
+    if (!loading && user) router.replace("/dashboard");
+  }, [user, loading, router]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
