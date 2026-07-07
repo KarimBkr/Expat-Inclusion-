@@ -19,10 +19,24 @@ export interface SchoolLevel {
   order: number;
 }
 
+export interface Language {
+  id: number;
+  code: string;
+  name: string;
+}
+
+export interface Modality {
+  id: number;
+  slug: string;
+  name: string;
+}
+
 export interface Taxonomies {
   countries: Country[];
   specializations: Specialization[];
   school_levels: SchoolLevel[];
+  languages: Language[];
+  modalities: Modality[];
 }
 
 export interface ParentProfile {
