@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AeshDocumentController;
+use App\Http\Controllers\Api\AeshProfileController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ParentProfileController;
@@ -35,7 +37,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     // Routes AESH uniquement
     Route::middleware('role:aesh')->prefix('aesh')->group(function (): void {
-        // US-05 et suivants
+        Route::get('/profile', [AeshProfileController::class, 'show']);
+        Route::post('/profile', [AeshProfileController::class, 'store']);
+        Route::put('/profile', [AeshProfileController::class, 'update']);
+
+        Route::get('/documents', [AeshDocumentController::class, 'index']);
+        Route::post('/documents', [AeshDocumentController::class, 'store']);
+        Route::get('/documents/{document}/download', [AeshDocumentController::class, 'download']);
+        Route::delete('/documents/{document}', [AeshDocumentController::class, 'destroy']);
     });
 
     // Routes admin uniquement
