@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -90,6 +91,12 @@ class AeshProfile extends Model
     public function isApproved(): bool
     {
         return $this->verification_status === self::STATUS_APPROVED;
+    }
+
+    /** @param  \Illuminate\Database\Eloquent\Builder<AeshProfile>  $query */
+    public function scopePublished(Builder $query): void
+    {
+        $query->where('verification_status', self::STATUS_PUBLISHED);
     }
 
     public function isComplete(): bool
