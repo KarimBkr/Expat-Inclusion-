@@ -18,6 +18,8 @@ export default function DashboardRedirectPage() {
       router.replace("/dashboard/aesh");
     } else if (user.role === "parent") {
       router.replace("/dashboard/parent");
+    } else if (user.role === "admin") {
+      router.replace("/dashboard/admin");
     } else {
       router.replace("/");
     }

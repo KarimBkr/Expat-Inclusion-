@@ -10,7 +10,7 @@ import {
   getAeshDocuments,
   uploadAeshDocument,
 } from "@/services/aesh-profile";
-import type { AeshDocument, DocumentType, VerificationStatus } from "@/types/aesh-profile";
+import type { AeshDocument, DocumentStatus, DocumentType } from "@/types/aesh-profile";
 import type { ApiError } from "@/types/auth";
 
 const documentTypes: { value: DocumentType; label: string }[] = [
@@ -27,13 +27,13 @@ const typeLabels: Record<DocumentType, string> = {
   other: "Autre",
 };
 
-const statusLabels: Record<VerificationStatus, string> = {
+const statusLabels: Record<DocumentStatus, string> = {
   pending: "En attente",
   approved: "Validé",
   rejected: "Refusé",
 };
 
-const statusClass: Record<VerificationStatus, string> = {
+const statusClass: Record<DocumentStatus, string> = {
   pending: "bg-amber-50 text-amber-800",
   approved: "bg-primary-light text-primary",
   rejected: "bg-danger/10 text-danger",

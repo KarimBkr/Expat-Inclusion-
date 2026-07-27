@@ -1,4 +1,6 @@
-export type VerificationStatus = "pending" | "approved" | "rejected";
+export type VerificationStatus = "pending" | "approved" | "rejected" | "published";
+
+export type DocumentStatus = "pending" | "approved" | "rejected";
 
 export type DocumentType = "diploma" | "identity" | "certification" | "other";
 
@@ -10,7 +12,7 @@ export interface AeshProfile {
   timezone: string;
   phone: string | null;
   verification_status: VerificationStatus;
-  is_published: boolean;
+  published_at: string | null;
   is_complete: boolean;
   specialization_ids?: number[];
   language_ids?: number[];
@@ -44,7 +46,7 @@ export interface AeshDocument {
   type: DocumentType;
   original_name: string;
   size: number;
-  status: VerificationStatus;
+  status: DocumentStatus;
   rejection_reason: string | null;
   created_at: string;
 }

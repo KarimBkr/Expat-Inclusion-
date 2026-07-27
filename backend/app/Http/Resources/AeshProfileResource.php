@@ -18,7 +18,7 @@ class AeshProfileResource extends JsonResource
             'timezone'            => $this->timezone,
             'phone'               => $this->phone,
             'verification_status' => $this->verification_status,
-            'is_published'        => $this->is_published,
+            'published_at'        => $this->published_at?->toIso8601String(),
             'is_complete'         => $this->isComplete(),
             'specialization_ids'  => $this->whenLoaded('specializations', fn () => $this->specializations->pluck('id')),
             'language_ids'        => $this->whenLoaded('languages', fn () => $this->languages->pluck('id')),

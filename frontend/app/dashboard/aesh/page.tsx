@@ -11,12 +11,14 @@ const verificationLabel: Record<AeshProfile["verification_status"], string> = {
   pending: "En attente de vérification",
   approved: "Profil vérifié",
   rejected: "Vérification refusée",
+  published: "Profil publié",
 };
 
 const verificationClass: Record<AeshProfile["verification_status"], string> = {
   pending: "bg-amber-50 text-amber-800 border-amber-200",
   approved: "bg-primary-light text-primary border-primary/20",
   rejected: "bg-danger/10 text-danger border-danger/20",
+  published: "bg-primary-light text-primary border-primary/20",
 };
 
 export default function DashboardAeshPage() {

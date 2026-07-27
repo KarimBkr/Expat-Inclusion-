@@ -9,6 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AeshProfile extends Model
 {
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_APPROVED = 'approved';
+
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_PUBLISHED = 'published';
+
     protected $fillable = [
         'user_id',
         'bio',
@@ -17,12 +25,12 @@ class AeshProfile extends Model
         'timezone',
         'phone',
         'verification_status',
-        'is_published',
+        'rejection_reason',
+        'published_at',
     ];
 
     protected $attributes = [
-        'verification_status' => 'pending',
-        'is_published' => false,
+        'verification_status' => self::STATUS_PENDING,
     ];
 
     protected function casts(): array
@@ -30,7 +38,7 @@ class AeshProfile extends Model
         return [
             'hourly_rate' => 'decimal:2',
             'experience_years' => 'integer',
-            'is_published' => 'boolean',
+            'published_at' => 'datetime',
         ];
     }
 
@@ -67,6 +75,21 @@ class AeshProfile extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(AeshDocument::class);
+    }
+
+    public function adminNotes(): HasMany
+    {
+        return $this->hasMany(AdminNote::class);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->verification_status === self::STATUS_PENDING;
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->verification_status === self::STATUS_APPROVED;
     }
 
     public function isComplete(): bool

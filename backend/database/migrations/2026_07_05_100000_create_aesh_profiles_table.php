@@ -11,13 +11,14 @@ return new class extends Migration
         Schema::create('aesh_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
-            $table->text('bio');
-            $table->decimal('hourly_rate', 8, 2);
+            $table->text('bio')->nullable();
+            $table->decimal('hourly_rate', 8, 2)->nullable();
             $table->unsignedTinyInteger('experience_years')->nullable();
-            $table->string('timezone');
+            $table->string('timezone')->nullable();
             $table->string('phone', 30)->nullable();
-            $table->enum('verification_status', ['pending', 'approved', 'rejected'])->default('pending')->index();
-            $table->boolean('is_published')->default(false)->index();
+            $table->string('verification_status')->default('pending')->index();
+            $table->string('rejection_reason', 500)->nullable();
+            $table->timestamp('published_at')->nullable()->index();
             $table->timestamps();
         });
     }
