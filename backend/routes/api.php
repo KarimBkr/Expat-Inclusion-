@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\AeshProfileController as AdminAeshProfileCont
 use App\Http\Controllers\Api\Admin\TaxonomyController as AdminTaxonomyController;
 use App\Http\Controllers\Api\AeshDocumentController;
 use App\Http\Controllers\Api\AeshProfileController;
+use App\Http\Controllers\Api\AeshSearchController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ParentProfileController;
@@ -35,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/profile', [ParentProfileController::class, 'show']);
         Route::post('/profile', [ParentProfileController::class, 'store']);
         Route::put('/profile', [ParentProfileController::class, 'update']);
+
+        Route::get('/aesh-search', [AeshSearchController::class, 'index']);
     });
 
     // Routes AESH uniquement
