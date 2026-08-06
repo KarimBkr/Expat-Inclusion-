@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AeshDocumentController;
 use App\Http\Controllers\Api\AeshProfileController;
 use App\Http\Controllers\Api\AeshSearchController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BookingRequestController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ParentProfileController;
 use App\Http\Controllers\Api\TaxonomyController;
@@ -31,6 +32,16 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
         ->middleware('signed')
         ->name('verification.verify');
+
+    // Demandes de réservation — parent auteur et AESH destinataire (policy)
+    Route::prefix('bookings')->group(function (): void {
+        Route::get('/', [BookingRequestController::class, 'index']);
+        Route::post('/', [BookingRequestController::class, 'store'])->middleware('role:parent');
+        Route::get('/{booking}', [BookingRequestController::class, 'show']);
+        Route::post('/{booking}/accept', [BookingRequestController::class, 'accept'])->middleware('role:aesh');
+        Route::post('/{booking}/decline', [BookingRequestController::class, 'decline'])->middleware('role:aesh');
+        Route::post('/{booking}/cancel', [BookingRequestController::class, 'cancel']);
+    });
 
     // Routes parent uniquement
     Route::middleware('role:parent')->prefix('parent')->group(function (): void {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getAeshDocuments, getAeshProfile } from "@/services/aesh-profile";
+import { listBookings } from "@/services/booking";
 import type { AeshProfile } from "@/types/aesh-profile";
 
 const verificationLabel: Record<AeshProfile["verification_status"], string> = {
@@ -26,6 +27,7 @@ export default function DashboardAeshPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<AeshProfile | null>(null);
   const [docCount, setDocCount] = useState<number | null>(null);
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -41,6 +43,9 @@ export default function DashboardAeshPage() {
     getAeshDocuments()
       .then((docs) => setDocCount(docs.length))
       .catch(() => setDocCount(0));
+    listBookings("requested")
+      .then((bookings) => setPendingCount(bookings.length))
+      .catch(() => setPendingCount(0));
   }, [user]);
 
   if (loading || !user) {
@@ -126,12 +131,13 @@ export default function DashboardAeshPage() {
           description="Pièces de vérification"
           href="/dashboard/aesh/documents"
         />
-        <DashboardCard title="Demandes reçues" value="—" description="Demandes des parents" />
+        <DashboardCard
+          title="Demandes reçues"
+          value={pendingCount === null ? "—" : String(pendingCount)}
+          description="En attente de votre réponse"
+          href="/dashboard/aesh/demandes"
+        />
       </div>
-
-      <p className="mt-12 text-sm text-subtle text-center">
-        Les demandes des parents arriveront dès le Sprint 4.
-      </p>
     </div>
   );
 }
