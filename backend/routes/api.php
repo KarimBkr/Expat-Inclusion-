@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\AeshProfileController as AdminAeshProfileController;
 use App\Http\Controllers\Api\Admin\TaxonomyController as AdminTaxonomyController;
+use App\Http\Controllers\Api\AeshDetailController;
 use App\Http\Controllers\Api\AeshDocumentController;
 use App\Http\Controllers\Api\AeshProfileController;
 use App\Http\Controllers\Api\AeshSearchController;
@@ -38,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::put('/profile', [ParentProfileController::class, 'update']);
 
         Route::get('/aesh-search', [AeshSearchController::class, 'index']);
+        Route::get('/aesh-profiles/{id}', [AeshDetailController::class, 'show'])->whereNumber('id');
     });
 
     // Routes AESH uniquement

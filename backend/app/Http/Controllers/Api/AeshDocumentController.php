@@ -58,7 +58,7 @@ class AeshDocumentController extends Controller
     {
         $this->authorizeOwnership($request, $document);
 
-        if ($document->status === 'approved') {
+        if ($document->status === AeshDocument::STATUS_APPROVED) {
             return response()->json([
                 'message' => 'Un document déjà validé ne peut pas être supprimé.',
             ], 403);
