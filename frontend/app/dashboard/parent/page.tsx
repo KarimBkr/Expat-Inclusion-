@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { listBookings } from "@/services/booking";
 import { getParentProfile } from "@/services/parent-profile";
 
 export default function DashboardParentPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
+  const [bookingCount, setBookingCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -22,6 +24,9 @@ export default function DashboardParentPage() {
     getParentProfile()
       .then((res) => setProfileComplete(res.is_complete))
       .catch(() => setProfileComplete(false));
+    listBookings()
+      .then((bookings) => setBookingCount(bookings.length))
+      .catch(() => setBookingCount(0));
   }, [user]);
 
   if (loading || !user) {
@@ -111,13 +116,18 @@ export default function DashboardParentPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <DashboardCard title="Mes demandes" value="—" description="Demandes de réservation" />
+        <DashboardCard
+          title="Mes demandes"
+          value={bookingCount === null ? "—" : String(bookingCount)}
+          description="Demandes de réservation"
+          href="/dashboard/parent/reservations"
+        />
         <DashboardCard title="Mes paiements" value="—" description="Historique paiements" />
         <DashboardCard title="Mes conversations" value="—" description="Messages avec les AESH" />
       </div>
 
       <p className="mt-12 text-sm text-subtle text-center">
-        Demandes, paiements et messagerie arrivent dès le Sprint 4.
+        Paiements et messagerie arrivent dès le Sprint 5.
       </p>
     </div>
   );
@@ -127,16 +137,28 @@ function DashboardCard({
   title,
   value,
   description,
+  href,
 }: {
   title: string;
   value: string;
   description: string;
+  href?: string;
 }) {
-  return (
-    <div className="bg-card border border-line rounded-2xl p-6">
+  const content = (
+    <div className="bg-card border border-line rounded-2xl p-6 h-full">
       <p className="text-sm font-medium text-subtle mb-1">{title}</p>
       <p className="text-3xl font-bold text-ink mb-1">{value}</p>
       <p className="text-xs text-subtle">{description}</p>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block hover:opacity-90 transition-opacity">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
