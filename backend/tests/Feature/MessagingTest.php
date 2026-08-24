@@ -45,7 +45,6 @@ class MessagingTest extends TestCase
         $this->profile = AeshProfile::create([
             'user_id'             => $this->aeshUser->id,
             'bio'                 => 'Accompagnante spécialisée pour le test messagerie.',
-            'hourly_rate'         => 35,
             'timezone'            => 'Europe/Paris',
             'verification_status' => AeshProfile::STATUS_PUBLISHED,
             'published_at'        => now(),
@@ -70,7 +69,6 @@ class MessagingTest extends TestCase
             'school_level_id' => SchoolLevel::first()->id,
             'start_date'      => now()->addWeek()->toDateString(),
             'hours_per_week'  => 6,
-            'hourly_rate'     => 35,
             'responded_at'    => now(),
         ]);
     }
@@ -143,7 +141,6 @@ class MessagingTest extends TestCase
             'school_level_id' => SchoolLevel::first()->id,
             'start_date'      => now()->addWeeks(2)->toDateString(),
             'hours_per_week'  => 4,
-            'hourly_rate'     => 35,
         ]);
 
         $this->actingAs($this->parent)
