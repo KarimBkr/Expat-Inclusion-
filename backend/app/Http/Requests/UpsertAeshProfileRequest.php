@@ -15,7 +15,6 @@ class UpsertAeshProfileRequest extends FormRequest
     {
         return [
             'bio'                => ['required', 'string', 'min:50', 'max:2000'],
-            'hourly_rate'        => ['required', 'numeric', 'min:0', 'max:9999.99'],
             'experience_years'   => ['nullable', 'integer', 'min:0', 'max:60'],
             'timezone'           => ['required', 'string', 'timezone:all'],
             'phone'              => ['nullable', 'string', 'max:30', 'regex:/^\+?[0-9\s\-().]{6,30}$/'],
@@ -38,8 +37,6 @@ class UpsertAeshProfileRequest extends FormRequest
             'bio.required'                => 'La présentation est requise.',
             'bio.min'                     => 'La présentation doit contenir au moins 50 caractères.',
             'bio.max'                     => 'La présentation ne peut pas dépasser 2000 caractères.',
-            'hourly_rate.required'        => 'Le tarif horaire est requis.',
-            'hourly_rate.numeric'         => 'Le tarif horaire doit être un nombre.',
             'timezone.required'           => 'Le fuseau horaire est requis.',
             'timezone.timezone'           => 'Le fuseau horaire sélectionné est invalide.',
             'phone.regex'                 => 'Le numéro de téléphone est invalide.',

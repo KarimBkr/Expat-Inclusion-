@@ -26,7 +26,6 @@ class BookingRequestResource extends JsonResource
             'message'         => $this->message,
             'start_date'      => $this->start_date?->toDateString(),
             'hours_per_week'  => $this->hours_per_week,
-            'hourly_rate'     => $this->hourly_rate,
             'response_reason' => $this->response_reason,
             'responded_at'    => $this->responded_at?->toIso8601String(),
             'created_at'      => $this->created_at?->toIso8601String(),

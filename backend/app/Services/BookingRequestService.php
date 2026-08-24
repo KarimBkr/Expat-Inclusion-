@@ -48,7 +48,6 @@ class BookingRequestService
                 'school_level_id' => $data['school_level_id'],
                 'start_date'      => $data['start_date'],
                 'hours_per_week'  => $data['hours_per_week'],
-                'hourly_rate'     => $profile->hourly_rate,
             ]);
 
             $this->recordHistory($booking, null, BookingStatus::Requested, $parent);

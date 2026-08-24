@@ -42,7 +42,6 @@ class AeshProfileTest extends TestCase
     {
         return [
             'bio'                => 'Accompagnante expérimentée auprès d\'élèves à besoins spécifiques depuis dix ans.',
-            'hourly_rate'        => 35.5,
             'experience_years'   => 10,
             'timezone'           => 'Europe/Paris',
             'phone'              => '+33612345678',
@@ -60,7 +59,6 @@ class AeshProfileTest extends TestCase
             ->postJson('/api/aesh/profile', $this->validPayload());
 
         $response->assertStatus(201)
-            ->assertJsonPath('profile.hourly_rate', '35.50')
             ->assertJsonPath('profile.is_complete', true)
             ->assertJsonPath('profile.verification_status', 'pending');
 
@@ -96,13 +94,29 @@ class AeshProfileTest extends TestCase
         $this->actingAs($this->aesh)
             ->putJson('/api/aesh/profile', [
                 ...$this->validPayload(),
-                'hourly_rate' => 42,
-                'language_ids' => Language::limit(2)->pluck('id')->all(),
+                'experience_years' => 12,
+                'language_ids'     => Language::limit(2)->pluck('id')->all(),
             ])
             ->assertOk()
-            ->assertJsonPath('profile.hourly_rate', '42.00');
+            ->assertJsonPath('profile.experience_years', 12);
 
         $this->assertDatabaseCount('aesh_profile_language', 2);
+    }
+
+    /**
+     * Garde-fou : le tarif horaire a été retiré du produit. Un profil sans
+     * tarif doit rester complet, donc publiable et visible en recherche.
+     */
+    public function test_profil_complet_sans_tarif_horaire(): void
+    {
+        $payload = $this->validPayload();
+        $this->assertArrayNotHasKey('hourly_rate', $payload);
+
+        $this->actingAs($this->aesh)
+            ->postJson('/api/aesh/profile', $payload)
+            ->assertStatus(201)
+            ->assertJsonPath('profile.is_complete', true)
+            ->assertJsonMissingPath('profile.hourly_rate');
     }
 
     public function test_creation_echoue_si_profil_existe_deja(): void
@@ -156,10 +170,9 @@ class AeshProfileTest extends TestCase
     public function test_profil_incomplet_si_aucune_modalite(): void
     {
         $profile = AeshProfile::create([
-            'user_id'     => $this->aesh->id,
-            'bio'         => 'Une présentation suffisamment longue pour passer la validation minimale requise.',
-            'hourly_rate' => 30,
-            'timezone'    => 'Europe/Paris',
+            'user_id'  => $this->aesh->id,
+            'bio'      => 'Une présentation suffisamment longue pour passer la validation minimale requise.',
+            'timezone' => 'Europe/Paris',
         ]);
         $profile->specializations()->sync([Specialization::first()->id]);
         $profile->languages()->sync([Language::first()->id]);

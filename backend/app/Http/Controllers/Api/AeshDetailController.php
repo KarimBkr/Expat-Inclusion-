@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AeshDetailResource;
-use App\Models\AeshDocument;
 use App\Models\AeshProfile;
 
 class AeshDetailController extends Controller
@@ -19,7 +18,6 @@ class AeshDetailController extends Controller
     {
         $profile = AeshProfile::published()
             ->with(self::RELATIONS)
-            ->withCount(['documents as approved_documents_count' => fn ($q) => $q->where('status', AeshDocument::STATUS_APPROVED)])
             ->findOrFail($id);
 
         return AeshDetailResource::make($profile);

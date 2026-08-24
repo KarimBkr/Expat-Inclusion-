@@ -12,9 +12,9 @@ import type { AeshProfile } from "@/types/aesh-profile";
 import type { ConversationSummary } from "@/types/messaging";
 
 const verificationLabel: Record<AeshProfile["verification_status"], string> = {
-  pending: "En attente de vérification",
-  approved: "Profil vérifié",
-  rejected: "Vérification refusée",
+  pending: "Candidature en cours d'examen",
+  approved: "Candidature approuvée",
+  rejected: "Candidature refusée",
   published: "Profil publié",
 };
 
@@ -99,7 +99,7 @@ export default function DashboardAeshPage() {
           <div>
             <p className="font-medium text-ink">Complétez votre profil professionnel</p>
             <p className="text-sm text-subtle mt-1">
-              Présentez votre expertise, vos langues, vos pays d&apos;intervention et votre tarif
+              Présentez votre expertise, vos langues, vos pays d&apos;intervention et vos modalités
               pour être visible auprès des familles.
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function DashboardAeshPage() {
         <DashboardCard
           title="Mes documents"
           value={docCount === null ? "—" : String(docCount)}
-          description="Pièces de vérification"
+          description="CV et lettre de motivation"
           href="/dashboard/aesh/documents"
         />
         <DashboardCard

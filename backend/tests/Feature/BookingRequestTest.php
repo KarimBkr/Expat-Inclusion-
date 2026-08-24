@@ -42,12 +42,11 @@ class BookingRequestTest extends TestCase
         $this->profile = $this->makeProfile($this->aeshUser, AeshProfile::STATUS_PUBLISHED);
     }
 
-    private function makeProfile(User $user, string $status, float $rate = 35): AeshProfile
+    private function makeProfile(User $user, string $status): AeshProfile
     {
         return AeshProfile::create([
             'user_id'             => $user->id,
             'bio'                 => 'Accompagnante spécialisée avec une solide expérience de terrain.',
-            'hourly_rate'         => $rate,
             'timezone'            => 'Europe/Paris',
             'verification_status' => $status,
             'published_at'        => $status === AeshProfile::STATUS_PUBLISHED ? now() : null,
@@ -78,7 +77,6 @@ class BookingRequestTest extends TestCase
             'school_level_id' => SchoolLevel::first()->id,
             'start_date'      => now()->addWeek()->toDateString(),
             'hours_per_week'  => 6,
-            'hourly_rate'     => 35,
         ]);
     }
 
@@ -100,13 +98,15 @@ class BookingRequestTest extends TestCase
         ]);
     }
 
-    public function test_le_tarif_est_fige_a_la_creation(): void
+    /** La rémunération se règle hors plateforme : aucun montant n'est exposé. */
+    public function test_aucun_montant_dans_la_demande(): void
     {
-        $this->actingAs($this->parent)->postJson('/api/bookings', $this->payload())->assertStatus(201);
+        $json = $this->actingAs($this->parent)
+            ->postJson('/api/bookings', $this->payload())
+            ->assertStatus(201)
+            ->json('data');
 
-        $this->profile->update(['hourly_rate' => 90]);
-
-        $this->assertSame('35.00', BookingRequest::first()->hourly_rate);
+        $this->assertArrayNotHasKey('hourly_rate', $json);
     }
 
     public function test_la_creation_ecrit_une_ligne_d_historique(): void
@@ -330,7 +330,6 @@ class BookingRequestTest extends TestCase
             'school_level_id' => SchoolLevel::first()->id,
             'start_date'      => now()->addWeek()->toDateString(),
             'hours_per_week'  => 3,
-            'hourly_rate'     => 35,
         ]);
 
         $this->actingAs($this->parent)

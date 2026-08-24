@@ -9,7 +9,6 @@ export interface AeshSearchResult {
   id: number;
   name: string;
   bio: string;
-  hourly_rate: string;
   experience_years: number | null;
   verification_status: VerificationStatus;
   specializations: TaxonomyRef[];

@@ -160,9 +160,7 @@ function AeshBookingCard({
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="font-bold text-ink">{booking.parent?.name ?? "Famille"}</h2>
-          <p className="text-xs text-subtle mt-0.5">
-            Reçue le {formatDate(booking.created_at)} · {booking.hourly_rate} €/h
-          </p>
+          <p className="text-xs text-subtle mt-0.5">Reçue le {formatDate(booking.created_at)}</p>
         </div>
         <BookingStatusBadge status={booking.status} label={booking.status_label} />
       </div>

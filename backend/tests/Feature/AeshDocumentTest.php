@@ -27,7 +27,6 @@ class AeshDocumentTest extends TestCase
         $this->profile = AeshProfile::create([
             'user_id'     => $this->aesh->id,
             'bio'         => 'Une présentation suffisamment longue pour passer la validation minimale requise.',
-            'hourly_rate' => 30,
             'timezone'    => 'Europe/Paris',
         ]);
     }
@@ -35,12 +34,12 @@ class AeshDocumentTest extends TestCase
     public function test_aesh_peut_uploader_un_document(): void
     {
         $response = $this->actingAs($this->aesh)->postJson('/api/aesh/documents', [
-            'type' => 'diploma',
-            'file' => UploadedFile::fake()->create('diplome.pdf', 200, 'application/pdf'),
+            'type' => 'cv',
+            'file' => UploadedFile::fake()->create('cv.pdf', 200, 'application/pdf'),
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('document.type', 'diploma')
+            ->assertJsonPath('document.type', 'cv')
             ->assertJsonPath('document.status', 'pending');
 
         $document = AeshDocument::first();
@@ -51,7 +50,7 @@ class AeshDocumentTest extends TestCase
     public function test_upload_echoue_avec_mauvais_format(): void
     {
         $this->actingAs($this->aesh)->postJson('/api/aesh/documents', [
-            'type' => 'diploma',
+            'type' => 'cv',
             'file' => UploadedFile::fake()->create('virus.exe', 100),
         ])->assertStatus(422)->assertJsonValidationErrors(['file']);
     }
@@ -61,30 +60,30 @@ class AeshDocumentTest extends TestCase
         $aeshSansProfil = User::factory()->create(['role' => 'aesh']);
 
         $this->actingAs($aeshSansProfil)->postJson('/api/aesh/documents', [
-            'type' => 'diploma',
-            'file' => UploadedFile::fake()->create('diplome.pdf', 200, 'application/pdf'),
+            'type' => 'cv',
+            'file' => UploadedFile::fake()->create('cv.pdf', 200, 'application/pdf'),
         ])->assertStatus(409);
     }
 
     public function test_aesh_peut_lister_ses_documents(): void
     {
         $this->actingAs($this->aesh)->postJson('/api/aesh/documents', [
-            'type' => 'identity',
-            'file' => UploadedFile::fake()->create('cni.pdf', 100, 'application/pdf'),
+            'type' => 'cover_letter',
+            'file' => UploadedFile::fake()->create('lettre.pdf', 100, 'application/pdf'),
         ]);
 
         $this->actingAs($this->aesh)
             ->getJson('/api/aesh/documents')
             ->assertOk()
             ->assertJsonCount(1, 'documents')
-            ->assertJsonPath('documents.0.type', 'identity');
+            ->assertJsonPath('documents.0.type', 'cover_letter');
     }
 
     public function test_aesh_peut_supprimer_un_document_en_attente(): void
     {
         $this->actingAs($this->aesh)->postJson('/api/aesh/documents', [
-            'type' => 'other',
-            'file' => UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf'),
+            'type' => 'cv',
+            'file' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
         ]);
 
         $document = AeshDocument::first();
@@ -100,9 +99,9 @@ class AeshDocumentTest extends TestCase
     public function test_document_valide_ne_peut_pas_etre_supprime(): void
     {
         $document = $this->profile->documents()->create([
-            'type'          => 'diploma',
-            'original_name' => 'diplome.pdf',
-            'path'          => 'aesh-documents/1/diplome.pdf',
+            'type'          => 'cv',
+            'original_name' => 'cv.pdf',
+            'path'          => 'aesh-documents/1/cv.pdf',
             'size'          => 1000,
             'status'        => 'approved',
         ]);
@@ -120,13 +119,12 @@ class AeshDocumentTest extends TestCase
         $autreProfile = AeshProfile::create([
             'user_id'     => $autreAesh->id,
             'bio'         => 'Une présentation suffisamment longue pour passer la validation minimale requise.',
-            'hourly_rate' => 40,
             'timezone'    => 'Europe/Paris',
         ]);
         $document = $autreProfile->documents()->create([
-            'type'          => 'diploma',
-            'original_name' => 'diplome.pdf',
-            'path'          => 'aesh-documents/2/diplome.pdf',
+            'type'          => 'cv',
+            'original_name' => 'cv.pdf',
+            'path'          => 'aesh-documents/2/cv.pdf',
             'size'          => 1000,
         ]);
 

@@ -148,7 +148,7 @@ function ParentBookingCard({
         <div>
           <h2 className="font-bold text-ink">{booking.aesh?.name ?? "Accompagnant"}</h2>
           <p className="text-xs text-subtle mt-0.5">
-            Demande envoyée le {formatDate(booking.created_at)} · {booking.hourly_rate} €/h
+            Demande envoyée le {formatDate(booking.created_at)}
           </p>
         </div>
         <BookingStatusBadge status={booking.status} label={booking.status_label} />

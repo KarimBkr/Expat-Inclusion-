@@ -43,7 +43,6 @@ class AeshDetailTest extends TestCase
         $profile = AeshProfile::create([
             'user_id'             => $aesh->id,
             'bio'                 => 'Accompagnante spécialisée TSA avec dix ans de terrain en réseau AEFE.',
-            'hourly_rate'         => 35,
             'experience_years'    => 10,
             'timezone'            => 'Europe/Paris',
             'phone'               => '+33612345678',
@@ -110,47 +109,30 @@ class AeshDetailTest extends TestCase
         $this->assertArrayNotHasKey('user_id', $json);
     }
 
-    public function test_badge_documents_verifies(): void
+    /**
+     * La fiche n'annonce aucune vérification de pièces : seuls un CV et une
+     * lettre de motivation sont collectés, et ils ne sont jamais exposés.
+     */
+    public function test_aucune_information_sur_les_documents_exposee(): void
     {
         $profile = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
 
-        $this->actingAs($this->parent)
-            ->getJson("/api/parent/aesh-profiles/{$profile->id}")
-            ->assertOk()
-            ->assertJsonPath('data.documents_verified', false);
-
         AeshDocument::create([
             'aesh_profile_id' => $profile->id,
-            'type'            => 'identite',
-            'original_name'   => 'piece.pdf',
-            'path'            => 'documents/piece.pdf',
+            'type'            => AeshDocument::TYPE_CV,
+            'original_name'   => 'cv.pdf',
+            'path'            => 'documents/cv.pdf',
             'size'            => 1024,
             'status'          => AeshDocument::STATUS_APPROVED,
         ]);
 
-        $this->actingAs($this->parent)
+        $json = $this->actingAs($this->parent)
             ->getJson("/api/parent/aesh-profiles/{$profile->id}")
             ->assertOk()
-            ->assertJsonPath('data.documents_verified', true);
-    }
+            ->json('data');
 
-    public function test_document_en_attente_ne_valide_pas_le_badge(): void
-    {
-        $profile = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
-
-        AeshDocument::create([
-            'aesh_profile_id' => $profile->id,
-            'type'            => 'diplome',
-            'original_name'   => 'diplome.pdf',
-            'path'            => 'documents/diplome.pdf',
-            'size'            => 2048,
-            'status'          => AeshDocument::STATUS_PENDING,
-        ]);
-
-        $this->actingAs($this->parent)
-            ->getJson("/api/parent/aesh-profiles/{$profile->id}")
-            ->assertOk()
-            ->assertJsonPath('data.documents_verified', false);
+        $this->assertArrayNotHasKey('documents_verified', $json);
+        $this->assertArrayNotHasKey('documents', $json);
     }
 
     public function test_aesh_ne_peut_pas_consulter_la_fiche_parent(): void
