@@ -19,7 +19,6 @@ class BookingRequest extends Model
         'school_level_id',
         'start_date',
         'hours_per_week',
-        'hourly_rate',
         'response_reason',
         'responded_at',
     ];
@@ -34,7 +33,6 @@ class BookingRequest extends Model
             'status' => BookingStatus::class,
             'start_date' => 'date',
             'hours_per_week' => 'integer',
-            'hourly_rate' => 'decimal:2',
             'responded_at' => 'datetime',
         ];
     }

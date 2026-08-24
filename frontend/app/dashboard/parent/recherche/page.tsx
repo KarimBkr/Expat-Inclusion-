@@ -222,7 +222,7 @@ function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
           )}
         </div>
         <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary font-medium">
-          Vérifié
+          Candidature examinée
         </span>
       </div>
 
@@ -239,8 +239,7 @@ function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
         ))}
       </div>
 
-      <div className="mt-auto flex items-center justify-between">
-        <span className="text-sm font-semibold text-ink">{aesh.hourly_rate} €/h</span>
+      <div className="mt-auto flex items-center justify-end">
         <Link
           href={`/aesh/${aesh.id}`}
           className="text-sm font-semibold text-primary hover:underline"

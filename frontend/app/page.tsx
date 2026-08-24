@@ -45,7 +45,7 @@ const steps = [
 ];
 
 const familyPoints = [
-  { icon: Shield, text: "Accompagnants vérifiés et certifiés" },
+  { icon: Shield, text: "Candidatures examinées une à une par notre équipe" },
   { icon: Globe, text: "Disponibles dans 30+ pays du réseau AEFE" },
   { icon: MessageCircle, text: "Messagerie directe et sécurisée" },
   { icon: CreditCard, text: "Paiement sécurisé via Stripe" },
@@ -55,13 +55,13 @@ const aeshPoints = [
   { icon: User, text: "Profil professionnel mis en valeur" },
   { icon: Globe, text: "Familles qualifiées du réseau AEFE" },
   { icon: Video, text: "Présentiel, distanciel ou hybride" },
-  { icon: Euro, text: "Définissez votre propre tarif" },
+  { icon: Euro, text: "Vous convenez librement de vos conditions" },
 ];
 
 const stats = [
   { value: "30+", label: "Pays du réseau AEFE" },
   { value: "10", label: "Spécialisations couvertes" },
-  { value: "100%", label: "Profils vérifiés" },
+  { value: "100%", label: "Profils examinés avant publication" },
 ];
 
 const faqPreview = [
@@ -70,8 +70,8 @@ const faqPreview = [
     a: "Un AESH (Accompagnant des Élèves en Situation de Handicap) est un professionnel formé pour soutenir les enfants ayant des besoins éducatifs particuliers : TSA, TDA/H, troubles Dys, EIP. Il intervient en complémentarité de l'équipe pédagogique.",
   },
   {
-    q: "Les profils AESH sont-ils vérifiés ?",
-    a: "Oui. Chaque AESH référencé passe par un processus de vérification : diplômes, expériences et documents professionnels sont examinés par notre équipe avant toute publication de profil.",
+    q: "Les profils AESH sont-ils contrôlés ?",
+    a: "Chaque candidature — CV, lettre de motivation et parcours déclaré — est examinée par notre équipe avant toute publication de profil. Un profil non approuvé n'apparaît jamais dans la recherche. Nous ne collectons en revanche ni pièce d'identité, ni diplôme : il vous revient de vérifier ces éléments lors de vos échanges avec l'accompagnant.",
   },
   {
     q: "Dans quels pays êtes-vous disponibles ?",

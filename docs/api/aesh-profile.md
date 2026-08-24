@@ -1,7 +1,11 @@
 # Profil AESH & Documents — Endpoints (US-05 & US-06)
 
-Profil professionnel de l'AESH (bio, tarif, langues, pays, modalités, niveaux) et
-documents de vérification (diplômes, pièce d'identité, attestations).
+Profil professionnel de l'AESH (bio, langues, pays, modalités, niveaux) et
+pièces de candidature (CV, lettre de motivation).
+
+> Aucun tarif n'est collecté : la rémunération se convient directement entre la
+> famille et l'accompagnant, hors plateforme. Aucune pièce d'identité ni diplôme
+> n'est demandé — la plateforme ne traite aucun document à portée légale.
 
 > **Aucun document médical.** Les documents sont stockés sur le disque privé
 > (`storage/app/private`) et ne sont jamais servis publiquement.
@@ -38,7 +42,6 @@ Public. Étendu pour US-05 avec `languages` et `modalities`.
   "profile": {
     "id": 1,
     "bio": "Accompagnante expérimentée…",
-    "hourly_rate": "35.50",
     "experience_years": 10,
     "timezone": "Europe/Paris",
     "phone": "+33612345678",
@@ -66,7 +69,6 @@ Crée le profil (une seule fois par compte).
 | Champ                | Type    | Requis | Contraintes                       |
 |----------------------|---------|--------|-----------------------------------|
 | `bio`                | string  | oui    | min 50, max 2000                  |
-| `hourly_rate`        | number  | oui    | ≥ 0, max 9999.99                  |
 | `experience_years`   | integer | non    | 0–60                              |
 | `timezone`           | string  | oui    | fuseau IANA valide                |
 | `phone`              | string  | non    | max 30, format international      |
@@ -98,7 +100,7 @@ resynchronisées (`sync`) à chaque appel.
 
 ### Complétion
 
-`is_complete` = bio + tarif > 0 + fuseau + au moins une spécialisation, une
+`is_complete` = bio + fuseau + au moins une spécialisation, une
 langue, une modalité et un pays. `verification_status` (pending/approved/rejected)
 et `is_published` sont pilotés par l'admin (US-08).
 
@@ -111,7 +113,7 @@ et `is_published` sont pilotés par l'admin (US-08).
   "documents": [
     {
       "id": 1,
-      "type": "diploma",
+      "type": "cv",
       "original_name": "diplome.pdf",
       "size": 204800,
       "status": "pending",
@@ -130,7 +132,7 @@ et `is_published` sont pilotés par l'admin (US-08).
 
 | Champ  | Type | Requis | Contraintes                                   |
 |--------|------|--------|-----------------------------------------------|
-| `type` | enum | oui    | `diploma`, `identity`, `certification`, `other` |
+| `type` | enum | oui    | `cv`, `cover_letter` |
 | `file` | file | oui    | pdf/jpg/jpeg/png, max 5 Mo                     |
 
 | Code | Cas                              |

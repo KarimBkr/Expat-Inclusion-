@@ -42,7 +42,6 @@ class AeshSearchTest extends TestCase
         $profile = AeshProfile::create([
             'user_id'             => $aesh->id,
             'bio'                 => 'Accompagnante spécialisée avec une solide expérience de terrain.',
-            'hourly_rate'         => 30,
             'timezone'            => 'Europe/Paris',
             'phone'               => '+33612345678',
             'verification_status' => $status,

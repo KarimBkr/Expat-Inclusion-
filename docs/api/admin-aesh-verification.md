@@ -2,7 +2,7 @@
 
 Workflow admin : **pending → approved → published** ou **pending → rejected**.
 
-> La table `aesh_profiles` est minimale en attendant l'enrichissement US-05/06 (Jihad). Les champs pro (tarif, langues, pivots) seront ajoutés via migration dédiée.
+> Le profil professionnel complet (langues, pays, modalités, niveaux, spécialités) a été livré par US-05/06. Aucun tarif n'est collecté : la rémunération se convient hors plateforme.
 
 ## Statuts
 
