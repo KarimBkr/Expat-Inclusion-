@@ -27,7 +27,9 @@ export interface BookingRequest {
   modality?: TaxonomyRef;
   school_level?: TaxonomyRef;
   parent?: { id: number; name: string };
-  aesh?: { id: number; name: string | null };
+  aesh?: { id: number; user_id?: number; name: string | null };
+  can_message?: boolean;
+  conversation_id?: string | null;
   histories?: BookingStatusHistory[];
 }
 

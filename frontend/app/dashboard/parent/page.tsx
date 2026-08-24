@@ -4,14 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useUnreadConversations } from "@/lib/use-unread-conversations";
 import { listBookings } from "@/services/booking";
+import { listConversations } from "@/services/messaging";
 import { getParentProfile } from "@/services/parent-profile";
+import type { ConversationSummary } from "@/types/messaging";
 
 export default function DashboardParentPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
   const [bookingCount, setBookingCount] = useState<number | null>(null);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const { unreadCount } = useUnreadConversations(conversations);
 
   useEffect(() => {
     if (loading) return;
@@ -27,6 +32,9 @@ export default function DashboardParentPage() {
     listBookings()
       .then((bookings) => setBookingCount(bookings.length))
       .catch(() => setBookingCount(0));
+    listConversations()
+      .then(setConversations)
+      .catch(() => setConversations([]));
   }, [user]);
 
   if (loading || !user) {
@@ -123,12 +131,15 @@ export default function DashboardParentPage() {
           href="/dashboard/parent/reservations"
         />
         <DashboardCard title="Mes paiements" value="—" description="Historique paiements" />
-        <DashboardCard title="Mes conversations" value="—" description="Messages avec les AESH" />
+        <DashboardCard
+          title="Mes conversations"
+          value={String(conversations.length)}
+          description={unreadCount > 0 ? `${unreadCount} non lu(s)` : "Messages avec les AESH"}
+          href="/dashboard/parent/conversations"
+        />
       </div>
 
-      <p className="mt-12 text-sm text-subtle text-center">
-        Paiements et messagerie arrivent dès le Sprint 5.
-      </p>
+      <p className="mt-12 text-sm text-subtle text-center">Les paiements arrivent au Sprint 5.</p>
     </div>
   );
 }

@@ -186,6 +186,17 @@ function ParentBookingCard({
           </div>
         ))}
 
+      {booking.can_message && (
+        <div className="mt-5">
+          <Link
+            href={`/dashboard/parent/conversations/${booking.id}`}
+            className="inline-flex px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+          >
+            Ouvrir la conversation
+          </Link>
+        </div>
+      )}
+
       <BookingHistory bookingId={booking.id} />
     </div>
   );

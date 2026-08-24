@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\BookingStatus;
+use App\Services\FirebaseTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,9 +34,14 @@ class BookingRequestResource extends JsonResource
             'school_level'    => $this->whenLoaded('schoolLevel', fn () => ['id' => $this->schoolLevel->id, 'name' => $this->schoolLevel->name]),
             'parent'          => $this->whenLoaded('parent', fn () => ['id' => $this->parent->id, 'name' => $this->parent->name]),
             'aesh'            => $this->whenLoaded('aeshProfile', fn () => [
-                'id'   => $this->aeshProfile->id,
-                'name' => $this->aeshProfile->relationLoaded('user') ? $this->aeshProfile->user->name : null,
+                'id'      => $this->aeshProfile->id,
+                'user_id' => $this->aeshProfile->user_id,
+                'name'    => $this->aeshProfile->relationLoaded('user') ? $this->aeshProfile->user->name : null,
             ]),
+            'can_message'     => $this->status === BookingStatus::Accepted,
+            'conversation_id' => $this->status === BookingStatus::Accepted
+                ? FirebaseTokenService::conversationId($this->id)
+                : null,
             'histories'       => BookingStatusHistoryResource::collection($this->whenLoaded('statusHistories')),
         ];
     }

@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\AeshSearchController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingRequestController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ConversationController;
+use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\ParentProfileController;
 use App\Http\Controllers\Api\TaxonomyController;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +43,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/{booking}/accept', [BookingRequestController::class, 'accept'])->middleware('role:aesh');
         Route::post('/{booking}/decline', [BookingRequestController::class, 'decline'])->middleware('role:aesh');
         Route::post('/{booking}/cancel', [BookingRequestController::class, 'cancel']);
+        Route::get('/{booking}/conversation', [ConversationController::class, 'show']);
     });
+
+    // Messagerie Firebase (US-13) — token custom + inbox des threads acceptés
+    Route::post('/firebase/token', [FirebaseTokenController::class, 'store'])
+        ->middleware('throttle:30,1');
+    Route::get('/conversations', [ConversationController::class, 'index']);
 
     // Routes parent uniquement
     Route::middleware('role:parent')->prefix('parent')->group(function (): void {

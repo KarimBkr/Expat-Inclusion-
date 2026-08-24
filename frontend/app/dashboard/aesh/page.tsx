@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useUnreadConversations } from "@/lib/use-unread-conversations";
 import { getAeshDocuments, getAeshProfile } from "@/services/aesh-profile";
 import { listBookings } from "@/services/booking";
+import { listConversations } from "@/services/messaging";
 import type { AeshProfile } from "@/types/aesh-profile";
+import type { ConversationSummary } from "@/types/messaging";
 
 const verificationLabel: Record<AeshProfile["verification_status"], string> = {
   pending: "En attente de vérification",
@@ -28,6 +31,8 @@ export default function DashboardAeshPage() {
   const [profile, setProfile] = useState<AeshProfile | null>(null);
   const [docCount, setDocCount] = useState<number | null>(null);
   const [pendingCount, setPendingCount] = useState<number | null>(null);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const { unreadCount } = useUnreadConversations(conversations);
 
   useEffect(() => {
     if (loading) return;
@@ -46,6 +51,9 @@ export default function DashboardAeshPage() {
     listBookings("requested")
       .then((bookings) => setPendingCount(bookings.length))
       .catch(() => setPendingCount(0));
+    listConversations()
+      .then(setConversations)
+      .catch(() => setConversations([]));
   }, [user]);
 
   if (loading || !user) {
@@ -118,7 +126,7 @@ export default function DashboardAeshPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <DashboardCard
           title="Mon profil"
           value={profile === null ? "À créer" : profile.is_complete ? "Complet" : "Incomplet"}
@@ -136,6 +144,12 @@ export default function DashboardAeshPage() {
           value={pendingCount === null ? "—" : String(pendingCount)}
           description="En attente de votre réponse"
           href="/dashboard/aesh/demandes"
+        />
+        <DashboardCard
+          title="Conversations"
+          value={String(conversations.length)}
+          description={unreadCount > 0 ? `${unreadCount} non lu(s)` : "Messages avec les familles"}
+          href="/dashboard/aesh/conversations"
         />
       </div>
     </div>
