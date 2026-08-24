@@ -139,12 +139,12 @@ function NouvelleDemandeForm() {
         rien à cette étape.
       </p>
 
-      <div className="bg-card border border-line rounded-2xl p-5 mb-6 flex items-center justify-between">
-        <div>
-          <p className="font-semibold text-ink">{aesh.name}</p>
-          <p className="text-xs text-subtle mt-0.5">Tarif appliqué à cette demande</p>
-        </div>
-        <p className="text-lg font-semibold text-ink">{aesh.hourly_rate} €/h</p>
+      <div className="bg-card border border-line rounded-2xl p-5 mb-6">
+        <p className="font-semibold text-ink">{aesh.name}</p>
+        <p className="text-xs text-subtle mt-0.5">
+          Les conditions de rémunération se conviennent directement avec l&apos;accompagnant, une
+          fois la demande acceptée.
+        </p>
       </div>
 
       {error && Object.keys(fieldErrors).length === 0 && (

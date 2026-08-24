@@ -34,7 +34,7 @@ const categories = [
       },
       {
         q: "Comment trouver un AESH adapté à mon enfant ?",
-        a: "Utilisez le moteur de recherche pour filtrer les profils AESH selon le pays, le type de trouble, la modalité (présentiel, distanciel, hybride) et le niveau scolaire. Chaque profil publié est vérifié par notre équipe.",
+        a: "Utilisez le moteur de recherche pour filtrer les profils AESH selon le pays, le type de trouble, la modalité (présentiel, distanciel, hybride) et le niveau scolaire. Chaque profil publié a été examiné par notre équipe.",
       },
       {
         q: "Puis-je contacter un AESH avant de réserver ?",
@@ -47,11 +47,15 @@ const categories = [
     items: [
       {
         q: "Comment créer mon profil AESH ?",
-        a: "Après votre inscription, renseignez vos spécialisations, langues parlées, pays d'exercice, modalités proposées, niveaux scolaires couverts et votre tarif horaire. Votre profil ne sera visible qu'après validation par notre équipe.",
+        a: "Après votre inscription, renseignez vos spécialisations, langues parlées, pays d'exercice, modalités proposées et niveaux scolaires couverts. Votre profil ne sera visible qu'après validation par notre équipe.",
       },
       {
-        q: "Comment mes documents sont-ils vérifiés ?",
-        a: "Vous téléversez vos justificatifs (diplômes, expériences). Notre équipe les examine et met à jour le statut de votre profil : en attente, approuvé ou rejeté (avec motif). La vérification vise à garantir la qualité et la sécurité pour les familles.",
+        q: "Quels documents dois-je fournir ?",
+        a: "Uniquement votre CV et votre lettre de motivation, aux formats PDF, DOC ou DOCX. Nous ne demandons ni pièce d'identité, ni diplôme, ni document médical. Notre équipe examine votre candidature et met à jour son statut : en attente, approuvée ou refusée avec motif.",
+      },
+      {
+        q: "Comment suis-je rémunéré ?",
+        a: "Directement par la famille, selon les conditions que vous convenez ensemble une fois la demande acceptée. Expat Inclusion n'affiche aucun tarif sur votre profil et n'intervient pas dans votre rémunération.",
       },
       {
         q: "Puis-je exercer en distanciel ?",

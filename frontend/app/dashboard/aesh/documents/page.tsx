@@ -14,17 +14,13 @@ import type { AeshDocument, DocumentStatus, DocumentType } from "@/types/aesh-pr
 import type { ApiError } from "@/types/auth";
 
 const documentTypes: { value: DocumentType; label: string }[] = [
-  { value: "diploma", label: "Diplôme" },
-  { value: "identity", label: "Pièce d'identité" },
-  { value: "certification", label: "Attestation professionnelle" },
-  { value: "other", label: "Autre" },
+  { value: "cv", label: "CV" },
+  { value: "cover_letter", label: "Lettre de motivation" },
 ];
 
 const typeLabels: Record<DocumentType, string> = {
-  diploma: "Diplôme",
-  identity: "Pièce d'identité",
-  certification: "Attestation professionnelle",
-  other: "Autre",
+  cv: "CV",
+  cover_letter: "Lettre de motivation",
 };
 
 const statusLabels: Record<DocumentStatus, string> = {
@@ -51,7 +47,7 @@ export default function AeshDocumentsPage() {
 
   const [documents, setDocuments] = useState<AeshDocument[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
-  const [type, setType] = useState<DocumentType>("diploma");
+  const [type, setType] = useState<DocumentType>("cv");
   const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -135,10 +131,11 @@ export default function AeshDocumentsPage() {
         >
           ← Retour au tableau de bord
         </Link>
-        <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Documents de vérification</h1>
+        <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Ma candidature</h1>
         <p className="text-subtle text-sm">
-          Ajoutez vos diplômes, pièce d&apos;identité et attestations. Formats acceptés : PDF, JPG,
-          PNG (5 Mo max). Aucun document médical n&apos;est demandé.
+          Ajoutez votre CV et votre lettre de motivation. Formats acceptés : PDF, DOC, DOCX (5 Mo
+          max). Aucune pièce d&apos;identité, aucun diplôme et aucun document médical ne sont
+          demandés.
         </p>
       </div>
 
@@ -176,7 +173,7 @@ export default function AeshDocumentsPage() {
             <input
               id="file"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
+              accept=".pdf,.doc,.docx"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="w-full text-sm text-ink file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-light file:text-primary file:font-medium hover:file:bg-primary/20"
             />

@@ -2,12 +2,11 @@ export type VerificationStatus = "pending" | "approved" | "rejected" | "publishe
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
-export type DocumentType = "diploma" | "identity" | "certification" | "other";
+export type DocumentType = "cv" | "cover_letter";
 
 export interface AeshProfile {
   id: number;
   bio: string;
-  hourly_rate: string;
   experience_years: number | null;
   timezone: string;
   phone: string | null;
@@ -30,7 +29,6 @@ export interface AeshProfileResponse {
 
 export interface UpsertAeshProfilePayload {
   bio: string;
-  hourly_rate: number;
   experience_years?: number | null;
   timezone: string;
   phone?: string | null;

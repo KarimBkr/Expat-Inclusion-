@@ -35,7 +35,6 @@ publication décroissante.
       "id": 1,
       "name": "Samira B.",
       "bio": "Accompagnante spécialisée…",
-      "hourly_rate": "35.00",
       "experience_years": 8,
       "verification_status": "published",
       "specializations": [{ "id": 1, "name": "TSA" }],

@@ -20,7 +20,6 @@ export interface BookingRequest {
   message: string;
   start_date: string | null;
   hours_per_week: number;
-  hourly_rate: string;
   response_reason: string | null;
   responded_at: string | null;
   created_at: string | null;

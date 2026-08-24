@@ -58,7 +58,6 @@ Un statut inconnu renvoie `422`.
       "message": "Nous cherchons un accompagnement pour notre fils…",
       "start_date": "2026-09-01",
       "hours_per_week": 6,
-      "hourly_rate": "35.00",
       "response_reason": null,
       "responded_at": null,
       "created_at": "2026-08-06T09:14:00+00:00",
@@ -113,8 +112,8 @@ Règles métier appliquées par `BookingRequestService` :
 
 - le profil visé doit être **publié** — sinon `422` sur `aesh_profile_id` ;
 - un parent ne peut pas avoir **deux demandes `requested`** auprès du même AESH ;
-- le **tarif horaire est figé** à la création (`hourly_rate` recopié depuis le
-  profil) : une révision de tarif ultérieure ne change pas le montant dû.
+- **aucun montant n'est enregistré** : la rémunération de l'accompagnant se
+  convient directement entre les parties, hors plateforme.
 
 Réponse `201` avec la demande créée.
 

@@ -28,7 +28,6 @@ export default function AeshProfilPage() {
   const [success, setSuccess] = useState("");
 
   const [bio, setBio] = useState("");
-  const [hourlyRate, setHourlyRate] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
   const [timezone, setTimezone] = useState("Europe/Paris");
   const [phone, setPhone] = useState("");
@@ -47,7 +46,6 @@ export default function AeshProfilPage() {
         const p = profileRes.profile;
         setExistingProfile(p);
         setBio(p.bio);
-        setHourlyRate(p.hourly_rate);
         setExperienceYears(p.experience_years !== null ? String(p.experience_years) : "");
         setTimezone(p.timezone);
         setPhone(p.phone ?? "");
@@ -88,7 +86,6 @@ export default function AeshProfilPage() {
       const result = await saveAeshProfile(
         {
           bio: bio.trim(),
-          hourly_rate: Number(hourlyRate),
           experience_years: experienceYears ? Number(experienceYears) : null,
           timezone,
           phone: phone.trim() || null,
@@ -174,49 +171,27 @@ export default function AeshProfilPage() {
               {fieldErrors.bio && <p className="mt-1 text-xs text-danger">{fieldErrors.bio}</p>}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label htmlFor="hourly_rate" className="block text-sm font-medium text-ink mb-1.5">
-                  Tarif horaire (€)
-                </label>
-                <input
-                  id="hourly_rate"
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={hourlyRate}
-                  onChange={(e) => setHourlyRate(e.target.value)}
-                  required
-                  className={inputClass}
-                  placeholder="35"
-                />
-                {fieldErrors.hourly_rate && (
-                  <p className="mt-1 text-xs text-danger">{fieldErrors.hourly_rate}</p>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="experience_years"
-                  className="block text-sm font-medium text-ink mb-1.5"
-                >
-                  Années d&apos;expérience{" "}
-                  <span className="text-subtle font-normal">(optionnel)</span>
-                </label>
-                <input
-                  id="experience_years"
-                  type="number"
-                  min="0"
-                  max="60"
-                  value={experienceYears}
-                  onChange={(e) => setExperienceYears(e.target.value)}
-                  className={inputClass}
-                  placeholder="5"
-                />
-                {fieldErrors.experience_years && (
-                  <p className="mt-1 text-xs text-danger">{fieldErrors.experience_years}</p>
-                )}
-              </div>
+            <div>
+              <label
+                htmlFor="experience_years"
+                className="block text-sm font-medium text-ink mb-1.5"
+              >
+                Années d&apos;expérience{" "}
+                <span className="text-subtle font-normal">(optionnel)</span>
+              </label>
+              <input
+                id="experience_years"
+                type="number"
+                min="0"
+                max="60"
+                value={experienceYears}
+                onChange={(e) => setExperienceYears(e.target.value)}
+                className={inputClass}
+                placeholder="5"
+              />
+              {fieldErrors.experience_years && (
+                <p className="mt-1 text-xs text-danger">{fieldErrors.experience_years}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

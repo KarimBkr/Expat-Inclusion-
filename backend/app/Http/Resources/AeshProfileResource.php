@@ -13,7 +13,6 @@ class AeshProfileResource extends JsonResource
         return [
             'id'                  => $this->id,
             'bio'                 => $this->bio,
-            'hourly_rate'         => $this->hourly_rate,
             'experience_years'    => $this->experience_years,
             'timezone'            => $this->timezone,
             'phone'               => $this->phone,

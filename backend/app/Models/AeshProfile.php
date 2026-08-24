@@ -21,7 +21,6 @@ class AeshProfile extends Model
     protected $fillable = [
         'user_id',
         'bio',
-        'hourly_rate',
         'experience_years',
         'timezone',
         'phone',
@@ -37,7 +36,6 @@ class AeshProfile extends Model
     protected function casts(): array
     {
         return [
-            'hourly_rate' => 'decimal:2',
             'experience_years' => 'integer',
             'published_at' => 'datetime',
         ];
@@ -102,7 +100,6 @@ class AeshProfile extends Model
     public function isComplete(): bool
     {
         return filled($this->bio)
-            && $this->hourly_rate > 0
             && filled($this->timezone)
             && $this->specializations()->exists()
             && $this->languages()->exists()

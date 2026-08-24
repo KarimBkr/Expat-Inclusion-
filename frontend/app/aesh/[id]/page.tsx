@@ -84,21 +84,15 @@ export default function FicheAeshPage() {
       <BackLink />
 
       <div className="bg-card border border-line rounded-2xl p-6 sm:p-8 mt-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-ink">{aesh.name}</h1>
-            <p className="text-sm text-subtle mt-1">
-              {aesh.experience_years !== null && `${aesh.experience_years} ans d'expérience`}
-              {aesh.experience_years !== null && aesh.timezone && " · "}
-              {aesh.timezone && `Fuseau ${aesh.timezone}`}
-            </p>
-          </div>
-          <p className="text-lg font-semibold text-ink shrink-0">{aesh.hourly_rate} €/h</p>
-        </div>
+        <h1 className="text-2xl font-bold text-ink">{aesh.name}</h1>
+        <p className="text-sm text-subtle mt-1">
+          {aesh.experience_years !== null && `${aesh.experience_years} ans d'expérience`}
+          {aesh.experience_years !== null && aesh.timezone && " · "}
+          {aesh.timezone && `Fuseau ${aesh.timezone}`}
+        </p>
 
         <div className="flex flex-wrap gap-2 mt-5">
-          <Badge label="Profil vérifié par Expat Inclusion" />
-          {aesh.documents_verified && <Badge label="Documents validés" />}
+          <Badge label="Candidature examinée par notre équipe" />
           {aesh.published_at && (
             <span className="text-xs px-2.5 py-1 rounded-full bg-cream text-subtle border border-line">
               Publié le {formatDate(aesh.published_at)}

@@ -19,7 +19,6 @@ class AeshSearchResultResource extends JsonResource
             'id'                  => $this->id,
             'name'                => $this->whenLoaded('user', fn () => $this->user->name),
             'bio'                 => $this->bio,
-            'hourly_rate'         => $this->hourly_rate,
             'experience_years'    => $this->experience_years,
             'verification_status' => $this->verification_status,
             'specializations'     => $this->whenLoaded('specializations', fn () => $this->specializations->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])),

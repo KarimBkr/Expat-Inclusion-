@@ -29,7 +29,7 @@ npm run dev                       # http://localhost:3000
 
 | Rôle   | Action                                                              |
 |--------|---------------------------------------------------------------------|
-| AESH   | S'inscrire, compléter le profil (bio, tarif, taxonomies)             |
+| AESH   | S'inscrire, compléter le profil (bio, taxonomies), déposer CV et LM |
 | Admin  | `/dashboard/admin/aesh` → approuver puis **publier** le profil       |
 | Parent | S'inscrire, compléter le profil parent                               |
 
@@ -41,7 +41,7 @@ Un profil non publié n'est ni cherchable ni consultable : c'est volontaire.
 |---|-------|--------|---------|
 | 1 | `/dashboard/parent/recherche` | Filtrer par pays / trouble | L'AESH publié apparaît |
 | 2 | Carte résultat | « Voir le profil » | Fiche `/aesh/{id}` avec badges de vérification |
-| 3 | Fiche AESH | « Demander une réservation » | Formulaire pré-rempli du tarif |
+| 3 | Fiche AESH | « Demander une réservation » | Formulaire de demande, sans aucun montant |
 | 4 | Formulaire | Envoyer avec message < 20 caractères | Erreur de champ sous la zone de texte |
 | 5 | Formulaire | Envoyer une date passée | Erreur sur la date |
 | 6 | Formulaire | Envoyer un dossier complet | Redirection vers `/dashboard/parent/reservations`, statut **En attente de réponse** |
@@ -74,9 +74,8 @@ Un profil non publié n'est ni cherchable ni consultable : c'est volontaire.
 
 ## Points de vigilance métier
 
-- **Tarif figé** : modifier le tarif du profil AESH après création d'une demande
-  ne doit **pas** changer le montant de la demande (vérifié en base et via
-  `GET /api/bookings/{id}`).
+- **Aucun montant** : ni la fiche AESH, ni la demande, ni les listes ne doivent
+  afficher de tarif. À revérifier à chaque ajout de champ dans les Resources.
 - **Aucune coordonnée** : la fiche AESH et les demandes n'exposent ni email ni
   téléphone. À revérifier à chaque ajout de champ dans les Resources.
 - **Aucune donnée de santé** : le champ « votre besoin » affiche l'avertissement.
