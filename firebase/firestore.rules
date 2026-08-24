@@ -21,6 +21,14 @@ service cloud.firestore {
         && request.auth.uid in resource.data.participant_ids;
     }
 
+    // À utiliser dans les sous-collections : `resource` y désigne le document
+    // enfant (message, read), pas la conversation — on relit la conversation
+    // parente explicitement.
+    function isParticipantOfParentConversation(conversationId) {
+      return canAccessConversation(conversationId)
+        && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participant_ids;
+    }
+
     match /conversations/{conversationId} {
       allow read: if isParticipant(conversationId);
 
@@ -41,11 +49,9 @@ service cloud.firestore {
       allow delete: if false;
 
       match /messages/{messageId} {
-        allow read: if canAccessConversation(conversationId)
-          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participant_ids;
+        allow read: if isParticipantOfParentConversation(conversationId);
 
-        allow create: if canAccessConversation(conversationId)
-          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participant_ids
+        allow create: if isParticipantOfParentConversation(conversationId)
           && request.resource.data.sender_id == request.auth.uid
           && request.resource.data.keys().hasAll(['sender_id', 'text', 'created_at'])
           && request.resource.data.text is string
@@ -57,9 +63,9 @@ service cloud.firestore {
 
       // Marqueur de lecture par participant — un utilisateur ne peut écrire que son propre document.
       match /reads/{uid} {
-        allow read: if isParticipant(conversationId);
+        allow read: if isParticipantOfParentConversation(conversationId);
 
-        allow write: if isParticipant(conversationId) && request.auth.uid == uid;
+        allow write: if isParticipantOfParentConversation(conversationId) && request.auth.uid == uid;
       }
     }
 
