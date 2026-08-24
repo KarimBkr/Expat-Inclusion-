@@ -1,4 +1,4 @@
 allowBuilds:
+  '@firebase/util': true
+  protobufjs: true
   sharp: true
-onlyBuiltDependencies:
-  - sharp
