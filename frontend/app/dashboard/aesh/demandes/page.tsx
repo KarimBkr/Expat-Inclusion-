@@ -202,13 +202,23 @@ function AeshBookingCard({
             </>
           )}
           {isAccepted && (
-            <button
-              type="button"
-              onClick={() => setPending("cancel")}
-              className="px-4 py-2 border border-line text-sm font-medium text-danger rounded-xl hover:border-danger transition-colors"
-            >
-              Annuler l&apos;accompagnement
-            </button>
+            <>
+              {booking.can_message && (
+                <Link
+                  href={`/dashboard/aesh/conversations/${booking.id}`}
+                  className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+                >
+                  Ouvrir la conversation
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => setPending("cancel")}
+                className="px-4 py-2 border border-line text-sm font-medium text-danger rounded-xl hover:border-danger transition-colors"
+              >
+                Annuler l&apos;accompagnement
+              </button>
+            </>
           )}
         </div>
       )}

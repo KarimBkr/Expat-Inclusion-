@@ -38,6 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await authService.logout();
+    const { signOutFirebase } = await import("@/services/firestore-chat");
+    await signOutFirebase().catch(() => undefined);
     setUser(null);
   };
 
