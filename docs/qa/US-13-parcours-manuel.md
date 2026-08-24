@@ -62,6 +62,7 @@ La messagerie n'existe que pour une demande au statut **accepted** (US-11/12).
 | `GET /api/bookings/{id}/conversation` sur une demande non acceptée (`requested`, `declined`, `cancelled`) | `422` |
 | `GET /api/conversations` | Ne liste que les demandes **accepted** de l'utilisateur connecté |
 | Firestore : lire `conversations/{id}` sans être dans `participant_ids` | Refusé par les Security Rules (`permission-denied` côté SDK) |
+| Firestore : écrire `conversations/{id}/reads/{sonPropreUid}` | Autorisé |
 | Firestore : écrire `conversations/{id}/reads/{autreUid}` | Refusé (on ne peut écrire que son propre marqueur de lecture) |
 | Firestore : modifier `participant_ids` ou `booking_id` d'une conversation existante | Refusé (`allow update` verrouille ces champs) |
 
@@ -83,4 +84,15 @@ La messagerie n'existe que pour une demande au statut **accepted** (US-11/12).
 Exécuté le 24 août 2026 en local (backend `php artisan serve`, frontend
 `npm run dev`, projet Firebase `expat-inclusion`) — parcours complet vert,
 y compris le temps réel entre les deux threads, le badge non-lu et les
-7 contrôles d'accès (API + Security Rules Firestore).
+8 contrôles d'accès (API + Security Rules Firestore).
+
+Les Security Rules ont aussi été vérifiées par script (custom token réel →
+`signInWithCustomToken` → appels REST Firestore) contre le projet
+`expat-inclusion` déployé, avec trois comptes réels (parent, AESH, tiers) :
+création de conversation, envoi/lecture de message, refus du tiers, marqueur
+de lecture. Ce test a révélé un bug réel — la règle `reads/{uid}` utilisait
+`resource.data.participant_ids`, qui pointait vers le document `reads`
+lui-même (sans ce champ) et non la conversation parente, bloquant tout accès
+au marqueur de lecture même pour le bon participant. Corrigé via
+`isParticipantOfParentConversation()` (relecture explicite de la conversation
+parente par `get()`), redéployé, revalidé.
