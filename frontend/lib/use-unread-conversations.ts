@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import {
-  ensureConversationDoc,
   ensureFirebaseAuth,
   getLastRead,
   subscribeToConversationMeta,
@@ -28,7 +27,8 @@ export function useUnreadConversations(conversations: ConversationSummary[]) {
       if (cancelled) return;
 
       for (const item of conversations) {
-        await ensureConversationDoc(item);
+        // Le document peut ne pas encore exister si personne n'a ouvert le
+        // fil : Firestore renvoie alors un instantané vide, pas une erreur.
         const lastRead = await getLastRead(item.conversation_id, uid);
         if (cancelled) return;
 

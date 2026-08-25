@@ -17,7 +17,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class BookingRequestController extends Controller
 {
-    private const RELATIONS = ['modality', 'schoolLevel', 'parent', 'aeshProfile.user'];
+    private const RELATIONS = ['modality', 'schoolLevel', 'parent', 'aeshProfile.user', 'statusHistories'];
 
     public function __construct(private readonly BookingRequestService $service) {}
 
@@ -39,7 +39,7 @@ class BookingRequestController extends Controller
     {
         $this->authorize('view', $booking);
 
-        $booking->load([...self::RELATIONS, 'statusHistories.author']);
+        $booking->load(['modality', 'schoolLevel', 'parent', 'aeshProfile.user', 'statusHistories.author']);
 
         return BookingRequestResource::make($booking);
     }

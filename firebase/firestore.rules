@@ -2,8 +2,16 @@ rules_version = '2';
 
 // Expat Inclusion — Security Rules Firestore (US-13)
 // Collections autorisées : conversations, messages UNIQUEMENT.
-// Accès limité aux participants d'une demande acceptée via claim
-// `allowed_conversations` émis par Laravel (custom token).
+//
+// La création d'une conversation est interdite au client (`allow create: if
+// false`) : seul Laravel en écrit le document, via l'API REST Firestore,
+// après avoir vérifié dans MySQL que la demande a un jour été acceptée
+// (`ConversationProvisioner`, appelé depuis `ConversationController::show`).
+// Ces rules n'ont donc plus qu'à vérifier l'appartenance à `participant_ids`
+// sur un document dont l'existence prouve déjà la légitimité — sans jamais
+// transporter cette preuve dans un claim du token, qui grossirait sans limite
+// avec le nombre de demandes acceptées et deviendrait périmé à chaque
+// nouvelle acceptation survenue en cours de session.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -11,13 +19,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function canAccessConversation(conversationId) {
+    // Ne prend pas conversationId : contrairement à la fonction suivante, elle
+    // n'a pas besoin de reconstruire un chemin, `resource` désigne déjà le
+    // document conversation à cet endroit de l'arbre.
+    function isParticipant() {
       return isSignedIn()
-        && conversationId in request.auth.token.allowed_conversations;
-    }
-
-    function isParticipant(conversationId) {
-      return canAccessConversation(conversationId)
         && request.auth.uid in resource.data.participant_ids;
     }
 
@@ -25,24 +31,16 @@ service cloud.firestore {
     // enfant (message, read), pas la conversation — on relit la conversation
     // parente explicitement.
     function isParticipantOfParentConversation(conversationId) {
-      return canAccessConversation(conversationId)
+      return isSignedIn()
         && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participant_ids;
     }
 
     match /conversations/{conversationId} {
-      allow read: if isParticipant(conversationId);
+      allow read: if isParticipant();
 
-      allow create: if canAccessConversation(conversationId)
-        && request.auth.uid in request.resource.data.participant_ids
-        && request.resource.data.participant_ids.size() == 2
-        && request.resource.data.keys().hasAll([
-          'booking_id',
-          'participant_ids',
-          'parent_id',
-          'aesh_user_id'
-        ]);
+      allow create: if false;
 
-      allow update: if isParticipant(conversationId)
+      allow update: if isParticipant()
         && request.resource.data.participant_ids == resource.data.participant_ids
         && request.resource.data.booking_id == resource.data.booking_id;
 

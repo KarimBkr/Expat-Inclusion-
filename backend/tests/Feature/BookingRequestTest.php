@@ -14,6 +14,7 @@ use Database\Seeders\ModalitySeeder;
 use Database\Seeders\SchoolLevelSeeder;
 use Database\Seeders\SpecializationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class BookingRequestTest extends TestCase
@@ -378,5 +379,70 @@ class BookingRequestTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data.histories')
             ->assertJsonPath('data.histories.0.to_status', 'accepted');
+    }
+
+    // ── can_message / conversation_id — reflètent l'historique, pas le statut courant ──
+
+    public function test_can_message_faux_tant_que_la_demande_nest_pas_acceptee(): void
+    {
+        $booking = $this->makeBooking();
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/bookings/{$booking->id}")
+            ->assertOk()
+            ->assertJsonPath('data.can_message', false)
+            ->assertJsonPath('data.conversation_id', null);
+    }
+
+    public function test_can_message_reste_vrai_apres_annulation_dune_demande_acceptee(): void
+    {
+        $booking = $this->makeBooking();
+        $this->actingAs($this->aeshUser)->postJson("/api/bookings/{$booking->id}/accept")->assertOk();
+        $this->actingAs($this->parent)
+            ->postJson("/api/bookings/{$booking->id}/cancel", ['reason' => 'Changement de programme.'])
+            ->assertOk();
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/bookings/{$booking->id}")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'cancelled')
+            ->assertJsonPath('data.can_message', true)
+            ->assertJsonPath('data.conversation_id', 'booking_'.$booking->id);
+    }
+
+    public function test_can_message_faux_si_annulee_avant_toute_acceptation(): void
+    {
+        $booking = $this->makeBooking();
+        $this->actingAs($this->parent)
+            ->postJson("/api/bookings/{$booking->id}/cancel", ['reason' => 'Finalement plus besoin.'])
+            ->assertOk();
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/bookings/{$booking->id}")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'cancelled')
+            ->assertJsonPath('data.can_message', false)
+            ->assertJsonPath('data.conversation_id', null);
+    }
+
+    public function test_can_message_ne_declenche_pas_de_requete_supplementaire_par_ligne(): void
+    {
+        $first = $this->makeBooking();
+        $this->actingAs($this->aeshUser)->postJson("/api/bookings/{$first->id}/accept")->assertOk();
+        $second = $this->makeBooking();
+
+        DB::enableQueryLog();
+
+        $this->actingAs($this->parent)->getJson('/api/bookings')->assertOk();
+
+        $queries = collect(DB::getQueryLog())
+            ->filter(fn ($q) => str_contains($q['query'], 'booking_status_histories'));
+
+        DB::disableQueryLog();
+
+        // Une seule requête pour l'historique de toutes les demandes de la
+        // liste (eager load), pas une par ligne : sinon `can_message` sur
+        // /api/bookings redeviendrait un N+1 à chaque demande supplémentaire.
+        $this->assertCount(1, $queries, (string) $queries->pluck('query'));
     }
 }

@@ -2,7 +2,6 @@
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import {
-  ensureConversationDoc,
   ensureFirebaseAuth,
   markConversationRead,
   sendMessage,
@@ -37,6 +36,8 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
       setLoading(true);
       setError("");
       try {
+        // Le back garantit que le document Firestore existe déjà avant de
+        // répondre : aucune création côté client, les rules l'interdisent.
         const conversation = await getConversation(bookingId);
         if (cancelled) return;
         setMeta(conversation);
@@ -44,9 +45,6 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
         const firebaseUid = await ensureFirebaseAuth();
         if (cancelled) return;
         setUid(firebaseUid);
-
-        await ensureConversationDoc(conversation);
-        if (cancelled) return;
 
         unsub = subscribeToMessages(
           conversation.conversation_id,

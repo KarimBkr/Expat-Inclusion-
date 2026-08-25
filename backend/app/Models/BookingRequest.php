@@ -67,4 +67,25 @@ class BookingRequest extends Model
     {
         $query->where('status', BookingStatus::Requested);
     }
+
+    /**
+     * La demande a-t-elle un jour été acceptée — y compris si elle a ensuite
+     * été annulée. Contrairement à `status === Accepted`, ce test survit à
+     * une annulation : c'est la condition d'accès à la messagerie, pas le
+     * statut courant.
+     *
+     * Utilise la relation déjà chargée si disponible (listes de demandes) pour
+     * éviter une requête par ligne ; retombe sur une requête ciblée sinon
+     * (vérification ponctuelle, ex. policy).
+     */
+    public function wasAccepted(): bool
+    {
+        if ($this->relationLoaded('statusHistories')) {
+            return $this->statusHistories->contains(
+                fn (BookingStatusHistory $history) => $history->to_status === BookingStatus::Accepted,
+            );
+        }
+
+        return $this->statusHistories()->where('to_status', BookingStatus::Accepted)->exists();
+    }
 }

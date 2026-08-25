@@ -14,41 +14,39 @@ class FirebaseTokenService
 
     /**
      * Émet un custom token Firebase pour l'utilisateur Laravel.
-     * Les claims `allowed_conversations` limitent l'accès Firestore aux
-     * threads des demandes acceptées dont l'utilisateur est participant.
      *
-     * @return array{token: string, uid: string, allowed_conversations: list<string>}
+     * Ne porte que l'identité : l'accès aux conversations est vérifié par les
+     * Security Rules directement sur `participant_ids`, sans claim. Un claim
+     * listant les conversations autorisées grossirait avec le nombre de
+     * demandes acceptées et dépasserait la limite Firebase de 1000 octets au
+     * bout d'une soixantaine de demandes — un risque qu'on élimine en ne
+     * transportant plus cette liste du tout, plutôt qu'en la plafonnant.
+     *
+     * @return array{token: string, uid: string}
      */
     public function issueFor(User $user): array
     {
-        $allowed = $this->allowedConversationIds($user);
-
         $token = $this->auth->createCustomToken((string) $user->id, [
             'role' => $user->role,
-            'allowed_conversations' => $allowed,
         ]);
 
         return [
             'token' => $token->toString(),
             'uid' => (string) $user->id,
-            'allowed_conversations' => $allowed,
         ];
     }
 
-    /** @return list<string> */
-    private function allowedConversationIds(User $user): array
-    {
-        return $this->acceptedBookingsFor($user)
-            ->map(fn (BookingRequest $booking): string => self::conversationId($booking->id))
-            ->values()
-            ->all();
-    }
-
-    /** @return Collection<int, BookingRequest> */
-    public function acceptedBookingsFor(User $user): Collection
+    /**
+     * Demandes ouvrant droit à une conversation pour cet utilisateur : celles
+     * qui ont un jour été acceptées, même si elles ont depuis été annulées —
+     * l'historique des échanges ne doit pas disparaître avec le statut.
+     *
+     * @return Collection<int, BookingRequest>
+     */
+    public function conversableBookingsFor(User $user): Collection
     {
         $query = BookingRequest::query()
-            ->where('status', BookingStatus::Accepted)
+            ->whereHas('statusHistories', fn ($q) => $q->where('to_status', BookingStatus::Accepted))
             ->with(['parent', 'aeshProfile.user'])
             ->latest();
 
