@@ -7,7 +7,12 @@ use App\Exceptions\BookingTransitionException;
 use App\Models\AeshProfile;
 use App\Models\BookingRequest;
 use App\Models\User;
+use App\Notifications\BookingRequestAcceptedNotification;
+use App\Notifications\BookingRequestCancelledNotification;
+use App\Notifications\BookingRequestDeclinedNotification;
+use App\Notifications\BookingRequestReceivedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class BookingRequestService
@@ -38,7 +43,7 @@ class BookingRequestService
             ]);
         }
 
-        return DB::transaction(function () use ($data, $parent, $profile): BookingRequest {
+        $booking = DB::transaction(function () use ($data, $parent, $profile): BookingRequest {
             $booking = BookingRequest::create([
                 'parent_id'       => $parent->id,
                 'aesh_profile_id' => $profile->id,
@@ -54,6 +59,11 @@ class BookingRequestService
 
             return $booking;
         });
+
+        $booking->loadMissing(['parent', 'aeshProfile.user']);
+        Notification::send($booking->aeshProfile->user, new BookingRequestReceivedNotification($booking));
+
+        return $booking;
     }
 
     /**
@@ -73,7 +83,7 @@ class BookingRequestService
             throw BookingTransitionException::from($current, $target);
         }
 
-        return DB::transaction(function () use ($booking, $current, $target, $actor, $reason): BookingRequest {
+        $booking = DB::transaction(function () use ($booking, $current, $target, $actor, $reason): BookingRequest {
             $booking->update([
                 'status'          => $target,
                 'response_reason' => $reason,
@@ -84,6 +94,33 @@ class BookingRequestService
 
             return $booking->refresh();
         });
+
+        $booking->loadMissing(['parent', 'aeshProfile.user']);
+        $this->notifyTransition($booking, $target, $actor, $reason);
+
+        return $booking;
+    }
+
+    /** Prévient la partie concernée par la nouvelle étape de la demande. */
+    private function notifyTransition(BookingRequest $booking, BookingStatus $target, User $actor, ?string $reason): void
+    {
+        match ($target) {
+            BookingStatus::Accepted => Notification::send($booking->parent, new BookingRequestAcceptedNotification($booking)),
+            BookingStatus::Declined => Notification::send($booking->parent, new BookingRequestDeclinedNotification($booking, $reason)),
+            BookingStatus::Cancelled => Notification::send(
+                $this->otherParty($booking, $actor),
+                new BookingRequestCancelledNotification($booking, $reason),
+            ),
+            BookingStatus::Requested => null,
+        };
+    }
+
+    /** L'autre partie que celle qui vient d'agir — jamais l'acteur lui-même. */
+    private function otherParty(BookingRequest $booking, User $actor): User
+    {
+        return $actor->id === $booking->parent_id
+            ? $booking->aeshProfile->user
+            : $booking->parent;
     }
 
     private function recordHistory(

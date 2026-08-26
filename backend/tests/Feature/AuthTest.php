@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -31,7 +31,7 @@ class AuthTest extends TestCase
             ->assertJsonFragment(['role' => 'parent']);
 
         $this->assertDatabaseHas('users', ['email' => 'marie@exemple.com', 'role' => 'parent']);
-        Notification::assertSentTo(User::first(), VerifyEmail::class);
+        Notification::assertSentTo(User::first(), VerifyEmailNotification::class);
     }
 
     public function test_aesh_peut_sinscrire(): void

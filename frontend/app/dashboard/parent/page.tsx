@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useUnreadConversations } from "@/lib/use-unread-conversations";
 import { listBookings } from "@/services/booking";
 import { listConversations } from "@/services/messaging";
+import { listNotifications } from "@/services/notifications";
 import { getParentProfile } from "@/services/parent-profile";
 import type { ConversationSummary } from "@/types/messaging";
 
@@ -17,6 +18,7 @@ export default function DashboardParentPage() {
   const [bookingCount, setBookingCount] = useState<number | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const { unreadCount } = useUnreadConversations(conversations);
+  const [unreadNotifications, setUnreadNotifications] = useState<number | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -35,6 +37,9 @@ export default function DashboardParentPage() {
     listConversations()
       .then(setConversations)
       .catch(() => setConversations([]));
+    listNotifications()
+      .then((res) => setUnreadNotifications(res.unreadCount))
+      .catch(() => setUnreadNotifications(0));
   }, [user]);
 
   if (loading || !user) {
@@ -112,7 +117,7 @@ export default function DashboardParentPage() {
         <div>
           <p className="font-semibold text-white">Trouvez l&apos;AESH qu&apos;il vous faut</p>
           <p className="text-sm text-white/70 mt-1">
-            Parcourez les profils vérifiés et filtrez selon vos besoins.
+            Parcourez les profils examinés par notre équipe et filtrez selon vos besoins.
           </p>
         </div>
         <Link
@@ -123,7 +128,7 @@ export default function DashboardParentPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <DashboardCard
           title="Mes demandes"
           value={bookingCount === null ? "—" : String(bookingCount)}
@@ -136,6 +141,12 @@ export default function DashboardParentPage() {
           value={String(conversations.length)}
           description={unreadCount > 0 ? `${unreadCount} non lu(s)` : "Messages avec les AESH"}
           href="/dashboard/parent/conversations"
+        />
+        <DashboardCard
+          title="Notifications"
+          value={unreadNotifications === null ? "—" : String(unreadNotifications)}
+          description="Non lues"
+          href="/dashboard/parent/notifications"
         />
       </div>
 

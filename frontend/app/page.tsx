@@ -34,7 +34,7 @@ const steps = [
     step: "02",
     title: "Trouvez votre AESH",
     description:
-      "Parcourez les profils vérifiés et filtrez selon le pays, le trouble et la modalité.",
+      "Parcourez les profils examinés par notre équipe et filtrez selon le pays, le trouble et la modalité.",
   },
   {
     icon: CalendarCheck,
@@ -115,7 +115,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-subtle">
               <span className="flex items-center gap-1.5">
                 <Shield size={15} className="text-primary shrink-0" />
-                Profils vérifiés
+                Profils examinés
               </span>
               <span className="flex items-center gap-1.5">
                 <Globe size={15} className="text-primary shrink-0" />

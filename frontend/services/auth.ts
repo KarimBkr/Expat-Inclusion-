@@ -88,3 +88,7 @@ export async function resetPassword(payload: ResetPasswordPayload): Promise<void
 export async function resendVerificationEmail(): Promise<void> {
   await apiFetch<void>("/email/resend", { method: "POST" });
 }
+
+export async function verifyEmail(id: string, hash: string, query: string): Promise<void> {
+  await apiFetch<void>(`/email/verify/${id}/${hash}?${query}`, { method: "GET" });
+}

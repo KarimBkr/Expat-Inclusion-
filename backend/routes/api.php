@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\BookingRequestController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\FirebaseTokenController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ParentProfileController;
 use App\Http\Controllers\Api\TaxonomyController;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/firebase/token', [FirebaseTokenController::class, 'store'])
         ->middleware('throttle:30,1');
     Route::get('/conversations', [ConversationController::class, 'index']);
+
+    // Notifications dashboard (US-16)
+    Route::prefix('notifications')->group(function (): void {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::post('/read-all', [NotificationController::class, 'markAllRead']);
+        Route::post('/{notification}/read', [NotificationController::class, 'markRead']);
+    });
 
     // Routes parent uniquement
     Route::middleware('role:parent')->prefix('parent')->group(function (): void {
