@@ -17,7 +17,6 @@ export interface ConversationSummary {
 export interface FirebaseTokenResponse {
   token: string;
   uid: string;
-  allowed_conversations: string[];
 }
 
 export interface ChatMessage {

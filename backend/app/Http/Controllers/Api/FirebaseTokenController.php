@@ -22,7 +22,6 @@ class FirebaseTokenController extends Controller
         return response()->json([
             'token' => $payload['token'],
             'uid' => $payload['uid'],
-            'allowed_conversations' => $payload['allowed_conversations'],
         ]);
     }
 }

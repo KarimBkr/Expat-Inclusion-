@@ -2,24 +2,28 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\BookingRequest;
+use App\Services\ConversationProvisioner;
 use App\Services\FirebaseTokenService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ConversationController extends Controller
 {
-    public function __construct(private readonly FirebaseTokenService $tokens) {}
+    public function __construct(
+        private readonly FirebaseTokenService $tokens,
+        private readonly ConversationProvisioner $provisioner,
+    ) {}
 
     /**
-     * Inbox : demandes acceptées de l'utilisateur courant (threads possibles).
+     * Inbox : demandes ayant ouvert droit à une conversation (acceptées, y
+     * compris si annulées depuis) pour l'utilisateur courant.
      */
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $bookings = $this->tokens->acceptedBookingsFor($user);
+        $bookings = $this->tokens->conversableBookingsFor($user);
 
         $data = $bookings->map(fn (BookingRequest $booking) => $this->serialize($booking, $user));
 
@@ -27,19 +31,16 @@ class ConversationController extends Controller
     }
 
     /**
-     * Métadonnées d'une conversation liée à une demande acceptée.
+     * Métadonnées d'une conversation, en garantissant que son document
+     * Firestore existe avant que le front ne s'y abonne.
      */
     public function show(Request $request, BookingRequest $booking): JsonResponse
     {
-        $this->authorize('view', $booking);
-
-        if ($booking->status !== BookingStatus::Accepted) {
-            return response()->json([
-                'message' => 'La messagerie n’est disponible qu’après acceptation de la demande.',
-            ], 422);
-        }
+        $this->authorize('converse', $booking);
 
         $booking->loadMissing(['parent', 'aeshProfile.user']);
+
+        $this->provisioner->ensure($booking);
 
         return response()->json([
             'data' => $this->serialize($booking, $request->user()),

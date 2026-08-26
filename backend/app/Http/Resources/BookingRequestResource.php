@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Enums\BookingStatus;
 use App\Services\FirebaseTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,6 +17,8 @@ class BookingRequestResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $canMessage = $this->wasAccepted();
+
         return [
             'id'              => $this->id,
             'status'          => $this->status->value,
@@ -37,8 +38,8 @@ class BookingRequestResource extends JsonResource
                 'user_id' => $this->aeshProfile->user_id,
                 'name'    => $this->aeshProfile->relationLoaded('user') ? $this->aeshProfile->user->name : null,
             ]),
-            'can_message'     => $this->status === BookingStatus::Accepted,
-            'conversation_id' => $this->status === BookingStatus::Accepted
+            'can_message'     => $canMessage,
+            'conversation_id' => $canMessage
                 ? FirebaseTokenService::conversationId($this->id)
                 : null,
             'histories'       => BookingStatusHistoryResource::collection($this->whenLoaded('statusHistories')),

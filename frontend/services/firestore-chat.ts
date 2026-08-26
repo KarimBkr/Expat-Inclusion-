@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase";
 import { fetchFirebaseToken } from "@/services/messaging";
-import type { ChatMessage, ConversationMeta, ConversationSummary } from "@/types/messaging";
+import type { ChatMessage, ConversationMeta } from "@/types/messaging";
 
 function toDate(value: unknown): Date | null {
   if (value instanceof Timestamp) return value.toDate();
@@ -89,25 +89,6 @@ function mapMessage(snap: QueryDocumentSnapshot<DocumentData>): ChatMessage {
     created_at:
       created instanceof Timestamp ? created.toDate() : created?.toDate ? created.toDate() : null,
   };
-}
-
-/**
- * Crée le document conversation s'il n'existe pas encore (idempotent côté rules).
- */
-export async function ensureConversationDoc(meta: ConversationSummary): Promise<void> {
-  const db = getFirebaseDb();
-  const ref = doc(db, "conversations", meta.conversation_id);
-  await setDoc(
-    ref,
-    {
-      booking_id: meta.booking_id,
-      participant_ids: meta.participant_ids,
-      parent_id: meta.parent_id,
-      aesh_user_id: meta.aesh_user_id,
-      created_at: serverTimestamp(),
-    },
-    { merge: true }
-  );
 }
 
 export function subscribeToMessages(

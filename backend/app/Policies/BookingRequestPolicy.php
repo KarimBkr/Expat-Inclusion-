@@ -25,6 +25,19 @@ class BookingRequestPolicy
         return $this->isAuthor($user, $booking) || $this->isRecipient($user, $booking);
     }
 
+    /**
+     * La messagerie reste ouverte tant que la demande a un jour été acceptée —
+     * y compris après une annulation ultérieure : l'historique des échanges
+     * ne doit pas disparaître parce que la réservation a changé de statut.
+     * Une demande refusée ou annulée avant toute acceptation n'a jamais eu
+     * de conversation et ne doit pas pouvoir en obtenir une a posteriori.
+     */
+    public function converse(User $user, BookingRequest $booking): bool
+    {
+        return ($this->isAuthor($user, $booking) || $this->isRecipient($user, $booking))
+            && $booking->wasAccepted();
+    }
+
     private function isAuthor(User $user, BookingRequest $booking): bool
     {
         return $user->isParent() && $booking->parent_id === $user->id;
