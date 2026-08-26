@@ -40,5 +40,9 @@
              n'y touchent jamais. -->
         <env name="STRIPE_SECRET" value="sk_test_fake_0000000000000000000000000000" force="true"/>
         <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_fake_secret" force="true"/>
+        <!-- Indépendant de la valeur locale de .env : les tests du parcours
+             payant doivent rester déterministes. Le parcours sans frais est
+             testé en surchargeant explicitement cette config au cas par cas. -->
+        <env name="STRIPE_PLATFORM_FEE_ENABLED" value="true" force="true"/>
     </php>
 </phpunit>

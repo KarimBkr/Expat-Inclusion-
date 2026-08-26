@@ -63,6 +63,8 @@ Réservé au parent auteur (policy `pay`). Rate limit 10/min.
 
 Le front redirige immédiatement vers cette URL (`window.location.href`) — pas
 d'intégration Stripe Elements, pas de formulaire de carte dans l'application.
+Si le frais est désactivé (voir plus bas), `checkout_url` pointe directement
+vers la page de succès interne plutôt que vers Stripe.
 
 ### Montant
 
@@ -71,6 +73,26 @@ depuis un profil AESH ou une demande (aucune colonne de tarif n'existe plus
 sur `booking_requests` depuis son retrait). Ajustable via la variable
 d'environnement `STRIPE_PLATFORM_FEE_AMOUNT`, sans changement de code —
 décision commerciale de la cliente, changeante par nature.
+
+### Interrupteur `STRIPE_PLATFORM_FEE_ENABLED`
+
+Le frais peut être désactivé sans changement de code via
+`STRIPE_PLATFORM_FEE_ENABLED=false` (config `services.stripe.platform_fee_enabled`,
+défaut `true`).
+
+Quand il est désactivé, `POST /api/bookings/{booking}/pay` ne crée **aucune**
+session Stripe : une ligne `payments` est enregistrée directement avec
+`amount = 0`, `status = paid` et un identifiant synthétique
+(`free_{uuid}`, jamais un vrai `cs_...` Stripe), et la demande passe
+immédiatement à `confirmed`. Les mêmes garde-fous s'appliquent (demande
+`accepted` requise, pas de double confirmation). Réactivable à tout moment en
+repassant la variable à `true` — aucune migration ni changement de code
+nécessaire.
+
+Les tests automatisés forcent `STRIPE_PLATFORM_FEE_ENABLED=true` par défaut
+(`phpunit.xml`) pour garder le parcours payant déterministe ; le parcours sans
+frais est testé en surchargeant explicitement cette config
+(`PaymentTest::test_frais_desactive_*`).
 
 ---
 
@@ -120,8 +142,9 @@ retentées) ; au plus une doit être `paid`.
 
 ## Frontend
 
-- `/dashboard/parent/reservations` — bouton « Payer le frais de mise en
-  relation » sur toute demande `accepted`, redirige vers Stripe.
+- `/dashboard/parent/reservations` — bouton « Confirmer la réservation » sur
+  toute demande `accepted`, libellé neutre car identique que le frais soit
+  actif (redirection Stripe) ou désactivé (confirmation immédiate).
 - `/dashboard/parent/paiement/succes?booking={id}` — relit le statut réel
   (une nouvelle tentative après 3 s si le webhook n'est pas encore passé),
   n'affiche jamais "confirmé" sans l'avoir vérifié.

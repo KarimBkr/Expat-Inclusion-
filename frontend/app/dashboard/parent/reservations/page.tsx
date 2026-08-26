@@ -209,7 +209,7 @@ function ParentBookingCard({
             disabled={paying}
             className="inline-flex px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
           >
-            {paying ? "Redirection…" : "Payer le frais de mise en relation"}
+            {paying ? "Redirection…" : "Confirmer la réservation"}
           </button>
         </div>
       )}
