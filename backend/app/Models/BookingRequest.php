@@ -62,6 +62,11 @@ class BookingRequest extends Model
         return $this->hasMany(BookingStatusHistory::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     /** @param  \Illuminate\Database\Eloquent\Builder<BookingRequest>  $query */
     public function scopePending(Builder $query): void
     {

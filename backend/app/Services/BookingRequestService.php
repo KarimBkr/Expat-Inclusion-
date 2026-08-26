@@ -40,14 +40,14 @@ class BookingRequestService
 
         return DB::transaction(function () use ($data, $parent, $profile): BookingRequest {
             $booking = BookingRequest::create([
-                'parent_id'       => $parent->id,
+                'parent_id' => $parent->id,
                 'aesh_profile_id' => $profile->id,
-                'status'          => BookingStatus::Requested,
-                'message'         => $data['message'],
-                'modality_id'     => $data['modality_id'],
+                'status' => BookingStatus::Requested,
+                'message' => $data['message'],
+                'modality_id' => $data['modality_id'],
                 'school_level_id' => $data['school_level_id'],
-                'start_date'      => $data['start_date'],
-                'hours_per_week'  => $data['hours_per_week'],
+                'start_date' => $data['start_date'],
+                'hours_per_week' => $data['hours_per_week'],
             ]);
 
             $this->recordHistory($booking, null, BookingStatus::Requested, $parent);
@@ -60,11 +60,15 @@ class BookingRequestService
      * Applique une transition de statut en respectant la machine à états.
      * L'autorisation (qui a le droit de déclencher quoi) est vérifiée en amont
      * par la policy — ce service ne juge que la légalité de la transition.
+     *
+     * `$actor` est nullable pour la seule transition vers `Confirmed` : elle
+     * est déclenchée par le webhook de paiement (US-15), sans utilisateur
+     * Laravel authentifié à l'origine.
      */
     public function transition(
         BookingRequest $booking,
         BookingStatus $target,
-        User $actor,
+        ?User $actor,
         ?string $reason = null,
     ): BookingRequest {
         $current = $booking->status;
@@ -74,11 +78,18 @@ class BookingRequestService
         }
 
         return DB::transaction(function () use ($booking, $current, $target, $actor, $reason): BookingRequest {
-            $booking->update([
-                'status'          => $target,
-                'response_reason' => $reason,
-                'responded_at'    => now(),
-            ]);
+            $updates = ['status' => $target];
+
+            // response_reason/responded_at documentent la réponse de l'AESH
+            // (acceptation, refus) ou le motif d'une annulation — pas la
+            // confirmation de paiement, qui n'en a pas et ne doit pas écraser
+            // la date de réponse déjà enregistrée à l'acceptation.
+            if ($target !== BookingStatus::Confirmed) {
+                $updates['response_reason'] = $reason;
+                $updates['responded_at'] = now();
+            }
+
+            $booking->update($updates);
 
             $this->recordHistory($booking, $current, $target, $actor, $reason);
 
@@ -90,14 +101,14 @@ class BookingRequestService
         BookingRequest $booking,
         ?BookingStatus $from,
         BookingStatus $to,
-        User $actor,
+        ?User $actor,
         ?string $reason = null,
     ): void {
         $booking->statusHistories()->create([
             'from_status' => $from,
-            'to_status'   => $to,
-            'changed_by'  => $actor->id,
-            'reason'      => $reason,
+            'to_status' => $to,
+            'changed_by' => $actor?->id,
+            'reason' => $reason,
         ]);
     }
 }

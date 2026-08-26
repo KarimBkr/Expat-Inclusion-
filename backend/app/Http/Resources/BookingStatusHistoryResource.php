@@ -16,7 +16,7 @@ class BookingStatusHistoryResource extends JsonResource
             'to_status'   => $this->to_status->value,
             'label'       => $this->to_status->label(),
             'reason'      => $this->reason,
-            'author'      => $this->whenLoaded('author', fn () => ['id' => $this->author->id, 'name' => $this->author->name]),
+            'author'      => $this->whenLoaded('author', fn () => $this->author ? ['id' => $this->author->id, 'name' => $this->author->name] : null),
             'created_at'  => $this->created_at?->toIso8601String(),
         ];
     }

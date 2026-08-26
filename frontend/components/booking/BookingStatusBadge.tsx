@@ -5,6 +5,7 @@ const STYLES: Record<BookingStatus, string> = {
   accepted: "bg-primary-light text-primary border-primary/20",
   declined: "bg-danger/10 text-danger border-danger/20",
   cancelled: "bg-cream text-subtle border-line",
+  confirmed: "bg-primary text-white border-primary",
 };
 
 export function BookingStatusBadge({ status, label }: { status: BookingStatus; label: string }) {

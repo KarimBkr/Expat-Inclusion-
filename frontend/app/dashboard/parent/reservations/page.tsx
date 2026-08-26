@@ -9,12 +9,14 @@ import { BookingSummary, formatDate } from "@/components/booking/BookingSummary"
 import { ReasonForm } from "@/components/booking/ReasonForm";
 import { useAuth } from "@/lib/auth-context";
 import { cancelBooking, listBookings } from "@/services/booking";
+import { createCheckoutSession } from "@/services/payment";
 import type { BookingRequest, BookingStatus } from "@/types/booking";
 
 const FILTERS: { value: BookingStatus | ""; label: string }[] = [
   { value: "", label: "Toutes" },
   { value: "requested", label: "En attente" },
   { value: "accepted", label: "Acceptées" },
+  { value: "confirmed", label: "Confirmées" },
   { value: "declined", label: "Refusées" },
   { value: "cancelled", label: "Annulées" },
 ];
@@ -129,6 +131,7 @@ function ParentBookingCard({
   onChanged: () => void;
 }) {
   const [cancelling, setCancelling] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
   async function handleCancel(reason: string) {
@@ -139,6 +142,18 @@ function ParentBookingCard({
       onChanged();
     } catch (err) {
       setError((err as Error).message);
+    }
+  }
+
+  async function handlePay() {
+    setPaying(true);
+    setError("");
+    try {
+      const checkoutUrl = await createCheckoutSession(booking.id);
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setError((err as Error).message);
+      setPaying(false);
     }
   }
 
@@ -185,6 +200,19 @@ function ParentBookingCard({
             </button>
           </div>
         ))}
+
+      {booking.status === "accepted" && (
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={handlePay}
+            disabled={paying}
+            className="inline-flex px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
+          >
+            {paying ? "Redirection…" : "Payer le frais de mise en relation"}
+          </button>
+        </div>
+      )}
 
       {booking.can_message && (
         <div className="mt-5">
