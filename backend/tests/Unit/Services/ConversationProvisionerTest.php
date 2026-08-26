@@ -80,23 +80,28 @@ class ConversationProvisionerTest extends TestCase
         ]);
     }
 
+    private function documentUrl(BookingRequest $booking): string
+    {
+        return "https://firestore.googleapis.com/v1/projects/expat-inclusion-test/databases/(default)/documents/conversations/booking_{$booking->id}";
+    }
+
     public function test_cree_le_document_si_absent(): void
     {
         $booking = $this->makeBooking()->load('aeshProfile');
-        $url = "https://firestore.googleapis.com/v1/projects/expat-inclusion-test/databases/(default)/documents/conversations/booking_{$booking->id}";
+        $url = $this->documentUrl($booking);
 
-        Http::fake([
-            $url => Http::sequence()
-                ->push('', 404)               // GET : le document n'existe pas encore
-                ->push(['fields' => []], 200), // PATCH : création
-        ]);
+        Http::fake([$url.'*' => Http::response(['fields' => []], 200)]);
 
         $this->provisioner()->ensure($booking);
 
-        Http::assertSent(fn ($request) => $request->method() === 'GET' && $request->url() === $url);
-
         Http::assertSent(function ($request) use ($url, $booking) {
-            if ($request->method() !== 'PATCH' || $request->url() !== $url) {
+            if ($request->method() !== 'PATCH' || ! str_starts_with($request->url(), $url)) {
+                return false;
+            }
+
+            // La précondition est ce qui rend la création atomique : sans
+            // elle, une écriture concurrente pourrait en écraser une autre.
+            if (! str_contains($request->url(), 'currentDocument.exists=false')) {
                 return false;
             }
 
@@ -110,30 +115,53 @@ class ConversationProvisionerTest extends TestCase
         });
     }
 
-    public function test_ne_reecrit_pas_si_le_document_existe_deja(): void
+    /**
+     * Régression : avant l'introduction de la précondition Firestore, un
+     * document déjà existant pouvait être réécrit en entier (PATCH sans
+     * updateMask), effaçant `last_message_at` et les autres métadonnées
+     * écrites par le client entre-temps. Avec `currentDocument.exists=false`,
+     * Firestore refuse lui-même l'écriture : `ensure()` doit traiter ce refus
+     * comme un succès silencieux, jamais comme une erreur.
+     */
+    public function test_ne_leve_pas_derreur_si_le_document_existe_deja(): void
     {
         $booking = $this->makeBooking();
-        $url = "https://firestore.googleapis.com/v1/projects/expat-inclusion-test/databases/(default)/documents/conversations/booking_{$booking->id}";
+        $url = $this->documentUrl($booking);
 
-        Http::fake([
-            $url => Http::response(['fields' => []], 200),
-        ]);
+        Http::fake([$url.'*' => Http::response([
+            'error' => ['code' => 409, 'message' => 'Document already exists', 'status' => 'ALREADY_EXISTS'],
+        ], 409)]);
 
         $this->provisioner()->ensure($booking);
 
-        Http::assertNotSent(fn ($request) => $request->method() === 'PATCH');
+        $this->addToAssertionCount(1); // aucune exception levée = comportement attendu
+    }
+
+    /**
+     * Un 409 n'est traité comme « déjà créé » que s'il porte précisément le
+     * statut `ALREADY_EXISTS` — pas n'importe quel conflit. Un check trop
+     * large avalerait silencieusement d'autres erreurs Firestore.
+     */
+    public function test_un_409_dune_autre_nature_reste_une_erreur(): void
+    {
+        $booking = $this->makeBooking();
+        $url = $this->documentUrl($booking);
+
+        Http::fake([$url.'*' => Http::response([
+            'error' => ['code' => 409, 'message' => 'Concurrent transaction', 'status' => 'ABORTED'],
+        ], 409)]);
+
+        $this->expectException(RuntimeException::class);
+
+        $this->provisioner()->ensure($booking);
     }
 
     public function test_leve_une_exception_si_lecriture_echoue(): void
     {
         $booking = $this->makeBooking();
-        $url = "https://firestore.googleapis.com/v1/projects/expat-inclusion-test/databases/(default)/documents/conversations/booking_{$booking->id}";
+        $url = $this->documentUrl($booking);
 
-        Http::fake([
-            $url => Http::sequence()
-                ->push('', 404)
-                ->push(['error' => 'permission denied'], 403),
-        ]);
+        Http::fake([$url.'*' => Http::response(['error' => 'permission denied'], 403)]);
 
         $this->expectException(RuntimeException::class);
 

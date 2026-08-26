@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      <section>
+      <section className="mb-10">
         <h2 className="text-lg font-semibold text-ink mb-4">Vérification AESH</h2>
         <Link
           href="/dashboard/admin/aesh"
@@ -71,6 +71,21 @@ export default function AdminDashboardPage() {
             <p className="font-semibold text-ink">Profils AESH à vérifier</p>
             <p className="text-xs text-subtle mt-1">
               Approuver · rejeter · publier · notes internes
+            </p>
+          </div>
+        </Link>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold text-ink mb-4">Sourcing</h2>
+        <Link
+          href="/dashboard/admin/aesh-import"
+          className="inline-flex items-center bg-card border border-line rounded-2xl px-6 py-4 hover:border-primary/40 transition-colors"
+        >
+          <div>
+            <p className="font-semibold text-ink">Import CSV — profils AESH</p>
+            <p className="text-xs text-subtle mt-1">
+              Créer des comptes en masse depuis le sourcing terrain
             </p>
           </div>
         </Link>

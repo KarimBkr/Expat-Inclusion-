@@ -143,3 +143,18 @@ touchée ; réservation de test annulée en base (rollback) après coup.
 Non fait à ce stade, volontairement : le déploiement des nouvelles Security
 Rules (`firebase deploy --only firestore:rules`) — voir l'avertissement sur
 l'ordre de déploiement ci-dessus.
+
+### 26 août 2026 — écriture atomique de `ConversationProvisioner`
+
+Relecture a posteriori du GET-puis-PATCH de la veille : une erreur transitoire
+du GET (faux négatif) suivie d'un PATCH sans `updateMask` aurait réécrit le
+document en entier, effaçant `last_message_at`/`last_message_preview` écrits
+par le client. `ensure()` tournant à chaque ouverture de thread, ce n'était
+qu'une question de temps avant que ça arrive en usage réel.
+
+Corrigé en une seule écriture atomique (`PATCH …?currentDocument.exists=false`
+— voir `docs/api/messaging.md`). 127 tests verts. Revérifié en conditions
+réelles contre `expat-inclusion` avec un scénario reproduisant exactement le
+bug : `ensure()` appelé une seconde fois après qu'un message a été envoyé —
+`last_message_preview` reste intact. Security Rules déjà déployées la veille
+inchangées par ce correctif (aucune rule ne dépendait du GET préalable).
