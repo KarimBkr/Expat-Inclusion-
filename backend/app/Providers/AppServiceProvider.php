@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
@@ -19,6 +22,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Limite par défaut sur toute l'API (US-21) : les routes plus
+        // sensibles (contact, paiement, réservation, import) gardent leurs
+        // propres limites, plus strictes, définies directement sur la route.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by(
+            $request->user()?->id ?: $request->ip(),
+        ));
+
         // Le lien de reset pointe vers le frontend, pas vers une route Laravel web.
         ResetPassword::createUrlUsing(function (object $user, string $token): string {
             $email = urlencode($user->email);
