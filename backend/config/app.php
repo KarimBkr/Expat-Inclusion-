@@ -54,6 +54,12 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Base du frontend Next.js — liens de reset de mot de passe, redirections
+    // Stripe Checkout. Était référencé par AppServiceProvider sans être
+    // jamais défini ici : FRONTEND_URL n'avait donc aucun effet hors du
+    // fallback codé en dur.
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

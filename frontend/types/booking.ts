@@ -1,6 +1,6 @@
 import type { TaxonomyRef } from "@/types/aesh-search";
 
-export type BookingStatus = "requested" | "accepted" | "declined" | "cancelled";
+export type BookingStatus = "requested" | "accepted" | "declined" | "cancelled" | "confirmed";
 
 export interface BookingStatusHistory {
   id: number;

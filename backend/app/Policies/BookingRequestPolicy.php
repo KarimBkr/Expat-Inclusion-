@@ -26,6 +26,17 @@ class BookingRequestPolicy
     }
 
     /**
+     * Seul le parent auteur paie le frais de mise en relation — l'AESH ne
+     * paie jamais rien via la plateforme. La légalité de la transition
+     * (demande bien acceptée, pas déjà payée) est vérifiée par
+     * `PaymentService`, pas ici.
+     */
+    public function pay(User $user, BookingRequest $booking): bool
+    {
+        return $this->isAuthor($user, $booking);
+    }
+
+    /**
      * La messagerie reste ouverte tant que la demande a un jour été acceptée —
      * y compris après une annulation ultérieure : l'historique des échanges
      * ne doit pas disparaître parce que la réservation a changé de statut.

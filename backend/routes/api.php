@@ -13,12 +13,19 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\ParentProfileController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\TaxonomyController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public ────────────────────────────────────────────────────────────────────
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
 Route::get('/taxonomies', [TaxonomyController::class, 'index']);
+
+// Stripe appelle ce endpoint directement (serveur à serveur) : pas de session
+// Sanctum possible. La légitimité de l'appel est garantie par la signature du
+// corps de la requête (US-15), vérifiée dans le controller lui-même.
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -45,6 +52,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/{booking}/decline', [BookingRequestController::class, 'decline'])->middleware('role:aesh');
         Route::post('/{booking}/cancel', [BookingRequestController::class, 'cancel']);
         Route::get('/{booking}/conversation', [ConversationController::class, 'show']);
+        Route::post('/{booking}/pay', [PaymentController::class, 'store'])
+            ->middleware(['role:parent', 'throttle:10,1']);
     });
 
     // Messagerie Firebase (US-13) — token custom + inbox des threads acceptés
