@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
+use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -50,5 +52,17 @@ class User extends Authenticatable implements MustVerifyEmail
     public function aeshProfile(): HasOne
     {
         return $this->hasOne(AeshProfile::class);
+    }
+
+    /** Remplace le rendu générique de Laravel par le template brandé et mis en queue. */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification());
+    }
+
+    /** Remplace le rendu générique de Laravel par le template brandé et mis en queue. */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

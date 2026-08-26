@@ -8,6 +8,10 @@ use App\Models\BookingRequest;
 use App\Models\Modality;
 use App\Models\SchoolLevel;
 use App\Models\User;
+use App\Notifications\BookingRequestAcceptedNotification;
+use App\Notifications\BookingRequestCancelledNotification;
+use App\Notifications\BookingRequestDeclinedNotification;
+use App\Notifications\BookingRequestReceivedNotification;
 use Database\Seeders\CountrySeeder;
 use Database\Seeders\LanguageSeeder;
 use Database\Seeders\ModalitySeeder;
@@ -15,6 +19,7 @@ use Database\Seeders\SchoolLevelSeeder;
 use Database\Seeders\SpecializationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class BookingRequestTest extends TestCase
@@ -444,5 +449,66 @@ class BookingRequestTest extends TestCase
         // liste (eager load), pas une par ligne : sinon `can_message` sur
         // /api/bookings redeviendrait un N+1 à chaque demande supplémentaire.
         $this->assertCount(1, $queries, (string) $queries->pluck('query'));
+    }
+
+    // ── US-16 · notifications transactionnelles ──────────────────────────────
+
+    public function test_creer_une_demande_notifie_laesh(): void
+    {
+        Notification::fake();
+
+        $this->actingAs($this->parent)->postJson('/api/bookings', $this->payload())->assertStatus(201);
+
+        Notification::assertSentTo($this->aeshUser, BookingRequestReceivedNotification::class);
+        Notification::assertNotSentTo($this->parent, BookingRequestReceivedNotification::class);
+    }
+
+    public function test_accepter_notifie_le_parent(): void
+    {
+        Notification::fake();
+        $booking = $this->makeBooking();
+
+        $this->actingAs($this->aeshUser)->postJson("/api/bookings/{$booking->id}/accept")->assertOk();
+
+        Notification::assertSentTo($this->parent, BookingRequestAcceptedNotification::class);
+        Notification::assertNotSentTo($this->aeshUser, BookingRequestAcceptedNotification::class);
+    }
+
+    public function test_refuser_notifie_le_parent(): void
+    {
+        Notification::fake();
+        $booking = $this->makeBooking();
+
+        $this->actingAs($this->aeshUser)
+            ->postJson("/api/bookings/{$booking->id}/decline", ['reason' => 'Indisponible sur cette période.'])
+            ->assertOk();
+
+        Notification::assertSentTo($this->parent, BookingRequestDeclinedNotification::class);
+    }
+
+    public function test_annulation_par_le_parent_notifie_laesh_pas_lacteur(): void
+    {
+        Notification::fake();
+        $booking = $this->makeBooking(BookingStatus::Accepted->value);
+
+        $this->actingAs($this->parent)
+            ->postJson("/api/bookings/{$booking->id}/cancel", ['reason' => 'Changement de programme.'])
+            ->assertOk();
+
+        Notification::assertSentTo($this->aeshUser, BookingRequestCancelledNotification::class);
+        Notification::assertNotSentTo($this->parent, BookingRequestCancelledNotification::class);
+    }
+
+    public function test_annulation_par_laesh_notifie_le_parent_pas_lacteur(): void
+    {
+        Notification::fake();
+        $booking = $this->makeBooking(BookingStatus::Accepted->value);
+
+        $this->actingAs($this->aeshUser)
+            ->postJson("/api/bookings/{$booking->id}/cancel", ['reason' => 'Empêchement imprévu.'])
+            ->assertOk();
+
+        Notification::assertSentTo($this->parent, BookingRequestCancelledNotification::class);
+        Notification::assertNotSentTo($this->aeshUser, BookingRequestCancelledNotification::class);
     }
 }

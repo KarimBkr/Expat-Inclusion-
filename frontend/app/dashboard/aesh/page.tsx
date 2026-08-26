@@ -8,6 +8,7 @@ import { useUnreadConversations } from "@/lib/use-unread-conversations";
 import { getAeshDocuments, getAeshProfile } from "@/services/aesh-profile";
 import { listBookings } from "@/services/booking";
 import { listConversations } from "@/services/messaging";
+import { listNotifications } from "@/services/notifications";
 import type { AeshProfile } from "@/types/aesh-profile";
 import type { ConversationSummary } from "@/types/messaging";
 
@@ -33,6 +34,7 @@ export default function DashboardAeshPage() {
   const [pendingCount, setPendingCount] = useState<number | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const { unreadCount } = useUnreadConversations(conversations);
+  const [unreadNotifications, setUnreadNotifications] = useState<number | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -54,6 +56,9 @@ export default function DashboardAeshPage() {
     listConversations()
       .then(setConversations)
       .catch(() => setConversations([]));
+    listNotifications()
+      .then((res) => setUnreadNotifications(res.unreadCount))
+      .catch(() => setUnreadNotifications(0));
   }, [user]);
 
   if (loading || !user) {
@@ -126,7 +131,7 @@ export default function DashboardAeshPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <DashboardCard
           title="Mon profil"
           value={profile === null ? "À créer" : profile.is_complete ? "Complet" : "Incomplet"}
@@ -150,6 +155,12 @@ export default function DashboardAeshPage() {
           value={String(conversations.length)}
           description={unreadCount > 0 ? `${unreadCount} non lu(s)` : "Messages avec les familles"}
           href="/dashboard/aesh/conversations"
+        />
+        <DashboardCard
+          title="Notifications"
+          value={unreadNotifications === null ? "—" : String(unreadNotifications)}
+          description="Non lues"
+          href="/dashboard/aesh/notifications"
         />
       </div>
     </div>
