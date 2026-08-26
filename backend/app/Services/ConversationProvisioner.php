@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BookingRequest;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -31,30 +32,46 @@ class ConversationProvisioner
 
     private ?ServiceAccountCredentials $credentials = null;
 
-    /** Crée le document s'il n'existe pas encore ; ne touche à rien s'il existe déjà. */
+    /**
+     * Crée le document s'il n'existe pas encore ; ne touche à rien s'il existe
+     * déjà.
+     *
+     * Écrit avec la précondition Firestore `currentDocument.exists=false` —
+     * une création atomique côté serveur, pas un GET puis un PATCH séparés.
+     * Un GET préalable exposait deux dangers réels : toute erreur transitoire
+     * du GET (401 après expiration du jeton en cache, blip réseau, 5xx
+     * Firestore) était traitée comme « le document n'existe pas », et le
+     * PATCH qui suivait n'avait pas d'`updateMask` — donc réécrivait le
+     * document en entier, effaçant silencieusement `last_message_at` /
+     * `last_message_preview` / `last_message_sender_id` écrits entre-temps
+     * par le client. Avec la précondition, Firestore lui-même refuse
+     * l'écriture (`409 ALREADY_EXISTS`) si le document existe déjà — aucune
+     * fenêtre de course possible, et le document existant n'est jamais
+     * touché, quelle qu'en soit la raison.
+     */
     public function ensure(BookingRequest $booking): void
     {
-        $conversationId = FirebaseTokenService::conversationId($booking->id);
+        $response = $this->createIfMissing($booking);
 
-        if (! $this->documentExists($conversationId)) {
-            $this->createDocument($conversationId, $booking);
+        if ($response->successful() || $this->alreadyExists($response)) {
+            return;
         }
+
+        throw new RuntimeException(sprintf(
+            'Impossible de provisionner la conversation Firestore pour la demande #%d : %s',
+            $booking->id,
+            $response->body(),
+        ));
     }
 
-    private function documentExists(string $conversationId): bool
+    private function createIfMissing(BookingRequest $booking): Response
     {
-        return Http::withToken($this->accessToken())
-            ->get($this->documentUrl($conversationId))
-            ->successful();
-    }
-
-    private function createDocument(string $conversationId, BookingRequest $booking): void
-    {
+        $conversationId = FirebaseTokenService::conversationId($booking->id);
         $aeshUserId = $booking->aeshProfile?->user_id;
         $participantIds = array_values(array_filter([$booking->parent_id, $aeshUserId]));
 
-        $response = Http::withToken($this->accessToken())
-            ->patch($this->documentUrl($conversationId), [
+        return Http::withToken($this->accessToken())
+            ->patch($this->documentUrl($conversationId).'?currentDocument.exists=false', [
                 'fields' => [
                     'booking_id' => ['integerValue' => (string) $booking->id],
                     'participant_ids' => [
@@ -70,14 +87,11 @@ class ConversationProvisioner
                     'created_at' => ['timestampValue' => now()->toIso8601String()],
                 ],
             ]);
+    }
 
-        if ($response->failed()) {
-            throw new RuntimeException(sprintf(
-                'Impossible de créer la conversation Firestore pour la demande #%d : %s',
-                $booking->id,
-                $response->body(),
-            ));
-        }
+    private function alreadyExists(Response $response): bool
+    {
+        return $response->status() === 409 && $response->json('error.status') === 'ALREADY_EXISTS';
     }
 
     private function documentUrl(string $conversationId): string

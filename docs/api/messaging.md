@@ -149,6 +149,31 @@ Security Rules : `firebase/firestore.rules`
 → accès en lecture/écriture si `auth.uid` ∈ `participant_ids` du document —
 plus aucune référence à un claim du token.
 
+### Écriture atomique — `currentDocument.exists=false`
+
+`ConversationProvisioner::ensure()` ne fait pas un GET puis un PATCH séparés.
+Une première version faisait exactement ça, avec deux défauts réels :
+
+- Toute erreur transitoire du GET (jeton en cache expiré, blip réseau, 5xx
+  Firestore) était traitée comme « le document n'existe pas ».
+- Le PATCH qui suivait n'avait pas d'`updateMask` : sur l'API REST Firestore,
+  un `PATCH` sans `updateMask.fieldPaths` **réécrit le document en entier**,
+  contrairement à ce que le mot « PATCH » suggère. Un faux négatif du GET
+  provoquait donc une réécriture complète, effaçant silencieusement
+  `last_message_at` / `last_message_preview` / `last_message_sender_id`
+  écrits entre-temps par le client — pas de perte de messages (ils vivent
+  dans la sous-collection `messages`, jamais touchée), mais le badge non-lu
+  pouvait se dérégler sans qu'aucune erreur ne remonte nulle part. `ensure()`
+  tournant à chaque ouverture de thread, ce n'était qu'une question de temps.
+
+La correction : un seul appel, `PATCH …?currentDocument.exists=false`. C'est
+Firestore lui-même qui refuse l'écriture (`409 ALREADY_EXISTS`) si le document
+existe déjà — le document existant n'est alors jamais touché, quelle que soit
+la raison de l'appel (relecture d'un thread déjà ouvert, deux requêtes
+concurrentes sur la même conversation). Vérifié en conditions réelles contre
+le projet Firebase : un second `ensure()` après qu'un message a été envoyé
+laisse `last_message_preview` intact.
+
 ---
 
 ## Frontend
