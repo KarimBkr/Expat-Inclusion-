@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AeshImportController;
 use App\Http\Controllers\Api\Admin\AeshProfileController as AdminAeshProfileController;
 use App\Http\Controllers\Api\Admin\TaxonomyController as AdminTaxonomyController;
 use App\Http\Controllers\Api\AeshDetailController;
@@ -86,5 +87,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/aesh-profiles/{id}/reject', [AdminAeshProfileController::class, 'reject']);
         Route::post('/aesh-profiles/{id}/publish', [AdminAeshProfileController::class, 'publish']);
         Route::post('/aesh-profiles/{id}/notes', [AdminAeshProfileController::class, 'storeNote']);
+
+        Route::post('/aesh-import', [AeshImportController::class, 'store'])
+            ->middleware('throttle:10,1');
     });
 });
