@@ -115,13 +115,13 @@ function PaiementSuccesContent() {
         </div>
 
         <h1 className="text-2xl font-bold text-ink mb-3">
-          {confirmed ? "Paiement confirmé" : "Paiement en cours de confirmation"}
+          {confirmed ? "Réservation confirmée" : "Confirmation en cours"}
         </h1>
         <p className="text-subtle text-sm mb-8">
           {error ||
             (confirmed
               ? "Votre réservation est confirmée. L'accompagnant en est informé."
-              : "Le paiement a bien été reçu par Stripe. La confirmation finale peut prendre quelques instants — actualisez cette page si le statut ne change pas.")}
+              : "La confirmation finale peut prendre quelques instants — actualisez cette page si le statut ne change pas.")}
         </p>
 
         <Link

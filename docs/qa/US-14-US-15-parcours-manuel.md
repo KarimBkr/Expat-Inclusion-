@@ -69,7 +69,7 @@ AESH inscrits, profil AESH publié, demande créée puis acceptée.
 
 | # | Écran | Action | Attendu |
 |---|-------|--------|---------|
-| 1 | `/dashboard/parent/reservations` | Demande **acceptée** | Bouton « Payer le frais de mise en relation » visible |
+| 1 | `/dashboard/parent/reservations` | Demande **acceptée** | Bouton « Confirmer la réservation » visible |
 | 2 | Cliquer sur le bouton | Redirection | Page Stripe Checkout hébergée, montant conforme à `STRIPE_PLATFORM_FEE_AMOUNT` |
 | 3 | Checkout Stripe | Payer avec la carte test `4242 4242 4242 4242` | Redirection vers `/dashboard/parent/paiement/succes` |
 | 4 | Page succès | Attendre | Bascule de « en cours de confirmation » à « Paiement confirmé » dès que le webhook (terminal `stripe listen`) est traité |
@@ -100,6 +100,21 @@ stripe trigger checkout.session.completed
 | Un autre parent tente de payer la demande | `403` |
 | `POST /api/bookings/{id}/pay` sur une demande `requested`, `declined` ou `cancelled` | `422` |
 
+## Parcours frais désactivé (`STRIPE_PLATFORM_FEE_ENABLED=false`)
+
+Interrupteur de configuration, réversible sans changement de code.
+
+| # | Écran | Action | Attendu |
+|---|-------|--------|---------|
+| 1 | `.env` | `STRIPE_PLATFORM_FEE_ENABLED=false`, relancer `serve` | — |
+| 2 | `/dashboard/parent/reservations` | Demande **acceptée**, cliquer « Confirmer la réservation » | Aucune redirection Stripe — retour direct sur `/dashboard/parent/paiement/succes`, statut déjà `confirmed` |
+| 3 | Base de données | Consulter `payments` | Ligne `amount = 0`, `status = paid`, `stripe_checkout_session_id` préfixé `free_` (pas un identifiant Stripe) |
+| 4 | Re-tenter un paiement sur la même demande | `POST /api/bookings/{id}/pay` | `422` — déjà payée, même garde-fou qu'en mode payant |
+| 5 | `.env` | Repasser à `true`, relancer `serve` | Parcours payant normal restauré sans rien d'autre à changer |
+
+Couvert par `PaymentTest::test_frais_desactive_confirme_directement_sans_stripe`
+et `test_frais_desactive_refuse_si_deja_paye`.
+
 ## Points de vigilance métier
 
 - **Le webhook est la seule source de vérité.** Ne jamais faire confiance à
@@ -120,10 +135,10 @@ stripe trigger checkout.session.completed
 
 ## Résultat du dernier passage
 
-Développé et testé le 26 août 2026 : 153 tests backend verts (137 existants +
-16 nouveaux), typecheck/lint/build front verts, migration vérifiée sur MySQL
-réel (schéma `booking_requests.status`, `booking_status_histories`, table
-`payments` conformes).
+Développé et testé le 26 août 2026 : 166 tests backend verts, typecheck/lint/
+build front verts, migration vérifiée sur MySQL réel (schéma
+`booking_requests.status`, `booking_status_histories`, table `payments`
+conformes). Inclut le parcours frais désactivé (ci-dessus).
 
 Vérifié en plus contre `stripe-mock` (voir section dédiée) : création de
 session réelle acceptée par un serveur qui valide selon la spec Stripe,

@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\BookingStatus;
 use App\Models\BookingRequest;
 use App\Models\Payment;
+use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Stripe\Checkout\Session;
 use Stripe\StripeClient;
@@ -23,7 +25,8 @@ class PaymentService
     ) {}
 
     /**
-     * Crée une session Stripe Checkout pour une demande acceptée.
+     * Confirme une demande acceptée — via Stripe Checkout si le frais de
+     * mise en relation est actif, directement sinon.
      *
      * Une demande ne peut être payée qu'une fois : si un paiement `paid`
      * existe déjà, la création est refusée plutôt que de facturer deux fois.
@@ -32,7 +35,7 @@ class PaymentService
      *
      * @return array{payment: Payment, checkout_url: string}
      */
-    public function createCheckoutSession(BookingRequest $booking): array
+    public function createCheckoutSession(BookingRequest $booking, User $actor): array
     {
         if ($booking->status !== BookingStatus::Accepted) {
             throw ValidationException::withMessages([
@@ -44,6 +47,10 @@ class PaymentService
             throw ValidationException::withMessages([
                 'booking' => 'Cette demande a déjà été payée.',
             ]);
+        }
+
+        if (! (bool) config('services.stripe.platform_fee_enabled')) {
+            return $this->confirmWithoutPayment($booking, $actor);
         }
 
         $amount = (int) config('services.stripe.platform_fee_amount');
@@ -58,6 +65,32 @@ class PaymentService
             'currency' => $currency,
             'status' => Payment::STATUS_PENDING,
         ]);
+
+        return ['payment' => $payment, 'checkout_url' => $checkoutUrl];
+    }
+
+    /**
+     * Confirme la demande sans passer par Stripe (frais désactivé) : aucune
+     * session Checkout n'est créée, la ligne `Payment` est enregistrée
+     * directement `paid` et la demande passe à `confirmed`.
+     *
+     * @return array{payment: Payment, checkout_url: string}
+     */
+    private function confirmWithoutPayment(BookingRequest $booking, User $actor): array
+    {
+        $payment = Payment::create([
+            'booking_request_id' => $booking->id,
+            'stripe_checkout_session_id' => 'free_'.Str::uuid(),
+            'amount' => 0,
+            'currency' => (string) config('services.stripe.currency'),
+            'status' => Payment::STATUS_PAID,
+            'paid_at' => now(),
+        ]);
+
+        $this->bookings->transition($booking, BookingStatus::Confirmed, $actor);
+
+        $frontendUrl = rtrim((string) config('app.frontend_url'), '/');
+        $checkoutUrl = "{$frontendUrl}/dashboard/parent/paiement/succes?booking={$booking->id}";
 
         return ['payment' => $payment, 'checkout_url' => $checkoutUrl];
     }

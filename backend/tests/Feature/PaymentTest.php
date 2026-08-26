@@ -172,4 +172,49 @@ class PaymentTest extends TestCase
 
         $this->postJson("/api/bookings/{$booking->id}/pay")->assertStatus(401);
     }
+
+    public function test_frais_desactive_confirme_directement_sans_stripe(): void
+    {
+        config(['services.stripe.platform_fee_enabled' => false]);
+        // Mode sans frais : aucun appel Stripe, donc pas besoin du mock de
+        // createStripeSession — le service réel (avec un vrai BookingRequestService
+        // injecté) est utilisé pour exercer le vrai chemin de confirmation.
+        $this->app->forgetInstance(PaymentService::class);
+        $booking = $this->makeBooking(BookingStatus::Accepted->value);
+
+        $response = $this->actingAs($this->parent)
+            ->postJson("/api/bookings/{$booking->id}/pay")
+            ->assertStatus(201);
+
+        $checkoutUrl = $response->json('checkout_url');
+        $this->assertStringContainsString('/dashboard/parent/paiement/succes', $checkoutUrl);
+        $this->assertStringNotContainsString('checkout.stripe.com', $checkoutUrl);
+
+        $payment = Payment::where('booking_request_id', $booking->id)->sole();
+        $this->assertSame(0, $payment->amount);
+        $this->assertTrue($payment->isPaid());
+        // Identifiant synthétique, jamais une vraie session Stripe (`cs_...`)
+        // — preuve que le SDK n'a pas été sollicité pour cette confirmation.
+        $this->assertStringStartsWith('free_', $payment->stripe_checkout_session_id);
+
+        $this->assertSame(BookingStatus::Confirmed, $booking->fresh()->status);
+    }
+
+    public function test_frais_desactive_refuse_si_deja_paye(): void
+    {
+        config(['services.stripe.platform_fee_enabled' => false]);
+        $this->app->forgetInstance(PaymentService::class);
+        $booking = $this->makeBooking(BookingStatus::Accepted->value);
+        Payment::create([
+            'booking_request_id' => $booking->id,
+            'stripe_checkout_session_id' => 'free_deja_paye',
+            'amount' => 0,
+            'status' => Payment::STATUS_PAID,
+            'paid_at' => now(),
+        ]);
+
+        $this->actingAs($this->parent)
+            ->postJson("/api/bookings/{$booking->id}/pay")
+            ->assertStatus(422);
+    }
 }

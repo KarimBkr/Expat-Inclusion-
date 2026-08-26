@@ -22,6 +22,10 @@ return [
         // Valeur ajustable sans changement de code (décision commerciale de
         // la cliente, susceptible d'évoluer).
         'platform_fee_amount' => (int) env('STRIPE_PLATFORM_FEE_AMOUNT', 2000),
+        // Si false, aucune session Stripe n'est créée : la demande est
+        // confirmée directement, sans paiement. Réactivable à tout moment
+        // sans changement de code.
+        'platform_fee_enabled' => (bool) env('STRIPE_PLATFORM_FEE_ENABLED', true),
         'currency'        => env('STRIPE_CURRENCY', 'eur'),
     ],
 
