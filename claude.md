@@ -358,6 +358,24 @@ Loucman ne commence pas avant que le Sprint 0 soit livré.
 
 ---
 
+## Idées à explorer plus tard — hypothèses, non décidées
+
+Rien ici n'est planifié ni engagé. Simples pistes à garder en tête, à ne pas
+implémenter sans en rediscuter explicitement.
+
+**Redevance de renouvellement (post-V1).** Le modèle actuel (frais de mise en
+relation unique, payé une fois par la famille) capture de la valeur au moment
+du match mais rien ensuite — rien n'empêche famille et AESH de continuer
+entre eux sans repasser par la plateforme (désintermédiation). Piste : faire
+payer à nouveau le même mécanisme de frais de mise en relation à chaque
+réouverture naturelle du besoin — rentrée scolaire suivante, changement
+d'AESH, second enfant — plutôt qu'un abonnement mensuel classique. Avantage :
+colle au rythme scolaire AEFE, ne demande aucune nouvelle brique technique
+(même mécanisme que US-14/15), ne rouvre pas la question Stripe Connect.
+Limite : capture ponctuelle (annuelle), pas continue.
+
+---
+
 ## Seuil minimal avant ouverture publique
 
 | Indicateur | Seuil requis |
