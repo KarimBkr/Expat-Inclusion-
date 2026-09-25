@@ -16,6 +16,7 @@ class AeshProfileAdminResource extends JsonResource
             'verification_status' => $this->verification_status,
             'rejection_reason'    => $this->rejection_reason,
             'published_at'        => $this->published_at?->toIso8601String(),
+            'interview_verified_at' => $this->interview_verified_at?->toIso8601String(),
             'bio'                 => $this->bio,
             'user'                => $this->whenLoaded('user', fn () => [
                 'id'    => $this->user->id,

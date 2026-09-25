@@ -41,19 +41,30 @@ un autre rôle).
 
 ### Ce que la fiche affirme — et ce qu'elle n'affirme pas
 
-| Champ                 | Signification                                              |
-|-----------------------|------------------------------------------------------------|
-| `verification_status` | Toujours `published` sur cet endpoint — profil approuvé par un admin |
-| `published_at`        | Date de publication par l'admin (US-08)                     |
+| Champ                    | Signification                                              |
+|--------------------------|------------------------------------------------------------|
+| `verification_status`    | Toujours `published` sur cet endpoint — profil approuvé par un admin |
+| `published_at`           | Date de publication par l'admin (US-08)                     |
+| `interview_verified_at`  | `null` par défaut. Renseigné quand l'admin a mené un entretien (Teams/Meet/autre, hors plateforme) et jugé confirmée une compétence revendiquée — voir `docs/api/admin-aesh-verification.md`. |
 
-Le front affiche un unique badge, **« Candidature examinée par notre équipe »**.
-Ce libellé décrit exactement ce que fait le circuit d'US-08 : un humain a lu le
-dossier, l'a approuvé et publié.
+Le front affiche un badge de base, **« Candidature examinée par notre équipe »**,
+sur tout profil publié. Ce libellé décrit exactement ce que fait le circuit
+d'US-08 : un humain a lu le dossier, l'a approuvé et publié.
 
 Ne pas réintroduire de libellé du type « profil vérifié » ou « documents
-validés » : seuls un CV et une lettre de motivation sont collectés, et aucune
-pièce d'identité ni diplôme n'est contrôlé. Le champ `documents_verified` a été
-retiré pour cette raison.
+validés » **pour ce badge de base** : seuls un CV et une lettre de motivation
+sont collectés, et aucune pièce d'identité ni diplôme n'est contrôlé. Le champ
+`documents_verified` a été retiré pour cette raison.
+
+**Exception délibérée** : quand `interview_verified_at` est renseigné, un
+second badge, **« Compétences vérifiées par entretien »**, s'affiche en plus.
+Celui-ci a le droit d'employer un vocabulaire plus fort que le badge de base,
+parce qu'il correspond à un fait réel et distinct : un admin a parlé de vive
+voix à la personne pour sonder une compétence précise (l'exemple fondateur :
+un profil qui met en avant le TSA, où l'admin veut s'assurer que ce n'est pas
+une déclaration de façade). Le libellé reste volontairement centré sur la
+compétence vérifiée, pas sur l'identité ni un casier — l'entretien ne contrôle
+ni l'un ni l'autre.
 
 ### Erreurs
 

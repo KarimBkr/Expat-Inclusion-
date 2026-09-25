@@ -135,6 +135,27 @@ class AeshDetailTest extends TestCase
         $this->assertArrayNotHasKey('documents', $json);
     }
 
+    public function test_badge_entretien_absent_par_defaut(): void
+    {
+        $profile = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/parent/aesh-profiles/{$profile->id}")
+            ->assertOk()
+            ->assertJsonPath('data.interview_verified_at', null);
+    }
+
+    public function test_badge_entretien_expose_quand_accorde(): void
+    {
+        $profile = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+        $profile->update(['interview_verified_at' => now()]);
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/parent/aesh-profiles/{$profile->id}")
+            ->assertOk()
+            ->assertJsonPath('data.interview_verified_at', fn ($value) => $value !== null);
+    }
+
     public function test_aesh_ne_peut_pas_consulter_la_fiche_parent(): void
     {
         $profile = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);

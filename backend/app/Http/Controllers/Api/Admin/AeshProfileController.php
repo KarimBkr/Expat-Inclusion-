@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RejectAeshProfileRequest;
+use App\Http\Requests\Admin\SendInterviewInvitationRequest;
 use App\Http\Requests\Admin\StoreAdminNoteRequest;
 use App\Http\Resources\AdminNoteResource;
 use App\Http\Resources\AeshProfileAdminResource;
 use App\Models\AdminNote;
 use App\Models\AeshProfile;
+use App\Notifications\InterviewInvitationNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class AeshProfileController extends Controller
 {
@@ -100,6 +103,69 @@ class AeshProfileController extends Controller
 
         return response()->json([
             'message' => 'Profil AESH publié.',
+            'data'    => new AeshProfileAdminResource($profile->fresh(['user'])),
+        ]);
+    }
+
+    /**
+     * Envoie à l'AESH le lien d'un entretien complémentaire (Teams, Meet, ou
+     * tout autre outil au choix de l'admin — jamais de visioconférence
+     * intégrée à la plateforme). Consigne l'envoi dans les notes internes
+     * pour garder une trace, sans ajouter de colonne dédiée à un événement
+     * ponctuel.
+     */
+    public function sendInterviewInvitation(SendInterviewInvitationRequest $request, int $id): JsonResponse
+    {
+        $profile = AeshProfile::with('user')->findOrFail($id);
+        $meetingLink = $request->validated('meeting_link');
+        $message = $request->validated('message');
+
+        Notification::send(
+            $profile->user,
+            new InterviewInvitationNotification($profile, $meetingLink, $message),
+        );
+
+        $note = AdminNote::create([
+            'admin_id'        => $request->user()->id,
+            'aesh_profile_id' => $profile->id,
+            'body'            => "Invitation à un entretien envoyée — lien : {$meetingLink}"
+                .($message ? " · message : \"{$message}\"" : ''),
+        ]);
+        $note->load('admin');
+
+        return response()->json([
+            'message' => 'Invitation envoyée.',
+            'data'    => new AdminNoteResource($note),
+        ], 201);
+    }
+
+    /**
+     * Vérification renforcée par entretien (Teams/Meet/autre, mené hors
+     * plateforme). Indépendante du statut de candidature : l'admin peut
+     * l'accorder à tout moment, typiquement après avoir noté son doute dans
+     * les notes internes puis mené l'entretien de son côté.
+     */
+    public function interviewVerify(int $id): JsonResponse
+    {
+        $profile = AeshProfile::findOrFail($id);
+
+        $profile->update(['interview_verified_at' => now()]);
+
+        return response()->json([
+            'message' => 'Vérification par entretien enregistrée.',
+            'data'    => new AeshProfileAdminResource($profile->fresh(['user'])),
+        ]);
+    }
+
+    /** Retire la vérification par entretien — correction d'une saisie admin. */
+    public function removeInterviewVerification(int $id): JsonResponse
+    {
+        $profile = AeshProfile::findOrFail($id);
+
+        $profile->update(['interview_verified_at' => null]);
+
+        return response()->json([
+            'message' => 'Vérification par entretien retirée.',
             'data'    => new AeshProfileAdminResource($profile->fresh(['user'])),
         ]);
     }

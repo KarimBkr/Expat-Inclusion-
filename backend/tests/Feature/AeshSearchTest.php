@@ -7,7 +7,6 @@ use App\Models\Country;
 use App\Models\Language;
 use App\Models\Modality;
 use App\Models\SchoolLevel;
-use App\Models\Specialization;
 use App\Models\User;
 use Database\Seeders\CountrySeeder;
 use Database\Seeders\LanguageSeeder;
@@ -82,21 +81,52 @@ class AeshSearchTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-    public function test_filtre_par_specialisation_et_modalite(): void
+    public function test_filtre_par_modalite(): void
     {
-        $spec = Specialization::first()->id;
         $modality = Modality::first()->id;
 
-        $this->makeProfile(AeshProfile::STATUS_PUBLISHED, [
-            'specializations' => [$spec],
-            'modalities'      => [$modality],
-        ]);
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED, ['modalities' => [$modality]]);
         $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
 
         $this->actingAs($this->parent)
-            ->getJson("/api/parent/aesh-search?specialization_id={$spec}&modality_id={$modality}")
+            ->getJson("/api/parent/aesh-search?modality_id={$modality}")
             ->assertOk()
             ->assertJsonCount(1, 'data');
+    }
+
+    public function test_filtre_par_langue(): void
+    {
+        $fr = Language::where('code', 'fr')->first()->id;
+        $other = Language::where('code', '!=', 'fr')->first()->id;
+
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED, ['languages' => [$fr]]);
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED, ['languages' => [$other]]);
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/parent/aesh-search?language_id={$fr}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_tri_par_annees_d_experience(): void
+    {
+        $junior = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+        $junior->update(['experience_years' => 2]);
+        $senior = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+        $senior->update(['experience_years' => 15]);
+
+        $this->actingAs($this->parent)
+            ->getJson('/api/parent/aesh-search?sort=experience')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $senior->id)
+            ->assertJsonPath('data.1.id', $junior->id);
+    }
+
+    public function test_tri_invalide_rejete(): void
+    {
+        $this->actingAs($this->parent)
+            ->getJson('/api/parent/aesh-search?sort=inconnu')
+            ->assertStatus(422);
     }
 
     public function test_filtre_par_niveau_scolaire(): void

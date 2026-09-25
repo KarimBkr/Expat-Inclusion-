@@ -24,6 +24,7 @@ class AeshDetailResource extends JsonResource
             'timezone'            => $this->timezone,
             'verification_status' => $this->verification_status,
             'published_at'        => $this->published_at?->toIso8601String(),
+            'interview_verified_at' => $this->interview_verified_at?->toIso8601String(),
             'specializations'     => $this->whenLoaded('specializations', fn () => $this->specializations->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])),
             'languages'           => $this->whenLoaded('languages', fn () => $this->languages->map(fn ($l) => ['id' => $l->id, 'name' => $l->name])),
             'modalities'          => $this->whenLoaded('modalities', fn () => $this->modalities->map(fn ($m) => ['id' => $m->id, 'name' => $m->name])),
