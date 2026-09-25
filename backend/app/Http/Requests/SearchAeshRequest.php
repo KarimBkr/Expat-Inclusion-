@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SearchAeshRequest extends FormRequest
 {
@@ -14,12 +15,12 @@ class SearchAeshRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'country_id'        => ['nullable', 'integer', 'exists:countries,id'],
-            'specialization_id' => ['nullable', 'integer', 'exists:specializations,id'],
-            'modality_id'       => ['nullable', 'integer', 'exists:modalities,id'],
-            'school_level_id'   => ['nullable', 'integer', 'exists:school_levels,id'],
-            'language_id'       => ['nullable', 'integer', 'exists:languages,id'],
-            'page'              => ['nullable', 'integer', 'min:1'],
+            'country_id'      => ['nullable', 'integer', 'exists:countries,id'],
+            'modality_id'     => ['nullable', 'integer', 'exists:modalities,id'],
+            'school_level_id' => ['nullable', 'integer', 'exists:school_levels,id'],
+            'language_id'     => ['nullable', 'integer', 'exists:languages,id'],
+            'sort'            => ['nullable', Rule::in(['recent', 'experience'])],
+            'page'            => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

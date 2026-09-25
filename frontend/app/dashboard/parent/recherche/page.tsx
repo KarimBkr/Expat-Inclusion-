@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { searchAesh } from "@/services/aesh-search";
 import { getTaxonomies } from "@/services/parent-profile";
-import type { AeshSearchResult, SearchFilters } from "@/types/aesh-search";
+import type { AeshSearchResult, AeshSearchSort, SearchFilters } from "@/types/aesh-search";
 import type { Taxonomies } from "@/types/parent-profile";
 
 const selectClass =
@@ -60,10 +60,18 @@ export default function RechercheAeshPage() {
     if (user?.role === "parent") runSearch({}, 1);
   }, [user, runSearch]);
 
-  function updateFilter(key: keyof SearchFilters, value: string) {
+  function updateFilter(key: keyof Omit<SearchFilters, "sort">, value: string) {
     const next = { ...filters };
     if (value) next[key] = Number(value);
     else delete next[key];
+    setFilters(next);
+    runSearch(next, 1);
+  }
+
+  function updateSort(value: string) {
+    const next = { ...filters };
+    if (value === "experience") next.sort = value;
+    else delete next.sort;
     setFilters(next);
     runSearch(next, 1);
   }
@@ -92,11 +100,12 @@ export default function RechercheAeshPage() {
         </Link>
         <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Trouver un AESH</h1>
         <p className="text-subtle text-sm">
-          Filtrez selon le pays, le trouble accompagné, la modalité et le niveau scolaire.
+          Filtrez selon le pays, la langue parlée, la modalité et le niveau scolaire, puis triez par
+          expérience.
         </p>
       </div>
 
-      <div className="bg-card border border-line rounded-2xl p-5 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-card border border-line rounded-2xl p-5 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <FilterSelect
           label="Pays"
           value={filters.country_id}
@@ -104,10 +113,10 @@ export default function RechercheAeshPage() {
           options={taxonomies?.countries ?? []}
         />
         <FilterSelect
-          label="Trouble"
-          value={filters.specialization_id}
-          onChange={(v) => updateFilter("specialization_id", v)}
-          options={taxonomies?.specializations ?? []}
+          label="Langue parlée"
+          value={filters.language_id}
+          onChange={(v) => updateFilter("language_id", v)}
+          options={taxonomies?.languages ?? []}
         />
         <FilterSelect
           label="Modalité"
@@ -121,6 +130,7 @@ export default function RechercheAeshPage() {
           onChange={(v) => updateFilter("school_level_id", v)}
           options={taxonomies?.school_levels ?? []}
         />
+        <SortSelect value={filters.sort} onChange={updateSort} />
       </div>
 
       {error && <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
@@ -211,6 +221,31 @@ function FilterSelect({
   );
 }
 
+function SortSelect({
+  value,
+  onChange,
+}: {
+  value: AeshSearchSort | undefined;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor="filter-tri" className="block text-xs font-medium text-subtle mb-1.5">
+        Trier par
+      </label>
+      <select
+        id="filter-tri"
+        value={value ?? "recent"}
+        onChange={(e) => onChange(e.target.value)}
+        className={selectClass}
+      >
+        <option value="recent">Publication récente</option>
+        <option value="experience">Plus d&apos;expérience</option>
+      </select>
+    </div>
+  );
+}
+
 function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
   return (
     <div className="bg-card border border-line rounded-2xl p-6 flex flex-col">
@@ -221,9 +256,16 @@ function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
             <p className="text-xs text-subtle mt-0.5">{aesh.experience_years} ans d'expérience</p>
           )}
         </div>
-        <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary font-medium">
-          Candidature examinée
-        </span>
+        <div className="shrink-0 flex flex-col items-end gap-1">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary font-medium">
+            Candidature examinée
+          </span>
+          {aesh.interview_verified_at && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary font-medium">
+              ✓ Entretien vérifié
+            </span>
+          )}
+        </div>
       </div>
 
       <p className="text-sm text-subtle leading-relaxed mb-4 line-clamp-3">{aesh.bio}</p>

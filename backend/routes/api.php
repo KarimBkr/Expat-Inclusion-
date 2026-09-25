@@ -103,6 +103,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/aesh-profiles/{id}/approve', [AdminAeshProfileController::class, 'approve']);
         Route::post('/aesh-profiles/{id}/reject', [AdminAeshProfileController::class, 'reject']);
         Route::post('/aesh-profiles/{id}/publish', [AdminAeshProfileController::class, 'publish']);
+        Route::post('/aesh-profiles/{id}/interview-invitation', [AdminAeshProfileController::class, 'sendInterviewInvitation']);
+        Route::post('/aesh-profiles/{id}/interview-verify', [AdminAeshProfileController::class, 'interviewVerify']);
+        Route::delete('/aesh-profiles/{id}/interview-verify', [AdminAeshProfileController::class, 'removeInterviewVerification']);
         Route::post('/aesh-profiles/{id}/notes', [AdminAeshProfileController::class, 'storeNote']);
 
         Route::post('/aesh-import', [AeshImportController::class, 'store'])

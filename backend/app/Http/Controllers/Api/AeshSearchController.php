@@ -21,10 +21,13 @@ class AeshSearchController extends Controller
         $profiles = AeshProfile::published()
             ->with(self::RELATIONS)
             ->when($filters['country_id'] ?? null, fn ($q, $id) => $q->whereHas('countries', fn ($c) => $c->where('countries.id', $id)))
-            ->when($filters['specialization_id'] ?? null, fn ($q, $id) => $q->whereHas('specializations', fn ($s) => $s->where('specializations.id', $id)))
             ->when($filters['modality_id'] ?? null, fn ($q, $id) => $q->whereHas('modalities', fn ($m) => $m->where('modalities.id', $id)))
             ->when($filters['school_level_id'] ?? null, fn ($q, $id) => $q->whereHas('schoolLevels', fn ($sl) => $sl->where('school_levels.id', $id)))
             ->when($filters['language_id'] ?? null, fn ($q, $id) => $q->whereHas('languages', fn ($l) => $l->where('languages.id', $id)))
+            ->when(
+                ($filters['sort'] ?? 'recent') === 'experience',
+                fn ($q) => $q->orderByDesc('experience_years'),
+            )
             ->latest('published_at')
             ->paginate(self::PER_PAGE)
             ->withQueryString();

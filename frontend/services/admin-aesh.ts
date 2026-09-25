@@ -54,6 +54,29 @@ export async function publishAeshProfile(id: number): Promise<void> {
   await apiFetch(`/admin/aesh-profiles/${id}/publish`, { method: "POST" });
 }
 
+export async function sendInterviewInvitation(
+  id: number,
+  meetingLink: string,
+  message?: string
+): Promise<AdminNote> {
+  const res = await apiFetch<{ data: AdminNote }>(
+    `/admin/aesh-profiles/${id}/interview-invitation`,
+    {
+      method: "POST",
+      body: JSON.stringify({ meeting_link: meetingLink, message: message || undefined }),
+    }
+  );
+  return res.data;
+}
+
+export async function interviewVerifyAeshProfile(id: number): Promise<void> {
+  await apiFetch(`/admin/aesh-profiles/${id}/interview-verify`, { method: "POST" });
+}
+
+export async function removeInterviewVerification(id: number): Promise<void> {
+  await apiFetch(`/admin/aesh-profiles/${id}/interview-verify`, { method: "DELETE" });
+}
+
 export async function addAdminNote(id: number, body: string): Promise<AdminNote> {
   const res = await apiFetch<{ data: AdminNote }>(`/admin/aesh-profiles/${id}/notes`, {
     method: "POST",

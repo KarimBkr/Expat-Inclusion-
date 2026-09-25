@@ -27,6 +27,7 @@ class AeshProfile extends Model
         'verification_status',
         'rejection_reason',
         'published_at',
+        'interview_verified_at',
     ];
 
     protected $attributes = [
@@ -38,6 +39,7 @@ class AeshProfile extends Model
         return [
             'experience_years' => 'integer',
             'published_at' => 'datetime',
+            'interview_verified_at' => 'datetime',
         ];
     }
 
@@ -89,6 +91,18 @@ class AeshProfile extends Model
     public function isApproved(): bool
     {
         return $this->verification_status === self::STATUS_APPROVED;
+    }
+
+    /**
+     * Vérification renforcée par entretien — orthogonale au statut de
+     * candidature : ne conditionne ni n'est conditionnée par approve/publish.
+     * Déclenchée à la discrétion de l'admin quand une compétence revendiquée
+     * (ex. TSA) mérite d'être confirmée au-delà du CV/de la lettre de
+     * motivation.
+     */
+    public function isInterviewVerified(): bool
+    {
+        return $this->interview_verified_at !== null;
     }
 
     /** @param  \Illuminate\Database\Eloquent\Builder<AeshProfile>  $query */

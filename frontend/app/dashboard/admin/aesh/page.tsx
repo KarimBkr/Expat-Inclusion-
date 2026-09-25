@@ -8,9 +8,12 @@ import {
   addAdminNote,
   approveAeshProfile,
   getAeshProfile,
+  interviewVerifyAeshProfile,
   listAeshProfiles,
   publishAeshProfile,
   rejectAeshProfile,
+  removeInterviewVerification,
+  sendInterviewInvitation,
 } from "@/services/admin-aesh";
 import type { AeshProfileAdmin, AeshVerificationStatus } from "@/types/admin";
 import { STATUS_LABELS } from "@/types/admin";
@@ -33,6 +36,9 @@ export default function AdminAeshPage() {
   const [actionPending, setActionPending] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [noteBody, setNoteBody] = useState("");
+  const [meetingLink, setMeetingLink] = useState("");
+  const [inviteMessage, setInviteMessage] = useState("");
+  const [inviteSent, setInviteSent] = useState(false);
   const [error, setError] = useState("");
 
   const loadList = useCallback(async () => {
@@ -63,6 +69,9 @@ export default function AdminAeshPage() {
       setSelected(await getAeshProfile(id));
       setRejectReason("");
       setNoteBody("");
+      setMeetingLink("");
+      setInviteMessage("");
+      setInviteSent(false);
     } catch {
       setError("Impossible de charger le profil.");
     }
@@ -143,8 +152,15 @@ export default function AdminAeshPage() {
                   >
                     <p className="font-medium text-ink">{p.user?.name ?? `AESH #${p.id}`}</p>
                     <p className="text-xs text-subtle mt-0.5">{p.user?.email}</p>
-                    <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-cream text-subtle">
-                      {STATUS_LABELS[p.verification_status]}
+                    <span className="inline-flex flex-wrap gap-1.5 mt-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-cream text-subtle">
+                        {STATUS_LABELS[p.verification_status]}
+                      </span>
+                      {p.interview_verified_at && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary">
+                          Entretien ✓
+                        </span>
+                      )}
                     </span>
                   </button>
                 </li>
@@ -171,6 +187,82 @@ export default function AdminAeshPage() {
                 )}
                 {selected.rejection_reason && (
                   <p className="mt-3 text-sm text-danger">Motif : {selected.rejection_reason}</p>
+                )}
+              </div>
+
+              <div className="border-t border-line pt-4">
+                <h3 className="text-sm font-semibold text-ink mb-1">Vérification renforcée</h3>
+                <p className="text-xs text-subtle mb-3">
+                  En cas de doute sur une compétence revendiquée (ex. TSA), menez un entretien
+                  (Teams, Google Meet, etc.) hors plateforme, puis enregistrez le résultat ici.
+                  Indépendant du statut de candidature.
+                </p>
+                {selected.interview_verified_at ? (
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-primary-light text-primary font-medium">
+                      Compétences vérifiées par entretien ·{" "}
+                      {new Date(selected.interview_verified_at).toLocaleDateString("fr-FR")}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={actionPending}
+                      onClick={() => runAction(() => removeInterviewVerification(selected.id))}
+                      className="text-xs text-subtle hover:text-danger underline disabled:opacity-60"
+                    >
+                      Retirer
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="url"
+                        value={meetingLink}
+                        onChange={(e) => setMeetingLink(e.target.value)}
+                        placeholder="Lien Teams, Google Meet, etc."
+                        className="flex-1 px-3 py-2 text-sm border border-line rounded-xl"
+                      />
+                      <input
+                        type="text"
+                        value={inviteMessage}
+                        onChange={(e) => setInviteMessage(e.target.value)}
+                        placeholder="Message optionnel"
+                        className="flex-1 px-3 py-2 text-sm border border-line rounded-xl"
+                      />
+                      <button
+                        type="button"
+                        disabled={actionPending || !meetingLink.trim()}
+                        onClick={() =>
+                          runAction(async () => {
+                            await sendInterviewInvitation(
+                              selected.id,
+                              meetingLink.trim(),
+                              inviteMessage.trim()
+                            );
+                            setMeetingLink("");
+                            setInviteMessage("");
+                            setInviteSent(true);
+                          })
+                        }
+                        className="px-4 py-2 border border-line text-sm font-medium rounded-xl hover:border-primary disabled:opacity-60 whitespace-nowrap"
+                      >
+                        Envoyer l&apos;invitation
+                      </button>
+                    </div>
+                    {inviteSent && (
+                      <p className="text-xs text-primary">
+                        Invitation envoyée par email. Une fois l&apos;entretien mené :
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      disabled={actionPending}
+                      onClick={() => runAction(() => interviewVerifyAeshProfile(selected.id))}
+                      className="px-4 py-2 border border-line text-sm font-medium rounded-xl hover:border-primary disabled:opacity-60"
+                    >
+                      Marquer l&apos;entretien comme concluant
+                    </button>
+                  </div>
                 )}
               </div>
 

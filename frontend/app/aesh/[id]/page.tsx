@@ -93,6 +93,7 @@ export default function FicheAeshPage() {
 
         <div className="flex flex-wrap gap-2 mt-5">
           <Badge label="Candidature examinée par notre équipe" />
+          {aesh.interview_verified_at && <Badge label="✓ Compétences vérifiées par entretien" />}
           {aesh.published_at && (
             <span className="text-xs px-2.5 py-1 rounded-full bg-cream text-subtle border border-line">
               Publié le {formatDate(aesh.published_at)}

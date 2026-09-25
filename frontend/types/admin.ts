@@ -45,6 +45,7 @@ export interface AeshProfileAdmin {
   verification_status: AeshVerificationStatus;
   rejection_reason: string | null;
   published_at: string | null;
+  interview_verified_at: string | null;
   bio: string | null;
   user?: { id: number; name: string; email: string };
   admin_notes?: AdminNote[];

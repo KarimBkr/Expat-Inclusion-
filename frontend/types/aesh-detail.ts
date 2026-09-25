@@ -9,6 +9,7 @@ export interface AeshDetail {
   timezone: string | null;
   verification_status: VerificationStatus;
   published_at: string | null;
+  interview_verified_at: string | null;
   specializations: TaxonomyRef[];
   languages: TaxonomyRef[];
   modalities: TaxonomyRef[];

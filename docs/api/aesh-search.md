@@ -14,17 +14,27 @@ Authentification : `auth:sanctum` + `role:parent` (403 sinon).
 
 ### Query params (tous optionnels)
 
-| Param               | Type    | Contrainte              |
-|---------------------|---------|-------------------------|
-| `country_id`        | integer | exists:countries        |
-| `specialization_id` | integer | exists:specializations  |
-| `modality_id`       | integer | exists:modalities       |
-| `school_level_id`   | integer | exists:school_levels    |
-| `language_id`       | integer | exists:languages        |
-| `page`              | integer | min:1                   |
+| Param             | Type    | Contrainte                    |
+|-------------------|---------|--------------------------------|
+| `country_id`      | integer | exists:countries               |
+| `modality_id`     | integer | exists:modalities              |
+| `school_level_id` | integer | exists:school_levels           |
+| `language_id`     | integer | exists:languages               |
+| `sort`            | string  | `recent` (défaut) \| `experience` |
+| `page`            | integer | min:1                          |
 
-Un filtre invalide renvoie `422`. 12 résultats par page, triés par date de
-publication décroissante.
+Un filtre invalide renvoie `422`. 12 résultats par page.
+
+> Pas de filtre par spécialisation/trouble : le trouble reste affiché comme
+> étiquette sur chaque résultat (issu du profil AESH), mais ne réduit plus la
+> liste — remplacé par le tri `experience`, jugé plus utile pour comparer des
+> profils déjà filtrés par pays/langue/modalité.
+
+Tri :
+- `recent` (défaut) : date de publication décroissante.
+- `experience` : années d'expérience décroissantes, date de publication en
+  second critère pour départager les égalités. Les profils sans
+  `experience_years` renseigné apparaissent en dernier.
 
 ### Réponse `200`
 
@@ -37,6 +47,7 @@ publication décroissante.
       "bio": "Accompagnante spécialisée…",
       "experience_years": 8,
       "verification_status": "published",
+      "interview_verified_at": null,
       "specializations": [{ "id": 1, "name": "TSA" }],
       "languages": [{ "id": 1, "name": "Français" }],
       "modalities": [{ "id": 1, "name": "Présentiel" }],
