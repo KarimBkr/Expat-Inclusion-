@@ -177,4 +177,19 @@ class AuthTest extends TestCase
         $this->postJson('/api/forgot-password', ['email' => 'inexistant@exemple.com'])
             ->assertOk(); // réponse identique pour éviter l'énumération
     }
+
+    /**
+     * Régression : sans `Accept: application/json` (`->get()` plutôt que
+     * `->getJson()`, un client qui oublie l'en-tête), un visiteur non
+     * authentifié déclenchait une tentative de redirection vers une route
+     * `login` qui n'existe pas dans cette API — 500 avec trace complète au
+     * lieu d'un 401. Cette API n'a aucune route web de login : aucun invité
+     * ne doit jamais être redirigé, quel que soit l'en-tête envoyé.
+     */
+    public function test_requete_non_authentifiee_sans_en_tete_json_renvoie_401_propre(): void
+    {
+        $this->get('/api/bookings')
+            ->assertStatus(401)
+            ->assertJsonPath('message', 'Unauthenticated.');
+    }
 }

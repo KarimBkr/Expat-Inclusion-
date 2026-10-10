@@ -19,8 +19,16 @@ use Stripe\StripeClient;
  */
 class PaymentService
 {
+    /**
+     * `StripeClient` n'est volontairement pas injecté au constructeur : le
+     * SDK Stripe lève une exception dès sa construction si la clé est vide
+     * (`STRIPE_KEY=""`, configuration de lancement tant que le frais de mise
+     * en relation est désactivé). Un type-hint de constructeur forcerait
+     * Laravel à le résoudre — donc à planter — pour TOUT appel au service, y
+     * compris `confirmWithoutPayment()` qui ne le touche jamais. Résolu à la
+     * demande dans `createStripeSession()`, seul point qui en a besoin.
+     */
     public function __construct(
-        private readonly StripeClient $stripe,
         private readonly BookingRequestService $bookings,
     ) {}
 
@@ -109,7 +117,7 @@ class PaymentService
     {
         $frontendUrl = rtrim((string) config('app.frontend_url'), '/');
 
-        $session = $this->stripe->checkout->sessions->create([
+        $session = app(StripeClient::class)->checkout->sessions->create([
             'mode' => 'payment',
             'payment_method_types' => ['card'],
             'client_reference_id' => (string) $booking->id,
