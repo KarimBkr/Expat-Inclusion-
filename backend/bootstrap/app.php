@@ -16,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
         $middleware->throttleApi();
         $middleware->alias(['role' => \App\Http\Middleware\EnsureRole::class]);
+
+        // API pure, aucune route web `login` : sans ceci, un visiteur non
+        // authentifié qui omet l'en-tête Accept: application/json déclenche
+        // une tentative de redirection vers une route inexistante — 500 avec
+        // trace complète au lieu d'un 401 propre. Désactive la redirection
+        // pour tout invité, quel que soit l'en-tête envoyé.
+        $middleware->redirectGuestsTo(null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

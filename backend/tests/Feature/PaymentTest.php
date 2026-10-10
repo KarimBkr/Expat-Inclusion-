@@ -200,6 +200,33 @@ class PaymentTest extends TestCase
         $this->assertSame(BookingStatus::Confirmed, $booking->fresh()->status);
     }
 
+    /**
+     * Régression : phpunit.xml force STRIPE_SECRET à une fausse valeur non
+     * vide pour toute la suite — ce qui masquait un vrai bug de lancement.
+     * `STRIPE_KEY`/`STRIPE_SECRET` sont réellement vides en `.env` tant que
+     * le frais de mise en relation n'est pas activé, et le SDK Stripe lève
+     * une exception dès la construction de `StripeClient` sur une clé vide.
+     * Si `PaymentService` injectait encore `StripeClient` en dépendance de
+     * constructeur, Laravel le construirait pour CET appel aussi — avant
+     * même d'atteindre le code qui est censé l'éviter — et ce test aurait
+     * planté comme le vrai parcours en production.
+     */
+    public function test_frais_desactive_fonctionne_meme_avec_une_cle_stripe_reellement_vide(): void
+    {
+        config([
+            'services.stripe.platform_fee_enabled' => false,
+            'services.stripe.secret' => '',
+        ]);
+        $this->app->forgetInstance(PaymentService::class);
+        $booking = $this->makeBooking(BookingStatus::Accepted->value);
+
+        $this->actingAs($this->parent)
+            ->postJson("/api/bookings/{$booking->id}/pay")
+            ->assertStatus(201);
+
+        $this->assertSame(BookingStatus::Confirmed, $booking->fresh()->status);
+    }
+
     public function test_frais_desactive_refuse_si_deja_paye(): void
     {
         config(['services.stripe.platform_fee_enabled' => false]);
