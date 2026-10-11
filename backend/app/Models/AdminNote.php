@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AdminNote extends Model
 {
-    protected $fillable = ['admin_id', 'aesh_profile_id', 'body'];
+    protected $fillable = ['admin_id', 'aesh_profile_id', 'booking_request_id', 'body'];
 
     public function admin(): BelongsTo
     {
@@ -17,5 +17,10 @@ class AdminNote extends Model
     public function aeshProfile(): BelongsTo
     {
         return $this->belongsTo(AeshProfile::class);
+    }
+
+    public function bookingRequest(): BelongsTo
+    {
+        return $this->belongsTo(BookingRequest::class);
     }
 }

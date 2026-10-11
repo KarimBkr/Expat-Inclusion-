@@ -67,6 +67,11 @@ class BookingRequest extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function adminNotes(): HasMany
+    {
+        return $this->hasMany(AdminNote::class);
+    }
+
     /** @param  \Illuminate\Database\Eloquent\Builder<BookingRequest>  $query */
     public function scopePending(Builder $query): void
     {

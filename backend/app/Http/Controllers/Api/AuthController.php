@@ -39,6 +39,14 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (Auth::user()->isSuspended()) {
+            Auth::guard('web')->logout();
+
+            return response()->json([
+                'message' => 'Ce compte a été suspendu. Contactez l\'administration.',
+            ], 403);
+        }
+
         if ($request->hasSession()) {
             $request->session()->regenerate();
         }
