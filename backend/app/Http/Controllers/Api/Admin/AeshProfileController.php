@@ -113,6 +113,12 @@ class AeshProfileController extends Controller
      * intégrée à la plateforme). Consigne l'envoi dans les notes internes
      * pour garder une trace, sans ajouter de colonne dédiée à un événement
      * ponctuel.
+     *
+     * Mémorise aussi ce lien sur le compte de l'admin : s'il s'agit de sa
+     * page de réservation personnelle (Google Calendar, Microsoft Bookings…),
+     * elle n'a plus besoin de le recopier à chaque invitation — seulement la
+     * toute première fois, ou si elle veut en changer. Toujours un simple
+     * lien externe mémorisé, jamais une intégration calendrier.
      */
     public function sendInterviewInvitation(SendInterviewInvitationRequest $request, int $id): JsonResponse
     {
@@ -124,6 +130,10 @@ class AeshProfileController extends Controller
             $profile->user,
             new InterviewInvitationNotification($profile, $meetingLink, $message),
         );
+
+        if ($request->user()->scheduling_link !== $meetingLink) {
+            $request->user()->update(['scheduling_link' => $meetingLink]);
+        }
 
         $note = AdminNote::create([
             'admin_id'        => $request->user()->id,

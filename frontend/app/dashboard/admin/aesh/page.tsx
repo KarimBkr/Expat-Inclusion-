@@ -69,7 +69,10 @@ export default function AdminAeshPage() {
       setSelected(await getAeshProfile(id));
       setRejectReason("");
       setNoteBody("");
-      setMeetingLink("");
+      // Pré-rempli avec le lien de réservation mémorisé (page Google
+      // Calendar / Microsoft Bookings de l'admin) : à saisir une seule fois,
+      // jamais recopié à chaque invitation.
+      setMeetingLink(user?.scheduling_link ?? "");
       setInviteMessage("");
       setInviteSent(false);
     } catch {
@@ -214,20 +217,34 @@ export default function AdminAeshPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        type="url"
-                        value={meetingLink}
-                        onChange={(e) => setMeetingLink(e.target.value)}
-                        placeholder="Lien Teams, Google Meet, etc."
-                        className="flex-1 px-3 py-2 text-sm border border-line rounded-xl"
-                      />
+                    <div className="space-y-2">
+                      <div>
+                        <label
+                          htmlFor="meeting-link"
+                          className="block text-xs font-medium text-subtle mb-1"
+                        >
+                          Lien de planification (page de réservation Google Calendar, Microsoft
+                          Bookings…)
+                        </label>
+                        <input
+                          id="meeting-link"
+                          type="url"
+                          value={meetingLink}
+                          onChange={(e) => setMeetingLink(e.target.value)}
+                          placeholder="https://calendar.app.google/…"
+                          className="w-full px-3 py-2 text-sm border border-line rounded-xl"
+                        />
+                        <p className="text-xs text-subtle mt-1">
+                          Mémorisé après le premier envoi — pré-rempli la prochaine fois, modifiable
+                          si besoin.
+                        </p>
+                      </div>
                       <input
                         type="text"
                         value={inviteMessage}
                         onChange={(e) => setInviteMessage(e.target.value)}
                         placeholder="Message optionnel"
-                        className="flex-1 px-3 py-2 text-sm border border-line rounded-xl"
+                        className="w-full px-3 py-2 text-sm border border-line rounded-xl"
                       />
                       <button
                         type="button"
@@ -239,12 +256,11 @@ export default function AdminAeshPage() {
                               meetingLink.trim(),
                               inviteMessage.trim()
                             );
-                            setMeetingLink("");
                             setInviteMessage("");
                             setInviteSent(true);
                           })
                         }
-                        className="px-4 py-2 border border-line text-sm font-medium rounded-xl hover:border-primary disabled:opacity-60 whitespace-nowrap"
+                        className="px-4 py-2 border border-line text-sm font-medium rounded-xl hover:border-primary disabled:opacity-60"
                       >
                         Envoyer l&apos;invitation
                       </button>

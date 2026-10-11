@@ -177,6 +177,43 @@ class AdminAeshVerificationTest extends TestCase
             ->assertJsonCount(1, 'data.admin_notes');
     }
 
+    /**
+     * Le lien de planification (page de réservation Google Calendar,
+     * Microsoft Bookings…) est mémorisé sur le compte admin après le premier
+     * envoi : il n'a plus besoin d'être recopié à chaque invitation — seul
+     * un lien réellement différent remplace le précédent.
+     */
+    public function test_le_lien_de_planification_est_memorise_apres_le_premier_envoi(): void
+    {
+        Notification::fake();
+        $this->assertNull($this->admin->scheduling_link);
+
+        $this->actingAs($this->admin)
+            ->postJson("/api/admin/aesh-profiles/{$this->profile->id}/interview-invitation", [
+                'meeting_link' => 'https://calendar.app.google/reservation-admin',
+            ])
+            ->assertStatus(201);
+
+        $this->assertSame(
+            'https://calendar.app.google/reservation-admin',
+            $this->admin->fresh()->scheduling_link,
+        );
+    }
+
+    public function test_un_nouveau_lien_remplace_le_lien_memorise(): void
+    {
+        Notification::fake();
+        $this->admin->update(['scheduling_link' => 'https://ancien-lien.test']);
+
+        $this->actingAs($this->admin)
+            ->postJson("/api/admin/aesh-profiles/{$this->profile->id}/interview-invitation", [
+                'meeting_link' => 'https://nouveau-lien.test',
+            ])
+            ->assertStatus(201);
+
+        $this->assertSame('https://nouveau-lien.test', $this->admin->fresh()->scheduling_link);
+    }
+
     public function test_parent_ne_peut_pas_envoyer_d_invitation_a_entretien(): void
     {
         Notification::fake();

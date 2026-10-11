@@ -52,12 +52,20 @@ profil qui met en avant le TSA) et veut s'assurer que ce n'est pas une
 déclaration de façade avant de faire confiance à la candidature. Processus :
 
 1. L'admin note son doute dans les notes internes (`POST .../notes`).
-2. Elle saisit un lien de visioconférence (Teams, Google Meet, ou tout autre
-   outil de son choix) et envoie l'invitation (`POST .../interview-invitation`
-   ci-dessous) — l'AESH reçoit un email avec le lien. **Entièrement hors
-   plateforme** : aucune prise de rendez-vous, aucune visioconférence intégrée
-   (hors périmètre MVP, voir CLAUDE.md) — l'app se contente de relayer par
-   email un lien que l'admin a créé elle-même sur l'outil de son choix.
+2. Elle saisit un lien de planification et envoie l'invitation
+   (`POST .../interview-invitation` ci-dessous) — l'AESH reçoit un email avec
+   le lien. **Entièrement hors plateforme** : aucune prise de rendez-vous,
+   aucune lecture/écriture d'agenda, aucune visioconférence intégrée (hors
+   périmètre MVP, voir CLAUDE.md) — l'app se contente de relayer par email un
+   lien externe que l'admin gère elle-même.
+
+   Idéalement, ce lien pointe vers une **page de réservation personnelle**
+   (Google Calendar → *Horaires de réservation*, Microsoft Bookings, Calendly…)
+   montrant les vrais créneaux libres de l'admin plutôt qu'un lien de
+   visioconférence unique à recréer à chaque fois. Ce lien est **mémorisé sur
+   le compte admin** après le premier envoi (`users.scheduling_link`) et
+   pré-rempli automatiquement aux invitations suivantes — à saisir une seule
+   fois, modifiable à tout moment en changeant simplement la valeur envoyée.
 3. Elle mène l'entretien.
 4. Si l'entretien confirme la compétence, elle l'enregistre via
    `interview-verify`. Le badge public **« Compétences vérifiées par
