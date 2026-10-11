@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\Admin\AeshImportController;
 use App\Http\Controllers\Api\Admin\AeshProfileController as AdminAeshProfileController;
+use App\Http\Controllers\Api\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Api\Admin\TaxonomyController as AdminTaxonomyController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AeshDetailController;
 use App\Http\Controllers\Api\AeshDocumentController;
 use App\Http\Controllers\Api\AeshProfileController;
@@ -110,5 +112,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
         Route::post('/aesh-import', [AeshImportController::class, 'store'])
             ->middleware('throttle:10,1');
+
+        // Cockpit admin (US-19) — visibilité transverse réservations/utilisateurs
+        Route::get('/bookings', [AdminBookingController::class, 'index']);
+        Route::get('/bookings/{id}', [AdminBookingController::class, 'show']);
+        Route::post('/bookings/{id}/notes', [AdminBookingController::class, 'storeNote']);
+
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::get('/users/{id}', [AdminUserController::class, 'show']);
+        Route::post('/users/{id}/suspend', [AdminUserController::class, 'suspend']);
+        Route::post('/users/{id}/reactivate', [AdminUserController::class, 'reactivate']);
     });
 });

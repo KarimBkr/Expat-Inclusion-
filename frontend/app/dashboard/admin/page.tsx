@@ -76,6 +76,26 @@ export default function AdminDashboardPage() {
         </Link>
       </section>
 
+      <section className="mb-10">
+        <h2 className="text-lg font-semibold text-ink mb-4">Cockpit</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            href="/dashboard/admin/bookings"
+            className="bg-card border border-line rounded-2xl p-6 hover:border-primary/40 transition-colors"
+          >
+            <p className="font-semibold text-ink">Demandes de réservation</p>
+            <p className="text-xs text-subtle mt-1">Visibilité transverse · paiements · notes</p>
+          </Link>
+          <Link
+            href="/dashboard/admin/users"
+            className="bg-card border border-line rounded-2xl p-6 hover:border-primary/40 transition-colors"
+          >
+            <p className="font-semibold text-ink">Utilisateurs</p>
+            <p className="text-xs text-subtle mt-1">Parents, AESH, admins · suspendre</p>
+          </Link>
+        </div>
+      </section>
+
       <section>
         <h2 className="text-lg font-semibold text-ink mb-4">Sourcing</h2>
         <Link

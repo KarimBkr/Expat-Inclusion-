@@ -59,3 +59,66 @@ export const STATUS_LABELS: Record<AeshVerificationStatus, string> = {
   rejected: "Rejeté",
   published: "Publié",
 };
+
+// ── Cockpit admin (US-19) ───────────────────────────────────────────────────
+
+export type BookingStatus = "requested" | "accepted" | "declined" | "cancelled" | "confirmed";
+
+export interface AdminPayment {
+  id: number;
+  amount: number;
+  currency: string;
+  status: "pending" | "paid" | "failed";
+  paid_at: string | null;
+  created_at: string | null;
+}
+
+export interface AdminBookingHistory {
+  id: number;
+  from_status: BookingStatus | null;
+  to_status: BookingStatus;
+  label: string;
+  reason: string | null;
+  author?: { id: number; name: string };
+  created_at: string | null;
+}
+
+export interface AdminBooking {
+  id: number;
+  status: BookingStatus;
+  status_label: string;
+  message: string;
+  start_date: string | null;
+  hours_per_week: number;
+  response_reason: string | null;
+  responded_at: string | null;
+  created_at: string | null;
+  modality?: { id: number; name: string };
+  school_level?: { id: number; name: string };
+  parent?: { id: number; name: string; email: string };
+  aesh?: { id: number; user_id: number; name: string | null; email: string | null };
+  payments?: AdminPayment[];
+  histories?: AdminBookingHistory[];
+  admin_notes?: AdminNote[];
+}
+
+export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
+  requested: "Demandée",
+  accepted: "Acceptée",
+  declined: "Refusée",
+  cancelled: "Annulée",
+  confirmed: "Confirmée",
+};
+
+export type UserRole = "parent" | "aesh" | "admin";
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  email_verified_at: string | null;
+  suspended_at: string | null;
+  created_at: string | null;
+  aesh_verification_status?: AeshVerificationStatus | null;
+}
