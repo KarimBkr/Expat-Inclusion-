@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,9 +30,14 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-xs font-bold tracking-tight">
-              EI
-            </span>
+            <Image
+              src="/logo.jpeg"
+              alt="Expat Inclusion"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-lg object-cover"
+              priority
+            />
             <span className="font-heading font-semibold text-ink text-lg">
               Expat<span className="text-primary">Inclusion</span>
             </span>
