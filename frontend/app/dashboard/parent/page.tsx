@@ -16,6 +16,7 @@ export default function DashboardParentPage() {
   const router = useRouter();
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
   const [bookingCount, setBookingCount] = useState<number | null>(null);
+  const [acceptedCount, setAcceptedCount] = useState(0);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const { unreadCount } = useUnreadConversations(conversations);
   const [unreadNotifications, setUnreadNotifications] = useState<number | null>(null);
@@ -32,7 +33,10 @@ export default function DashboardParentPage() {
       .then((res) => setProfileComplete(res.is_complete))
       .catch(() => setProfileComplete(false));
     listBookings()
-      .then((bookings) => setBookingCount(bookings.length))
+      .then((bookings) => {
+        setBookingCount(bookings.length);
+        setAcceptedCount(bookings.filter((b) => b.status === "accepted").length);
+      })
       .catch(() => setBookingCount(0));
     listConversations()
       .then(setConversations)
@@ -109,6 +113,23 @@ export default function DashboardParentPage() {
             className="text-sm text-primary font-medium hover:underline"
           >
             Modifier
+          </Link>
+        </div>
+      )}
+
+      {acceptedCount > 0 && (
+        <div className="mb-8 p-4 bg-primary-light border border-primary/20 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="font-medium text-ink">
+            {acceptedCount > 1
+              ? `${acceptedCount} demandes ont été acceptées`
+              : "Une demande a été acceptée"}{" "}
+            — confirmez la réservation pour poursuivre.
+          </p>
+          <Link
+            href="/dashboard/parent/reservations"
+            className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+          >
+            Voir mes demandes
           </Link>
         </div>
       )}

@@ -8,12 +8,16 @@ export default function VerifierEmailPage() {
   const { user } = useAuth();
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleResend() {
     setPending(true);
+    setError("");
     try {
       await resendVerificationEmail();
       setSent(true);
+    } catch {
+      setError("L'envoi a échoué. Réessayez dans un instant.");
     } finally {
       setPending(false);
     }
@@ -45,8 +49,11 @@ export default function VerifierEmailPage() {
           <span className="font-medium text-ink">{user?.email ?? "votre adresse"}</span>.
         </p>
         <p className="text-subtle text-sm mb-8">
-          Cliquez sur le lien dans l&apos;email pour activer votre compte.
+          Cliquez sur le lien dans l&apos;email pour activer votre compte. Pensez à vérifier vos
+          courriers indésirables.
         </p>
+
+        {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
         {sent ? (
           <p className="text-sm text-primary font-medium">Email renvoyé !</p>

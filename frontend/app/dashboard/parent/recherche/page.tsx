@@ -76,6 +76,11 @@ export default function RechercheAeshPage() {
     runSearch(next, 1);
   }
 
+  function resetFilters() {
+    setFilters({});
+    runSearch({}, 1);
+  }
+
   function goToPage(target: number) {
     runSearch(filters, target);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -142,10 +147,19 @@ export default function RechercheAeshPage() {
       ) : results.length === 0 ? (
         <div className="bg-cream border border-line rounded-2xl p-12 text-center">
           <p className="font-medium text-ink mb-1">Aucun AESH ne correspond à votre recherche</p>
-          <p className="text-sm text-subtle">
+          <p className="text-sm text-subtle mb-6">
             Élargissez vos critères ou revenez plus tard — de nouveaux profils sont publiés
             régulièrement.
           </p>
+          {Object.keys(filters).length > 0 && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Réinitialiser les filtres
+            </button>
+          )}
         </div>
       ) : (
         <>
@@ -253,7 +267,9 @@ function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
         <div>
           <h2 className="font-bold text-ink">{aesh.name}</h2>
           {aesh.experience_years !== null && (
-            <p className="text-xs text-subtle mt-0.5">{aesh.experience_years} ans d'expérience</p>
+            <p className="text-xs text-subtle mt-0.5">
+              {aesh.experience_years} ans d&apos;expérience
+            </p>
           )}
         </div>
         <div className="shrink-0 flex flex-col items-end gap-1">

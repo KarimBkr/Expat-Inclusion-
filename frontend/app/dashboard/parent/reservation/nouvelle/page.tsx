@@ -89,7 +89,7 @@ function NouvelleDemandeForm() {
         start_date: startDate,
         hours_per_week: Number(hoursPerWeek),
       });
-      router.push("/dashboard/parent/reservations");
+      router.push("/dashboard/parent/reservations?envoyee=1");
     } catch (err) {
       const typed = err as Error & { errors?: Record<string, string[]> };
       setFieldErrors(typed.errors ?? {});

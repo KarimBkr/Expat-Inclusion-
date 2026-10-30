@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { BookingHistory } from "@/components/booking/BookingHistory";
 import { BookingStatusBadge } from "@/components/booking/BookingStatusBadge";
 import { BookingSummary, formatDate } from "@/components/booking/BookingSummary";
@@ -22,8 +22,17 @@ const FILTERS: { value: BookingStatus | ""; label: string }[] = [
 ];
 
 export default function MesReservationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <MesReservationsContent />
+    </Suspense>
+  );
+}
+
+function MesReservationsContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const justSent = useSearchParams().get("envoyee") === "1";
 
   const [bookings, setBookings] = useState<BookingRequest[]>([]);
   const [filter, setFilter] = useState<BookingStatus | "">("");
@@ -92,6 +101,13 @@ export default function MesReservationsPage() {
           </button>
         ))}
       </div>
+
+      {justSent && (
+        <div className="mb-6 p-4 bg-primary-light border border-primary/20 rounded-xl text-sm text-ink">
+          Votre demande est envoyée. L&apos;accompagnant vous répondra bientôt : vous serez
+          prévenu par email et dans vos notifications.
+        </div>
+      )}
 
       {error && <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
 
