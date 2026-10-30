@@ -78,6 +78,21 @@ class AeshProfileTest extends TestCase
             ->assertJsonPath('profile.timezone', 'Europe/Paris');
     }
 
+    public function test_aesh_voit_le_motif_de_refus_de_sa_candidature(): void
+    {
+        $this->actingAs($this->aesh)->postJson('/api/aesh/profile', $this->validPayload());
+        AeshProfile::where('user_id', $this->aesh->id)->update([
+            'verification_status' => 'rejected',
+            'rejection_reason'    => 'Lettre de motivation illisible.',
+        ]);
+
+        $this->actingAs($this->aesh)
+            ->getJson('/api/aesh/profile')
+            ->assertOk()
+            ->assertJsonPath('profile.verification_status', 'rejected')
+            ->assertJsonPath('profile.rejection_reason', 'Lettre de motivation illisible.');
+    }
+
     public function test_show_retourne_null_si_pas_de_profil(): void
     {
         $this->actingAs($this->aesh)

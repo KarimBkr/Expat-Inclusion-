@@ -46,6 +46,7 @@ Public. Étendu pour US-05 avec `languages` et `modalities`.
     "timezone": "Europe/Paris",
     "phone": "+33612345678",
     "verification_status": "pending",
+    "rejection_reason": null,
     "is_published": false,
     "is_complete": true,
     "specialization_ids": [1, 3],
@@ -102,7 +103,8 @@ resynchronisées (`sync`) à chaque appel.
 
 `is_complete` = bio + fuseau + au moins une spécialisation, une
 langue, une modalité et un pays. `verification_status` (pending/approved/rejected)
-et `is_published` sont pilotés par l'admin (US-08).
+et `is_published` sont pilotés par l'admin (US-08). `rejection_reason` : motif saisi par
+l'admin quand la candidature est `rejected`, sinon `null`.
 
 ---
 

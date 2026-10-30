@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import {
   aeshDocumentDownloadUrl,
@@ -47,6 +50,7 @@ export default function AeshDocumentsPage() {
 
   const [documents, setDocuments] = useState<AeshDocument[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [type, setType] = useState<DocumentType>("cv");
   const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
@@ -54,10 +58,12 @@ export default function AeshDocumentsPage() {
   const [success, setSuccess] = useState("");
 
   const loadDocuments = useCallback(async () => {
+    setLoadError(false);
+    setPageLoading(true);
     try {
       setDocuments(await getAeshDocuments());
     } catch {
-      setError("Impossible de charger les documents.");
+      setLoadError(true);
     } finally {
       setPageLoading(false);
     }
@@ -115,23 +121,25 @@ export default function AeshDocumentsPage() {
   }
 
   if (authLoading || pageLoading || !user) {
+    return <Spinner />;
+  }
+
+  if (loadError) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <ErrorState message="Impossible de charger vos documents." onRetry={loadDocuments} />
       </div>
     );
   }
 
+  const hasCurrent = (t: DocumentType) =>
+    documents.some((d) => d.type === t && d.status !== "rejected");
+  const complete = hasCurrent("cv") && hasCurrent("cover_letter");
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link
-          href="/dashboard/aesh"
-          className="text-sm text-subtle hover:text-ink transition-colors"
-        >
-          ← Retour au tableau de bord
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Ma candidature</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">Ma candidature</h1>
         <p className="text-subtle text-sm">
           Ajoutez votre CV et votre lettre de motivation. Formats acceptés : PDF, DOC, DOCX (5 Mo
           max). Aucune pièce d&apos;identité, aucun diplôme et aucun document médical ne sont
@@ -144,7 +152,18 @@ export default function AeshDocumentsPage() {
           <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>
         )}
         {success && (
-          <div className="mb-6 p-3 bg-primary-light text-primary text-sm rounded-lg">{success}</div>
+          <div role="status" className="mb-6 p-3 bg-primary-light text-primary text-sm rounded-lg">
+            {success}
+          </div>
+        )}
+        {complete && (
+          <div className="mb-6 p-3 bg-cream border border-line text-ink text-sm rounded-lg">
+            Votre CV et votre lettre sont envoyés : votre candidature est en cours de vérification
+            par l&apos;équipe.{" "}
+            <Link href="/dashboard/aesh" className="font-medium underline text-primary">
+              Suivre ma candidature
+            </Link>
+          </div>
         )}
 
         <form onSubmit={handleUpload} className="space-y-5">
@@ -192,9 +211,10 @@ export default function AeshDocumentsPage() {
       <h2 className="text-lg font-semibold text-ink mb-4">Documents envoyés</h2>
 
       {documents.length === 0 ? (
-        <div className="bg-cream border border-line rounded-xl p-8 text-center text-sm text-subtle">
-          Aucun document envoyé pour le moment.
-        </div>
+        <EmptyState
+          title="Aucun document envoyé pour le moment"
+          hint="Envoyez votre CV puis votre lettre de motivation pour lancer la vérification."
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {documents.map((doc) => (
@@ -206,7 +226,7 @@ export default function AeshDocumentsPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-ink truncate">{doc.original_name}</span>
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusClass[doc.status]}`}
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${statusClass[doc.status]}`}
                   >
                     {statusLabels[doc.status]}
                   </span>

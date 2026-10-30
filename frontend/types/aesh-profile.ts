@@ -12,6 +12,7 @@ export interface AeshProfile {
   phone: string | null;
   verification_status: VerificationStatus;
   published_at: string | null;
+  rejection_reason: string | null;
   is_complete: boolean;
   specialization_ids?: number[];
   language_ids?: number[];

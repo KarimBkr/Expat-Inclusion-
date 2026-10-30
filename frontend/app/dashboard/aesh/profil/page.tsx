@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { COMMON_TIMEZONES } from "@/lib/timezones";
 import { getAeshProfile, saveAeshProfile } from "@/services/aesh-profile";
@@ -22,6 +24,7 @@ export default function AeshProfilPage() {
   const [taxonomies, setTaxonomies] = useState<Taxonomies | null>(null);
   const [existingProfile, setExistingProfile] = useState<AeshProfile | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
@@ -38,6 +41,8 @@ export default function AeshProfilPage() {
   const [schoolLevelIds, setSchoolLevelIds] = useState<number[]>([]);
 
   const loadData = useCallback(async () => {
+    setLoadError(false);
+    setPageLoading(true);
     try {
       const [tax, profileRes] = await Promise.all([getTaxonomies(), getAeshProfile()]);
       setTaxonomies(tax);
@@ -56,7 +61,7 @@ export default function AeshProfilPage() {
         setSchoolLevelIds(p.school_level_ids ?? []);
       }
     } catch {
-      setGlobalError("Impossible de charger le profil. Réessayez plus tard.");
+      setLoadError(true);
     } finally {
       setPageLoading(false);
     }
@@ -117,9 +122,13 @@ export default function AeshProfilPage() {
   }
 
   if (authLoading || pageLoading || !user) {
+    return <Spinner />;
+  }
+
+  if (loadError) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <ErrorState message="Impossible de charger votre profil." onRetry={loadData} />
       </div>
     );
   }
@@ -127,13 +136,7 @@ export default function AeshProfilPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link
-          href="/dashboard/aesh"
-          className="text-sm text-subtle hover:text-ink transition-colors"
-        >
-          ← Retour au tableau de bord
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Mon profil professionnel</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">Mon profil professionnel</h1>
         <p className="text-subtle text-sm">
           Présentez votre expertise aux familles. Votre profil sera examiné par notre équipe avant
           publication.
@@ -145,7 +148,17 @@ export default function AeshProfilPage() {
           <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{globalError}</div>
         )}
         {success && (
-          <div className="mb-6 p-3 bg-primary-light text-primary text-sm rounded-lg">{success}</div>
+          <div role="status" className="mb-6 p-3 bg-primary-light text-primary text-sm rounded-lg">
+            {success}
+            {existingProfile?.is_complete && (
+              <>
+                {" "}
+                <Link href="/dashboard/aesh/documents" className="font-medium underline">
+                  Étape suivante : envoyer mon CV et ma lettre
+                </Link>
+              </>
+            )}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} noValidate className="space-y-8">
