@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ConversationInbox } from "@/components/messaging/ConversationInbox";
@@ -26,13 +25,7 @@ export default function ParentConversationsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <Link
-        href="/dashboard/parent"
-        className="text-sm text-subtle hover:text-ink transition-colors"
-      >
-        ← Retour au tableau de bord
-      </Link>
-      <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Mes conversations</h1>
+      <h1 className="text-2xl font-bold text-ink mb-2">Mes conversations</h1>
       <p className="text-subtle text-sm mb-8">
         Échangez avec les AESH une fois votre demande acceptée.
       </p>

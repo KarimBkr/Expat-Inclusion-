@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { useUnreadConversations } from "@/lib/use-unread-conversations";
 import { listBookings } from "@/services/booking";
@@ -20,6 +22,7 @@ export default function DashboardParentPage() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const { unreadCount } = useUnreadConversations(conversations);
   const [unreadNotifications, setUnreadNotifications] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -27,31 +30,31 @@ export default function DashboardParentPage() {
     else if (user.role !== "parent") router.replace("/dashboard");
   }, [user, loading, router]);
 
-  useEffect(() => {
-    if (user?.role !== "parent") return;
-    getParentProfile()
-      .then((res) => setProfileComplete(res.is_complete))
-      .catch(() => setProfileComplete(false));
-    listBookings()
-      .then((bookings) => {
+  const load = useCallback(() => {
+    setLoadError(false);
+    setProfileComplete(null);
+    // Profile + bookings decide the next action: their failure is shown; counters degrade silently.
+    Promise.all([getParentProfile(), listBookings()])
+      .then(([profile, bookings]) => {
+        setProfileComplete(profile.is_complete);
         setBookingCount(bookings.length);
         setAcceptedCount(bookings.filter((b) => b.status === "accepted").length);
       })
-      .catch(() => setBookingCount(0));
+      .catch(() => setLoadError(true));
     listConversations()
       .then(setConversations)
       .catch(() => setConversations([]));
     listNotifications()
       .then((res) => setUnreadNotifications(res.unreadCount))
       .catch(() => setUnreadNotifications(0));
-  }, [user]);
+  }, []);
+
+  useEffect(() => {
+    if (user?.role === "parent") load();
+  }, [user, load]);
 
   if (loading || !user) {
-    return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner />;
   }
 
   async function handleLogout() {
@@ -84,70 +87,19 @@ export default function DashboardParentPage() {
         </div>
       )}
 
-      {profileComplete === false && (
-        <div className="mb-8 p-4 bg-primary-light border border-primary/20 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="font-medium text-ink">Complétez votre profil parent</p>
-            <p className="text-sm text-subtle mt-1">
-              Renseignez votre pays, le brief enfant et vos consentements pour accéder à la
-              recherche d&apos;AESH.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/parent/profil"
-            className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Compléter mon profil
-          </Link>
+      {loadError ? (
+        <div className="mb-8">
+          <ErrorState message="Impossible de charger votre espace." onRetry={load} />
         </div>
+      ) : profileComplete === null ? (
+        <Spinner />
+      ) : (
+        <NextActionCard
+          profileComplete={profileComplete}
+          acceptedCount={acceptedCount}
+          bookingCount={bookingCount ?? 0}
+        />
       )}
-
-      {profileComplete === true && (
-        <div className="mb-8 flex items-center justify-between p-4 bg-card border border-line rounded-xl">
-          <p className="text-sm text-ink">
-            <span className="inline-block w-2 h-2 rounded-full bg-primary mr-2" />
-            Profil parent complet
-          </p>
-          <Link
-            href="/dashboard/parent/profil"
-            className="text-sm text-primary font-medium hover:underline"
-          >
-            Modifier
-          </Link>
-        </div>
-      )}
-
-      {acceptedCount > 0 && (
-        <div className="mb-8 p-4 bg-primary-light border border-primary/20 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p className="font-medium text-ink">
-            {acceptedCount > 1
-              ? `${acceptedCount} demandes ont été acceptées`
-              : "Une demande a été acceptée"}{" "}
-            — confirmez la réservation pour poursuivre.
-          </p>
-          <Link
-            href="/dashboard/parent/reservations"
-            className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Voir mes demandes
-          </Link>
-        </div>
-      )}
-
-      <div className="mb-8 p-6 bg-primary-900 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <p className="font-semibold text-white">Trouvez l&apos;AESH qu&apos;il vous faut</p>
-          <p className="text-sm text-white/70 mt-1">
-            Parcourez les profils examinés par notre équipe et filtrez selon vos besoins.
-          </p>
-        </div>
-        <Link
-          href="/dashboard/parent/recherche"
-          className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-white text-primary text-sm font-semibold rounded-xl hover:bg-white/90 transition-colors"
-        >
-          Rechercher un AESH
-        </Link>
-      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <DashboardCard
@@ -175,6 +127,68 @@ export default function DashboardParentPage() {
         aucun paiement.
       </p>
     </div>
+  );
+}
+
+function NextActionCard({
+  profileComplete,
+  acceptedCount,
+  bookingCount,
+}: {
+  profileComplete: boolean;
+  acceptedCount: number;
+  bookingCount: number;
+}) {
+  const action = !profileComplete
+    ? {
+        title: "Complétez votre profil parent",
+        text: "Renseignez votre pays, le brief enfant et vos consentements pour accéder à la recherche d'AESH.",
+        cta: "Compléter mon profil",
+        href: "/dashboard/parent/profil",
+      }
+    : acceptedCount > 0
+      ? {
+          title:
+            acceptedCount > 1
+              ? `${acceptedCount} demandes ont été acceptées`
+              : "Une demande a été acceptée",
+          text: "Confirmez la mise en relation pour ouvrir la conversation avec l'AESH.",
+          cta: "Confirmer la mise en relation",
+          href: "/dashboard/parent/reservations",
+        }
+      : bookingCount === 0
+        ? {
+            title: "Trouvez l'AESH qu'il vous faut",
+            text: "Parcourez les profils examinés par notre équipe et filtrez selon vos besoins.",
+            cta: "Rechercher un AESH",
+            href: "/dashboard/parent/recherche",
+          }
+        : {
+            title: "Suivez vos demandes",
+            text: "Vous serez notifié dès qu'un AESH répond. Vous pouvez aussi contacter d'autres profils.",
+            cta: "Voir mes demandes",
+            href: "/dashboard/parent/reservations",
+          };
+
+  return (
+    <section
+      aria-label="Prochaine étape"
+      className="mb-8 p-6 bg-primary-900 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+    >
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/60 mb-1">
+          Prochaine étape
+        </p>
+        <p className="font-semibold text-white">{action.title}</p>
+        <p className="text-sm text-white/70 mt-1">{action.text}</p>
+      </div>
+      <Link
+        href={action.href}
+        className="shrink-0 inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-white text-primary text-sm font-semibold rounded-xl hover:bg-white/90 transition-colors"
+      >
+        {action.cta}
+      </Link>
+    </section>
   );
 }
 

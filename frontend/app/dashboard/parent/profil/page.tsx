@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { COMMON_TIMEZONES } from "@/lib/timezones";
 import { getParentProfile, getTaxonomies, saveParentProfile } from "@/services/parent-profile";
@@ -23,6 +25,7 @@ export default function ParentProfilPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loadError, setLoadError] = useState(false);
 
   const [countryId, setCountryId] = useState("");
   const [timezone, setTimezone] = useState("Europe/Paris");
@@ -36,6 +39,8 @@ export default function ParentProfilPage() {
   const [consentMarketing, setConsentMarketing] = useState(false);
 
   const loadData = useCallback(async () => {
+    setLoadError(false);
+    setPageLoading(true);
     try {
       const [tax, profileRes] = await Promise.all([getTaxonomies(), getParentProfile()]);
       setTaxonomies(tax);
@@ -55,7 +60,7 @@ export default function ParentProfilPage() {
         setConsentMarketing(p.consent_marketing);
       }
     } catch {
-      setGlobalError("Impossible de charger le profil. Réessayez plus tard.");
+      setLoadError(true);
     } finally {
       setPageLoading(false);
     }
@@ -117,9 +122,13 @@ export default function ParentProfilPage() {
   }
 
   if (authLoading || pageLoading || !user) {
+    return <Spinner label="Chargement du profil…" />;
+  }
+
+  if (loadError) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <ErrorState message="Impossible de charger le profil." onRetry={loadData} />
       </div>
     );
   }
@@ -127,13 +136,7 @@ export default function ParentProfilPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link
-          href="/dashboard/parent"
-          className="text-sm text-subtle hover:text-ink transition-colors"
-        >
-          ← Retour au tableau de bord
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Mon profil parent</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">Mon profil parent</h1>
         <p className="text-subtle text-sm">
           Ces informations nous permettent de vous mettre en relation avec un AESH adapté. Nous
           collectons uniquement le minimum nécessaire — aucun document médical n&apos;est demandé.

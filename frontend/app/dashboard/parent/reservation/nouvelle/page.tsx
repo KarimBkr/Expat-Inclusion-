@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
+import { validateBookingForm } from "@/lib/booking-form";
 import { getAeshDetail } from "@/services/aesh-detail";
 import { createBooking } from "@/services/booking";
 import { getTaxonomies } from "@/services/parent-profile";
@@ -22,11 +26,7 @@ export default function NouvelleDemandePage() {
 }
 
 function PageLoader() {
-  return (
-    <div className="min-h-full flex items-center justify-center py-24">
-      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  return <Spinner />;
 }
 
 function NouvelleDemandeForm() {
@@ -38,7 +38,9 @@ function NouvelleDemandeForm() {
   const [aesh, setAesh] = useState<AeshDetail | null>(null);
   const [taxonomies, setTaxonomies] = useState<Taxonomies | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<"" | "notfound" | "failed">("");
   const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
@@ -47,6 +49,20 @@ function NouvelleDemandeForm() {
   const [schoolLevelId, setSchoolLevelId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [hoursPerWeek, setHoursPerWeek] = useState("4");
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setLoadError("");
+    Promise.all([getAeshDetail(aeshId), getTaxonomies()])
+      .then(([detail, taxo]) => {
+        setAesh(detail);
+        setTaxonomies(taxo);
+      })
+      .catch((err: Error & { status?: number }) =>
+        setLoadError(err.status === 404 ? "notfound" : "failed")
+      )
+      .finally(() => setLoading(false));
+  }, [aeshId]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -62,23 +78,25 @@ function NouvelleDemandeForm() {
       router.replace("/dashboard/parent/recherche");
       return;
     }
-
-    Promise.all([getAeshDetail(aeshId), getTaxonomies()])
-      .then(([detail, taxo]) => {
-        setAesh(detail);
-        setTaxonomies(taxo);
-      })
-      .catch(() => setError("Impossible de charger cet accompagnant."))
-      .finally(() => setLoading(false));
-  }, [aeshId, user, authLoading, router]);
+    load();
+  }, [aeshId, user, authLoading, router, load]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!aesh) return;
 
-    setSubmitting(true);
     setError("");
-    setFieldErrors({});
+    const clientErrors = validateBookingForm(
+      { message, modalityId, schoolLevelId, startDate, hoursPerWeek },
+      new Date().toISOString().slice(0, 10)
+    );
+    setFieldErrors(clientErrors);
+    if (Object.keys(clientErrors).length > 0) {
+      setError("Vérifiez les champs signalés.");
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       await createBooking({
@@ -89,7 +107,8 @@ function NouvelleDemandeForm() {
         start_date: startDate,
         hours_per_week: Number(hoursPerWeek),
       });
-      router.push("/dashboard/parent/reservations?envoyee=1");
+      setSent(true);
+      window.scrollTo({ top: 0 });
     } catch (err) {
       const typed = err as Error & { errors?: Record<string, string[]> };
       setFieldErrors(typed.errors ?? {});
@@ -100,9 +119,13 @@ function NouvelleDemandeForm() {
   }
 
   if (authLoading || !user || loading) {
+    return <Spinner />;
+  }
+
+  if (loadError === "failed") {
     return (
-      <div className="min-h-full flex items-center justify-center py-24">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <ErrorState message="Impossible de charger cet accompagnant." onRetry={load} />
       </div>
     );
   }
@@ -110,15 +133,49 @@ function NouvelleDemandeForm() {
   if (!aesh) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-cream border border-line rounded-2xl p-12 text-center">
-          <p className="font-medium text-ink mb-1">Accompagnant introuvable</p>
-          <p className="text-sm text-subtle mb-6">{error || "Ce profil n'est plus disponible."}</p>
-          <Link
-            href="/dashboard/parent/recherche"
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Retour à la recherche
-          </Link>
+        <EmptyState
+          title="Accompagnant introuvable"
+          hint="Ce profil n'est plus disponible. Choisissez un autre accompagnant dans la recherche."
+          action={
+            <Link
+              href="/dashboard/parent/recherche"
+              className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Retour à la recherche
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (sent) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <div role="status" className="bg-card border border-line rounded-2xl p-8 text-center">
+          <p className="text-3xl mb-3" aria-hidden="true">
+            ✓
+          </p>
+          <h1 className="text-xl font-bold text-ink mb-2">Demande envoyée</h1>
+          <p className="text-sm text-subtle mb-6">
+            {aesh.name} a reçu votre demande. Vous recevrez une notification dès qu&apos;une réponse
+            sera donnée ; si elle est acceptée, vous pourrez confirmer la mise en relation et
+            échanger par messagerie.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/dashboard/parent/reservations"
+              className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Suivre mes demandes
+            </Link>
+            <Link
+              href="/dashboard/parent/recherche"
+              className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 border border-line text-sm font-medium rounded-xl hover:border-primary transition-colors"
+            >
+              Voir d&apos;autres profils
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -133,7 +190,7 @@ function NouvelleDemandeForm() {
         ← Retour à la fiche
       </Link>
 
-      <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Demander une réservation</h1>
+      <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Envoyer une demande</h1>
       <p className="text-subtle text-sm mb-8">
         {aesh.name} recevra votre demande et pourra l&apos;accepter ou la refuser. Vous ne payez
         rien à cette étape.
@@ -147,15 +204,18 @@ function NouvelleDemandeForm() {
         </p>
       </div>
 
-      {error && Object.keys(fieldErrors).length === 0 && (
-        <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>
+      {error && (
+        <div role="alert" className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">
+          {error}
+        </div>
       )}
 
       <form
+        noValidate
         onSubmit={handleSubmit}
         className="bg-card border border-line rounded-2xl p-6 space-y-5"
       >
-        <Field label="Modalité souhaitée" error={fieldErrors.modality_id?.[0]}>
+        <Field id="modality" label="Modalité souhaitée" error={fieldErrors.modality_id?.[0]}>
           <select
             id="modality"
             value={modalityId}
@@ -172,7 +232,11 @@ function NouvelleDemandeForm() {
           </select>
         </Field>
 
-        <Field label="Niveau scolaire de l'enfant" error={fieldErrors.school_level_id?.[0]}>
+        <Field
+          id="school-level"
+          label="Niveau scolaire de l'enfant"
+          error={fieldErrors.school_level_id?.[0]}
+        >
           <select
             id="school-level"
             value={schoolLevelId}
@@ -190,7 +254,11 @@ function NouvelleDemandeForm() {
         </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Date de début souhaitée" error={fieldErrors.start_date?.[0]}>
+          <Field
+            id="start-date"
+            label="Date de début souhaitée"
+            error={fieldErrors.start_date?.[0]}
+          >
             <input
               id="start-date"
               type="date"
@@ -202,7 +270,7 @@ function NouvelleDemandeForm() {
             />
           </Field>
 
-          <Field label="Heures par semaine" error={fieldErrors.hours_per_week?.[0]}>
+          <Field id="hours" label="Heures par semaine" error={fieldErrors.hours_per_week?.[0]}>
             <input
               id="hours"
               type="number"
@@ -216,7 +284,7 @@ function NouvelleDemandeForm() {
           </Field>
         </div>
 
-        <Field label="Votre besoin" error={fieldErrors.message?.[0]}>
+        <Field id="message" label="Votre besoin" error={fieldErrors.message?.[0]}>
           <textarea
             id="message"
             value={message}
@@ -237,7 +305,7 @@ function NouvelleDemandeForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
+            className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
           >
             {submitting ? "Envoi en cours…" : "Envoyer la demande"}
           </button>
@@ -254,19 +322,27 @@ function NouvelleDemandeForm() {
 }
 
 function Field({
+  id,
   label,
   error,
   children,
 }: {
+  id: string;
   label: string;
   error?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <span className="block text-xs font-medium text-subtle mb-1.5">{label}</span>
+      <label htmlFor={id} className="block text-xs font-medium text-subtle mb-1.5">
+        {label}
+      </label>
       {children}
-      {error && <p className="text-xs text-danger mt-1">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} className="text-xs text-danger mt-1">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

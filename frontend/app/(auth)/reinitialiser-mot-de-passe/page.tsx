@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, Suspense, useState } from "react";
+import { Spinner } from "@/components/ui/Spinner";
 import { resetPassword } from "@/services/auth";
 import type { ApiError } from "@/types/auth";
 
@@ -125,7 +126,7 @@ export default function ReinitialiserMotDePassePage() {
           <h1 className="text-3xl font-bold text-ink mb-2">Nouveau mot de passe</h1>
           <p className="text-subtle">Choisissez un mot de passe sécurisé</p>
         </div>
-        <Suspense>
+        <Suspense fallback={<Spinner />}>
           <ResetForm />
         </Suspense>
       </div>

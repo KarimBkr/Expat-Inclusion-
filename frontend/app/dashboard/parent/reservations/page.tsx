@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { BookingHistory } from "@/components/booking/BookingHistory";
 import { BookingStatusBadge } from "@/components/booking/BookingStatusBadge";
 import { BookingSummary, formatDate } from "@/components/booking/BookingSummary";
 import { ReasonForm } from "@/components/booking/ReasonForm";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { cancelBooking, listBookings } from "@/services/booking";
 import { createCheckoutSession } from "@/services/payment";
@@ -22,17 +25,8 @@ const FILTERS: { value: BookingStatus | ""; label: string }[] = [
 ];
 
 export default function MesReservationsPage() {
-  return (
-    <Suspense fallback={null}>
-      <MesReservationsContent />
-    </Suspense>
-  );
-}
-
-function MesReservationsContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const justSent = useSearchParams().get("envoyee") === "1";
 
   const [bookings, setBookings] = useState<BookingRequest[]>([]);
   const [filter, setFilter] = useState<BookingStatus | "">("");
@@ -46,7 +40,7 @@ function MesReservationsContent() {
     try {
       setBookings(await listBookings(status || undefined));
     } catch {
-      setError("Impossible de charger vos demandes. Réessayez.");
+      setError("Impossible de charger vos demandes.");
     } finally {
       setLoading(false);
     }
@@ -66,22 +60,12 @@ function MesReservationsContent() {
   }, [user, authLoading, router, filter, load]);
 
   if (authLoading || !user) {
-    return (
-      <div className="min-h-full flex items-center justify-center py-24">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner />;
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <Link
-        href="/dashboard/parent"
-        className="text-sm text-subtle hover:text-ink transition-colors"
-      >
-        ← Retour au tableau de bord
-      </Link>
-      <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Mes demandes de réservation</h1>
+      <h1 className="text-2xl font-bold text-ink mb-2">Mes demandes de réservation</h1>
       <p className="text-subtle text-sm mb-8">
         Suivez l&apos;état de vos demandes et annulez celles qui ne sont plus d&apos;actualité.
       </p>
@@ -92,7 +76,8 @@ function MesReservationsContent() {
             key={item.value || "all"}
             type="button"
             onClick={() => setFilter(item.value)}
-            className={`px-3 py-1.5 text-sm rounded-xl border transition-colors ${
+            aria-pressed={filter === item.value}
+            className={`min-h-11 px-3 py-1.5 text-sm rounded-xl border transition-colors ${
               filter === item.value
                 ? "border-primary bg-primary-light text-primary font-medium"
                 : "border-line text-subtle hover:border-primary"
@@ -103,15 +88,6 @@ function MesReservationsContent() {
         ))}
       </div>
 
-      {justSent && (
-        <div className="mb-6 p-4 bg-primary-light border border-primary/20 rounded-xl text-sm text-ink">
-          Votre demande est envoyée. L&apos;accompagnant vous répondra bientôt : vous serez prévenu
-          par email et dans vos notifications.
-        </div>
-      )}
-
-      {error && <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
-
       {notice && (
         <p
           role="status"
@@ -121,23 +97,37 @@ function MesReservationsContent() {
         </p>
       )}
 
-      {loading ? (
-        <div className="py-16 flex justify-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
+      {error ? (
+        <ErrorState message={error} onRetry={() => load(filter)} />
+      ) : loading ? (
+        <Spinner label="Chargement de vos demandes…" />
+      ) : bookings.length === 0 && filter ? (
+        <EmptyState
+          title="Aucune demande dans cette catégorie"
+          hint="Affichez toutes vos demandes pour voir les autres statuts."
+          action={
+            <button
+              type="button"
+              onClick={() => setFilter("")}
+              className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 border border-line text-sm font-medium rounded-xl hover:border-primary transition-colors"
+            >
+              Voir toutes mes demandes
+            </button>
+          }
+        />
       ) : bookings.length === 0 ? (
-        <div className="bg-cream border border-line rounded-2xl p-12 text-center">
-          <p className="font-medium text-ink mb-1">Aucune demande pour l&apos;instant</p>
-          <p className="text-sm text-subtle mb-6">
-            Trouvez un accompagnant et envoyez votre première demande de réservation.
-          </p>
-          <Link
-            href="/dashboard/parent/recherche"
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Rechercher un AESH
-          </Link>
-        </div>
+        <EmptyState
+          title="Aucune demande pour l'instant"
+          hint="Trouvez un accompagnant et envoyez votre première demande de mise en relation."
+          action={
+            <Link
+              href="/dashboard/parent/recherche"
+              className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Rechercher un AESH
+            </Link>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {bookings.map((booking) => (

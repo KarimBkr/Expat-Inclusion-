@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/Spinner";
 import { verifyEmail } from "@/services/auth";
 import type { ApiError } from "@/types/auth";
 
@@ -33,11 +34,7 @@ function Confirmation() {
   }, [params.id, params.hash, searchParams]);
 
   if (status === "pending") {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner label="Vérification de votre email…" />;
   }
 
   if (status === "success") {
@@ -89,7 +86,7 @@ export default function ConfirmerVerificationEmailPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-ink mb-2">Vérification de l&apos;email</h1>
         </div>
-        <Suspense>
+        <Suspense fallback={<Spinner />}>
           <Confirmation />
         </Suspense>
       </div>

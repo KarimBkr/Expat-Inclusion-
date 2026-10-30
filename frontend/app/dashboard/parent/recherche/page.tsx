@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { searchAesh } from "@/services/aesh-search";
 import { getTaxonomies } from "@/services/parent-profile";
@@ -35,10 +38,13 @@ export default function RechercheAeshPage() {
       router.replace("/dashboard");
       return;
     }
+  }, [user, authLoading, router]);
+
+  const loadTaxonomies = useCallback(() => {
     getTaxonomies()
       .then(setTaxonomies)
       .catch(() => setError("Impossible de charger les filtres."));
-  }, [user, authLoading, router]);
+  }, []);
 
   const runSearch = useCallback(async (activeFilters: SearchFilters, activePage: number) => {
     setLoading(true);
@@ -57,8 +63,15 @@ export default function RechercheAeshPage() {
   }, []);
 
   useEffect(() => {
-    if (user?.role === "parent") runSearch({}, 1);
-  }, [user, runSearch]);
+    if (user?.role !== "parent") return;
+    loadTaxonomies();
+    runSearch({}, 1);
+  }, [user, runSearch, loadTaxonomies]);
+
+  function retry() {
+    if (!taxonomies) loadTaxonomies();
+    runSearch(filters, page);
+  }
 
   function updateFilter(key: keyof Omit<SearchFilters, "sort">, value: string) {
     const next = { ...filters };
@@ -87,23 +100,15 @@ export default function RechercheAeshPage() {
   }
 
   if (authLoading || !user) {
-    return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner />;
   }
+
+  const hasFilters = Object.keys(filters).length > 0;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link
-          href="/dashboard/parent"
-          className="text-sm text-subtle hover:text-ink transition-colors"
-        >
-          ← Retour au tableau de bord
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Trouver un AESH</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">Trouver un AESH</h1>
         <p className="text-subtle text-sm">
           Filtrez selon le pays, la langue parlée, la modalité et le niveau scolaire, puis triez par
           expérience.
@@ -136,31 +141,43 @@ export default function RechercheAeshPage() {
           options={taxonomies?.school_levels ?? []}
         />
         <SortSelect value={filters.sort} onChange={updateSort} />
-      </div>
-
-      {error && <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
-
-      {loading ? (
-        <div className="py-16 flex justify-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : results.length === 0 ? (
-        <div className="bg-cream border border-line rounded-2xl p-12 text-center">
-          <p className="font-medium text-ink mb-1">Aucun AESH ne correspond à votre recherche</p>
-          <p className="text-sm text-subtle mb-6">
-            Élargissez vos critères ou revenez plus tard — de nouveaux profils sont publiés
-            régulièrement.
-          </p>
-          {Object.keys(filters).length > 0 && (
+        {hasFilters && (
+          <div className="sm:col-span-2 lg:col-span-5 flex justify-end">
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+              className="min-h-11 px-3 text-sm font-medium text-primary hover:underline"
             >
               Réinitialiser les filtres
             </button>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
+
+      {error ? (
+        <ErrorState message={error} onRetry={retry} />
+      ) : loading ? (
+        <Spinner label="Recherche en cours…" />
+      ) : results.length === 0 ? (
+        <EmptyState
+          title="Aucun AESH ne correspond à votre recherche"
+          hint={
+            hasFilters
+              ? "Essayez de retirer un critère, par exemple le niveau scolaire ou la modalité : de nouveaux profils sont publiés régulièrement."
+              : "Aucun profil n'est publié pour le moment. Revenez bientôt : notre équipe examine de nouvelles candidatures chaque semaine."
+          }
+          action={
+            hasFilters && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+              >
+                Réinitialiser les filtres
+              </button>
+            )
+          }
+        />
       ) : (
         <>
           <p className="text-sm text-subtle mb-4">

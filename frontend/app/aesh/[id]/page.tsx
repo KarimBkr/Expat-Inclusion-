@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { getAeshDetail } from "@/services/aesh-detail";
 import type { AeshDetail } from "@/types/aesh-detail";
@@ -19,6 +22,18 @@ export default function FicheAeshPage() {
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState("");
 
+  const load = useCallback(() => {
+    setLoading(true);
+    setError("");
+    getAeshDetail(id)
+      .then(setAesh)
+      .catch((err: Error & { status?: number }) => {
+        if (err.status === 404) setNotFound(true);
+        else setError("Impossible de charger cette fiche.");
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -29,40 +44,30 @@ export default function FicheAeshPage() {
       router.replace("/dashboard");
       return;
     }
-
-    getAeshDetail(id)
-      .then(setAesh)
-      .catch((err: Error & { status?: number }) => {
-        if (err.status === 404) setNotFound(true);
-        else setError("Impossible de charger cette fiche. Réessayez.");
-      })
-      .finally(() => setLoading(false));
-  }, [id, user, authLoading, router]);
+    load();
+  }, [user, authLoading, router, load]);
 
   if (authLoading || !user || loading) {
-    return (
-      <div className="min-h-full flex items-center justify-center py-24">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner label="Chargement de la fiche…" />;
   }
 
   if (notFound) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12">
         <BackLink />
-        <div className="bg-cream border border-line rounded-2xl p-12 text-center mt-6">
-          <p className="font-medium text-ink mb-1">Ce profil n&apos;est plus disponible</p>
-          <p className="text-sm text-subtle mb-6">
-            L&apos;accompagnant a peut-être retiré sa fiche ou celle-ci n&apos;est pas encore
-            publiée.
-          </p>
-          <Link
-            href="/dashboard/parent/recherche"
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Retour à la recherche
-          </Link>
+        <div className="mt-6">
+          <EmptyState
+            title="Ce profil n'est plus disponible"
+            hint="L'accompagnant a peut-être retiré sa fiche ou celle-ci n'est pas encore publiée."
+            action={
+              <Link
+                href="/dashboard/parent/recherche"
+                className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+              >
+                Retour à la recherche
+              </Link>
+            }
+          />
         </div>
       </div>
     );
@@ -72,8 +77,8 @@ export default function FicheAeshPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12">
         <BackLink />
-        <div className="mt-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">
-          {error || "Une erreur est survenue."}
+        <div className="mt-6">
+          <ErrorState message={error || "Une erreur est survenue."} onRetry={load} />
         </div>
       </div>
     );
@@ -121,14 +126,15 @@ export default function FicheAeshPage() {
         <div>
           <p className="font-semibold text-white">Cet accompagnant correspond à votre besoin ?</p>
           <p className="text-sm text-white/70 mt-1">
-            Envoyez une demande de réservation. {aesh.name} pourra l&apos;accepter ou la refuser.
+            Envoyez une demande de mise en relation. {aesh.name} pourra l&apos;accepter ou la
+            refuser.
           </p>
         </div>
         <Link
           href={`/dashboard/parent/reservation/nouvelle?aesh=${aesh.id}`}
-          className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-white text-primary text-sm font-semibold rounded-xl hover:bg-white/90 transition-colors"
+          className="shrink-0 inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-white text-primary text-sm font-semibold rounded-xl hover:bg-white/90 transition-colors"
         >
-          Demander une réservation
+          Envoyer une demande
         </Link>
       </div>
 

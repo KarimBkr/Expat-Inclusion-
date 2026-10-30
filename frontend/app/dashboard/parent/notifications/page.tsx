@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { NotificationList } from "@/components/notifications/NotificationList";
@@ -26,13 +25,7 @@ export default function ParentNotificationsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <Link
-        href="/dashboard/parent"
-        className="text-sm text-subtle hover:text-ink transition-colors"
-      >
-        ← Retour au tableau de bord
-      </Link>
-      <h1 className="text-2xl font-bold text-ink mt-4 mb-8">Mes notifications</h1>
+      <h1 className="text-2xl font-bold text-ink mb-8">Mes notifications</h1>
       <NotificationList />
     </div>
   );
