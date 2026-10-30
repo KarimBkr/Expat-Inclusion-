@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\AeshDocument;
 use App\Models\AeshProfile;
 use App\Models\User;
 use App\Notifications\InterviewInvitationNotification;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminAeshVerificationTest extends TestCase
@@ -226,5 +229,46 @@ class AdminAeshVerificationTest extends TestCase
             ->assertStatus(403);
 
         Notification::assertNothingSent();
+    }
+
+    public function test_admin_voit_et_telecharge_les_documents_du_profil(): void
+    {
+        Storage::fake('local');
+        $this->actingAs($this->profile->user)->postJson('/api/aesh/documents', [
+            'type' => 'cv',
+            'file' => UploadedFile::fake()->create('cv.pdf', 20, 'application/pdf'),
+        ])->assertStatus(201);
+        $document = AeshDocument::firstOrFail();
+
+        $this->actingAs($this->admin)
+            ->getJson("/api/admin/aesh-profiles/{$this->profile->id}")
+            ->assertOk()
+            ->assertJsonPath('data.documents.0.type', 'cv')
+            ->assertJsonPath('data.documents.0.original_name', 'cv.pdf');
+
+        $this->actingAs($this->admin)
+            ->get("/api/admin/aesh-documents/{$document->id}/download")
+            ->assertOk()
+            ->assertDownload('cv.pdf');
+    }
+
+    public function test_parent_ne_peut_pas_telecharger_un_document_aesh(): void
+    {
+        Storage::fake('local');
+        $document = AeshDocument::create([
+            'aesh_profile_id' => $this->profile->id,
+            'type'            => 'cv',
+            'original_name'   => 'cv.pdf',
+            'path'            => 'aesh-documents/cv.pdf',
+            'size'            => 10,
+            'status'          => 'pending',
+        ]);
+        $parent = User::factory()->create(['role' => 'parent']);
+
+        $this->getJson("/api/admin/aesh-documents/{$document->id}/download")
+            ->assertStatus(401);
+        $this->actingAs($parent)
+            ->getJson("/api/admin/aesh-documents/{$document->id}/download")
+            ->assertStatus(403);
     }
 }

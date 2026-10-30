@@ -84,3 +84,7 @@ export async function addAdminNote(id: number, body: string): Promise<AdminNote>
   });
   return res.data;
 }
+
+export function adminDocumentDownloadUrl(documentId: number): string {
+  return `${API_URL}/api/admin/aesh-documents/${documentId}/download`;
+}

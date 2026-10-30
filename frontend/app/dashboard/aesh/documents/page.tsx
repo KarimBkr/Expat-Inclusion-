@@ -13,7 +13,12 @@ import {
   getAeshDocuments,
   uploadAeshDocument,
 } from "@/services/aesh-profile";
-import type { AeshDocument, DocumentStatus, DocumentType } from "@/types/aesh-profile";
+import {
+  type AeshDocument,
+  DOCUMENT_TYPE_LABELS,
+  type DocumentStatus,
+  type DocumentType,
+} from "@/types/aesh-profile";
 import type { ApiError } from "@/types/auth";
 
 const documentTypes: { value: DocumentType; label: string }[] = [
@@ -21,10 +26,7 @@ const documentTypes: { value: DocumentType; label: string }[] = [
   { value: "cover_letter", label: "Lettre de motivation" },
 ];
 
-const typeLabels: Record<DocumentType, string> = {
-  cv: "CV",
-  cover_letter: "Lettre de motivation",
-};
+const typeLabels = DOCUMENT_TYPE_LABELS;
 
 const statusLabels: Record<DocumentStatus, string> = {
   pending: "En attente",

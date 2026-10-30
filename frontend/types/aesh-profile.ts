@@ -4,6 +4,11 @@ export type DocumentStatus = "pending" | "approved" | "rejected";
 
 export type DocumentType = "cv" | "cover_letter";
 
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  cv: "CV",
+  cover_letter: "Lettre de motivation",
+};
+
 export interface AeshProfile {
   id: number;
   bio: string;

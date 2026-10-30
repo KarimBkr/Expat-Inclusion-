@@ -279,7 +279,10 @@ function SortSelect({
 
 function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
   return (
-    <div className="bg-card border border-line rounded-2xl p-6 flex flex-col">
+    <article
+      aria-label={aesh.name}
+      className="bg-card border border-line rounded-2xl p-6 flex flex-col"
+    >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <h2 className="font-bold text-ink">{aesh.name}</h2>
@@ -322,6 +325,6 @@ function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
           Voir le profil →
         </Link>
       </div>
-    </div>
+    </article>
   );
 }

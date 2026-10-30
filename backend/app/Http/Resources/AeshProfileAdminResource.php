@@ -23,6 +23,7 @@ class AeshProfileAdminResource extends JsonResource
                 'name'  => $this->user->name,
                 'email' => $this->user->email,
             ]),
+            'documents'           => AeshDocumentResource::collection($this->whenLoaded('documents')),
             'admin_notes'         => AdminNoteResource::collection($this->whenLoaded('adminNotes')),
             'created_at'          => $this->created_at?->toIso8601String(),
             'updated_at'          => $this->updated_at?->toIso8601String(),

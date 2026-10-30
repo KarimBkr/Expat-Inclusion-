@@ -9,11 +9,14 @@ use App\Http\Requests\Admin\StoreAdminNoteRequest;
 use App\Http\Resources\AdminNoteResource;
 use App\Http\Resources\AeshProfileAdminResource;
 use App\Models\AdminNote;
+use App\Models\AeshDocument;
 use App\Models\AeshProfile;
 use App\Notifications\InterviewInvitationNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AeshProfileController extends Controller
 {
@@ -36,7 +39,7 @@ class AeshProfileController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $profile = AeshProfile::with(['user', 'adminNotes.admin'])->findOrFail($id);
+        $profile = AeshProfile::with(['user', 'adminNotes.admin', 'documents'])->findOrFail($id);
 
         return response()->json([
             'data' => new AeshProfileAdminResource($profile),
@@ -196,5 +199,12 @@ class AeshProfileController extends Controller
             'message' => 'Note ajoutée.',
             'data'    => new AdminNoteResource($note),
         ], 201);
+    }
+
+    public function downloadDocument(AeshDocument $document): StreamedResponse
+    {
+        abort_unless(Storage::disk('local')->exists($document->path), 404);
+
+        return Storage::disk('local')->download($document->path, $document->original_name);
     }
 }

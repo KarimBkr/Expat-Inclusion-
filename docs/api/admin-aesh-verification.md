@@ -21,7 +21,11 @@ Query optionnel : `?status=pending|approved|rejected|published`
 
 ## GET /api/admin/aesh-profiles/{id}
 
-Détail + notes internes.
+Détail + notes internes + `documents` (CV, lettre : `id`, `type`, `original_name`, `size`, `status`).
+
+## GET /api/admin/aesh-documents/{document}/download
+
+Télécharge un document AESH (admin uniquement : 401 invité, 403 autre rôle).
 
 ## POST /api/admin/aesh-profiles/{id}/approve
 
@@ -107,4 +111,6 @@ Retire la vérification (correction d'une saisie admin). Remet
 
 ## Frontend
 
-`/dashboard/admin/aesh`
+`/dashboard/admin/aesh` — file filtrée par statut (« À vérifier » par défaut), détail avec documents, approuver, rejeter (motif obligatoire, étape de confirmation), publier, notes internes, vérification par entretien.
+
+`/dashboard/admin` — compteurs à traiter : profils à vérifier, profils approuvés à publier, demandes sans réponse.

@@ -1,3 +1,5 @@
+import type { AeshDocument } from "@/types/aesh-profile";
+
 export type TaxonomyType =
   | "countries"
   | "specializations"
@@ -48,6 +50,7 @@ export interface AeshProfileAdmin {
   interview_verified_at: string | null;
   bio: string | null;
   user?: { id: number; name: string; email: string };
+  documents?: AeshDocument[];
   admin_notes?: AdminNote[];
   created_at?: string;
   updated_at?: string;

@@ -109,6 +109,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/aesh-profiles/{id}/interview-verify', [AdminAeshProfileController::class, 'interviewVerify']);
         Route::delete('/aesh-profiles/{id}/interview-verify', [AdminAeshProfileController::class, 'removeInterviewVerification']);
         Route::post('/aesh-profiles/{id}/notes', [AdminAeshProfileController::class, 'storeNote']);
+        Route::get('/aesh-documents/{document}/download', [AdminAeshProfileController::class, 'downloadDocument']);
 
         Route::post('/aesh-import', [AeshImportController::class, 'store'])
             ->middleware('throttle:10,1');
