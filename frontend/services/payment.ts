@@ -5,7 +5,10 @@ function getXsrfToken(): string {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
-export async function createCheckoutSession(bookingId: number): Promise<string> {
+/** Frais désactivé : la demande est déjà confirmée côté serveur, aucune redirection n'est nécessaire. */
+export async function createCheckoutSession(
+  bookingId: number
+): Promise<{ checkoutUrl: string; paymentsEnabled: boolean }> {
   const res = await fetch(`${API_URL}/api/bookings/${bookingId}/pay`, {
     method: "POST",
     credentials: "include",
@@ -20,11 +23,15 @@ export async function createCheckoutSession(bookingId: number): Promise<string> 
 
   if (!res.ok) {
     const err = new Error(
-      (data as { message?: string }).message ?? "Impossible de lancer le paiement."
+      (data as { message?: string }).message ?? "Impossible de confirmer la mise en relation."
     ) as Error & { errors?: Record<string, string[]> };
     err.errors = (data as { errors?: Record<string, string[]> }).errors;
     throw err;
   }
 
-  return (data as { checkout_url: string }).checkout_url;
+  const { checkout_url, payments_enabled } = data as {
+    checkout_url: string;
+    payments_enabled?: boolean;
+  };
+  return { checkoutUrl: checkout_url, paymentsEnabled: payments_enabled !== false };
 }

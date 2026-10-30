@@ -54,7 +54,7 @@ enum BookingStatus: string
             self::Accepted => 'Acceptée',
             self::Declined => 'Refusée',
             self::Cancelled => 'Annulée',
-            self::Confirmed => 'Confirmée (payée)',
+            self::Confirmed => 'Confirmée',
         };
     }
 }

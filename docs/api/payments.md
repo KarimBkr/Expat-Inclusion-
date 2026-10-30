@@ -58,13 +58,20 @@ Réservé au parent auteur (policy `pay`). Rate limit 10/min.
 ### Réponse `201`
 
 ```json
-{ "checkout_url": "https://checkout.stripe.com/c/pay/cs_..." }
+{ "checkout_url": "https://checkout.stripe.com/c/pay/cs_...", "payments_enabled": true }
 ```
 
-Le front redirige immédiatement vers cette URL (`window.location.href`) — pas
-d'intégration Stripe Elements, pas de formulaire de carte dans l'application.
-Si le frais est désactivé (voir plus bas), `checkout_url` pointe directement
-vers la page de succès interne plutôt que vers Stripe.
+Frais actif (`payments_enabled: true`) : le front redirige immédiatement vers
+cette URL (`window.location.href`) — pas d'intégration Stripe Elements, pas de
+formulaire de carte dans l'application.
+Frais désactivé (`payments_enabled: false`, voir plus bas) : la demande est déjà
+`confirmed` au retour de l'appel ; le front ne redirige pas, il affiche
+« Mise en relation confirmée » sur la page des demandes. `checkout_url` pointe
+alors vers la page de succès interne (compatibilité), jamais vers Stripe.
+
+`payments_enabled` est aussi exposé par `BookingRequestResource` (listes et
+détail des demandes) : le bouton du parent lit « Confirmer la mise en
+relation » quand il vaut `false`, « Confirmer la réservation » sinon.
 
 ### Montant
 

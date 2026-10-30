@@ -47,13 +47,13 @@ class PaymentService
     {
         if ($booking->status !== BookingStatus::Accepted) {
             throw ValidationException::withMessages([
-                'booking' => 'Seule une demande acceptée peut être payée.',
+                'booking' => 'Seule une demande acceptée peut être confirmée.',
             ]);
         }
 
         if ($booking->payments()->where('status', Payment::STATUS_PAID)->exists()) {
             throw ValidationException::withMessages([
-                'booking' => 'Cette demande a déjà été payée.',
+                'booking' => 'Cette demande a déjà été confirmée.',
             ]);
         }
 

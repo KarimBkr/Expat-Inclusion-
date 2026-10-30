@@ -38,6 +38,8 @@ class BookingRequestResource extends JsonResource
                 'user_id' => $this->aeshProfile->user_id,
                 'name'    => $this->aeshProfile->relationLoaded('user') ? $this->aeshProfile->user->name : null,
             ]),
+            // Interrupteur du frais de mise en relation : le front adapte le libellé et confirme sur place s'il est désactivé.
+            'payments_enabled' => (bool) config('services.stripe.platform_fee_enabled'),
             'can_message'     => $canMessage,
             'conversation_id' => $canMessage
                 ? FirebaseTokenService::conversationId($this->id)

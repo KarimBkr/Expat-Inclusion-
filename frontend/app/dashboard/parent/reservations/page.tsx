@@ -38,6 +38,7 @@ function MesReservationsContent() {
   const [filter, setFilter] = useState<BookingStatus | "">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const load = useCallback(async (status: BookingStatus | "") => {
     setLoading(true);
@@ -111,6 +112,15 @@ function MesReservationsContent() {
 
       {error && <div className="mb-6 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
 
+      {notice && (
+        <p
+          role="status"
+          className="mb-4 rounded-xl bg-primary-light px-4 py-3 text-sm font-medium text-primary"
+        >
+          {notice}
+        </p>
+      )}
+
       {loading ? (
         <div className="py-16 flex justify-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -131,7 +141,14 @@ function MesReservationsContent() {
       ) : (
         <div className="space-y-4">
           {bookings.map((booking) => (
-            <ParentBookingCard key={booking.id} booking={booking} onChanged={() => load(filter)} />
+            <ParentBookingCard
+              key={booking.id}
+              booking={booking}
+              onChanged={(message) => {
+                setNotice(message ?? "");
+                load(filter);
+              }}
+            />
           ))}
         </div>
       )}
@@ -144,7 +161,7 @@ function ParentBookingCard({
   onChanged,
 }: {
   booking: BookingRequest;
-  onChanged: () => void;
+  onChanged: (notice?: string) => void;
 }) {
   const [cancelling, setCancelling] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -165,8 +182,15 @@ function ParentBookingCard({
     setPaying(true);
     setError("");
     try {
-      const checkoutUrl = await createCheckoutSession(booking.id);
-      window.location.href = checkoutUrl;
+      const { checkoutUrl, paymentsEnabled } = await createCheckoutSession(booking.id);
+      if (paymentsEnabled) {
+        window.location.href = checkoutUrl;
+        return;
+      }
+      setPaying(false);
+      onChanged(
+        "Mise en relation confirmée. Vous pouvez maintenant échanger avec l'accompagnant par messagerie."
+      );
     } catch (err) {
       setError((err as Error).message);
       setPaying(false);
@@ -229,7 +253,11 @@ function ParentBookingCard({
             disabled={paying}
             className="inline-flex px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
           >
-            {paying ? "Confirmation…" : "Confirmer la réservation"}
+            {paying
+              ? "Confirmation…"
+              : booking.payments_enabled === false
+                ? "Confirmer la mise en relation"
+                : "Confirmer la réservation"}
           </button>
         </div>
       )}

@@ -85,6 +85,7 @@ class PaymentTest extends TestCase
             ->assertStatus(201);
 
         $response->assertJsonPath('checkout_url', 'https://checkout.stripe.com/c/pay/cs_test_fake_123');
+        $response->assertJsonPath('payments_enabled', true);
 
         $this->assertDatabaseHas('payments', [
             'booking_request_id' => $booking->id,
@@ -186,6 +187,7 @@ class PaymentTest extends TestCase
             ->postJson("/api/bookings/{$booking->id}/pay")
             ->assertStatus(201);
 
+        $response->assertJsonPath('payments_enabled', false);
         $checkoutUrl = $response->json('checkout_url');
         $this->assertStringContainsString('/dashboard/parent/paiement/succes', $checkoutUrl);
         $this->assertStringNotContainsString('checkout.stripe.com', $checkoutUrl);
@@ -243,5 +245,18 @@ class PaymentTest extends TestCase
         $this->actingAs($this->parent)
             ->postJson("/api/bookings/{$booking->id}/pay")
             ->assertStatus(422);
+    }
+
+    public function test_la_ressource_reservation_expose_l_interrupteur_du_frais(): void
+    {
+        $booking = $this->makeBooking(BookingStatus::Accepted->value);
+
+        config(['services.stripe.platform_fee_enabled' => false]);
+        $this->actingAs($this->parent)->getJson("/api/bookings/{$booking->id}")
+            ->assertOk()->assertJsonPath('data.payments_enabled', false);
+
+        config(['services.stripe.platform_fee_enabled' => true]);
+        $this->actingAs($this->parent)->getJson("/api/bookings/{$booking->id}")
+            ->assertOk()->assertJsonPath('data.payments_enabled', true);
     }
 }

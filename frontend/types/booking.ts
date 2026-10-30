@@ -28,6 +28,7 @@ export interface BookingRequest {
   parent?: { id: number; name: string };
   aesh?: { id: number; user_id?: number; name: string | null };
   can_message?: boolean;
+  payments_enabled?: boolean;
   conversation_id?: string | null;
   histories?: BookingStatusHistory[];
 }

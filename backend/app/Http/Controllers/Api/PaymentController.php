@@ -22,6 +22,9 @@ class PaymentController extends Controller
 
         $result = $this->payments->createCheckoutSession($booking, $request->user());
 
-        return response()->json(['checkout_url' => $result['checkout_url']], 201);
+        return response()->json([
+            'checkout_url' => $result['checkout_url'],
+            'payments_enabled' => (bool) config('services.stripe.platform_fee_enabled'),
+        ], 201);
     }
 }
