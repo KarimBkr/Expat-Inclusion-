@@ -180,13 +180,23 @@ class MessagingTest extends TestCase
 
     public function test_api_repond_503_si_firebase_non_configure(): void
     {
-        $booking = $this->makeBookingThroughHistory();
+        $this->makeBookingThroughHistory();
+        $this->app->bind(FirebaseAuth::class, fn () => throw new \Kreait\Firebase\Exception\RuntimeException('Unable to determine the Firebase Project ID'));
+
+        $this->actingAs($this->parent)->getJson('/api/conversations')
+            ->assertStatus(503)
+            ->assertJsonPath('message', 'Messagerie momentanément indisponible.');
+        $this->actingAs($this->parent)->postJson('/api/firebase/token')->assertStatus(503);
+    }
+
+    public function test_acces_interdit_reste_403_meme_sans_firebase(): void
+    {
+        $booking = $this->makeBooking(BookingStatus::Declined->value);
         $this->app->bind(FirebaseAuth::class, fn () => throw new \Kreait\Firebase\Exception\RuntimeException('Unable to determine the Firebase Project ID'));
 
         $this->actingAs($this->parent)
             ->getJson("/api/bookings/{$booking->id}/conversation")
-            ->assertStatus(503)
-            ->assertJsonPath('message', 'Messagerie momentanément indisponible.');
+            ->assertStatus(403);
     }
 
     /**

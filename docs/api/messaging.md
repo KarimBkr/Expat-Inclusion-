@@ -111,6 +111,7 @@ s'il existe déjà.
 | 200 | OK — document garanti existant |
 | 401 | Non authentifié |
 | 403 | Pas participant, ou demande jamais acceptée |
+| 503 | Firebase indisponible (`Messagerie momentanément indisponible.`) — jamais avant le contrôle d'accès : un tiers reçoit toujours 403 |
 
 > Le `422` « demande non acceptée » de la première version a disparu : ce
 > n'est pas une erreur de validation, c'est une question d'autorisation —

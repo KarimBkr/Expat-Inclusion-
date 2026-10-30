@@ -109,6 +109,18 @@ class AeshDetailTest extends TestCase
         $this->assertArrayNotHasKey('user_id', $json);
     }
 
+    public function test_aucun_tarif_expose(): void
+    {
+        $profile = $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+
+        $json = $this->actingAs($this->parent)
+            ->getJson("/api/parent/aesh-profiles/{$profile->id}")
+            ->assertOk()
+            ->json('data');
+
+        $this->assertNoPricingKeys($json);
+    }
+
     /**
      * La fiche n'annonce aucune vérification de pièces : seuls un CV et une
      * lettre de motivation sont collectés, et ils ne sont jamais exposés.
@@ -172,5 +184,13 @@ class AeshDetailTest extends TestCase
 
         $this->getJson("/api/parent/aesh-profiles/{$profile->id}")
             ->assertStatus(401);
+    }
+
+    /** Aucun tarif n'est exposé (l'ancienne colonne `hourly_rate` a été supprimée). */
+    private function assertNoPricingKeys(array $json): void
+    {
+        array_walk_recursive($json, function ($value, $key) {
+            $this->assertDoesNotMatchRegularExpression('/rate|price|tarif|prix|amount/i', (string) $key);
+        });
     }
 }

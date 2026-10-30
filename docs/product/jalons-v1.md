@@ -14,10 +14,10 @@ Chaque jalon se termine par : `pnpm lint && pnpm build` (frontend), `php artisan
 
 ## Jalon 2 — Parcours AESH
 
-- [ ] Relire inscription → vérification email → profil → documents (CV + lettre) → statut de vérification
-- [ ] Demandes entrantes : accepter / refuser avec message clair, état vide, notifications
-- [ ] Messagerie : accès uniquement après acceptation
-- [ ] Vérifier qu'aucun tarif n'est affiché ni exposé par l'API publique (champ éventuel côté backend)
+- [x] Relire inscription → vérification email → profil → documents (CV + lettre) → statut de vérification
+- [x] Demandes entrantes : accepter / refuser avec message clair, état vide, notifications
+- [x] Messagerie : accès uniquement après acceptation
+- [x] Vérifier qu'aucun tarif n'est affiché ni exposé par l'API publique (champ éventuel côté backend)
 
 ## Jalon 3 — Parcours admin
 

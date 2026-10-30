@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 /** Saisie du motif obligatoire lors d'un refus ou d'une annulation. */
 export function ReasonForm({
@@ -14,6 +14,7 @@ export function ReasonForm({
   onSubmit: (reason: string) => Promise<void>;
   onCancel: () => void;
 }) {
+  const id = useId();
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -29,11 +30,11 @@ export function ReasonForm({
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 p-4 bg-cream border border-line rounded-xl">
-      <label htmlFor="reason" className="block text-xs font-medium text-subtle mb-1.5">
+      <label htmlFor={id} className="block text-xs font-medium text-subtle mb-1.5">
         {label}
       </label>
       <textarea
-        id="reason"
+        id={id}
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         rows={3}

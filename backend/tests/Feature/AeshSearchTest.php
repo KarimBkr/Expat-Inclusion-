@@ -169,6 +169,16 @@ class AeshSearchTest extends TestCase
         $this->assertArrayHasKey('name', $json);
     }
 
+    public function test_aucun_tarif_expose(): void
+    {
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+
+        $json = $this->actingAs($this->parent)->getJson('/api/parent/aesh-search')->assertOk()->json('data');
+
+        $this->assertNotEmpty($json);
+        $this->assertNoPricingKeys($json);
+    }
+
     public function test_aesh_ne_peut_pas_utiliser_la_recherche_parent(): void
     {
         $aesh = User::factory()->create(['role' => 'aesh']);
@@ -190,5 +200,13 @@ class AeshSearchTest extends TestCase
             ->getJson('/api/parent/aesh-search')
             ->assertOk()
             ->assertJsonCount(0, 'data');
+    }
+
+    /** Aucun tarif n'est exposé (l'ancienne colonne `hourly_rate` a été supprimée). */
+    private function assertNoPricingKeys(array $json): void
+    {
+        array_walk_recursive($json, function ($value, $key) {
+            $this->assertDoesNotMatchRegularExpression('/rate|price|tarif|prix|amount/i', (string) $key);
+        });
     }
 }

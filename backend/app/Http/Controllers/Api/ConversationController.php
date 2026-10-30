@@ -11,11 +11,6 @@ use Illuminate\Http\Request;
 
 class ConversationController extends Controller
 {
-    public function __construct(
-        private readonly FirebaseTokenService $tokens,
-        private readonly ConversationProvisioner $provisioner,
-    ) {}
-
     /**
      * Inbox : demandes ayant ouvert droit à une conversation (acceptées, y
      * compris si annulées depuis) pour l'utilisateur courant.
@@ -23,7 +18,7 @@ class ConversationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $bookings = $this->tokens->conversableBookingsFor($user);
+        $bookings = app(FirebaseTokenService::class)->conversableBookingsFor($user);
 
         $data = $bookings->map(fn (BookingRequest $booking) => $this->serialize($booking, $user));
 
@@ -36,12 +31,13 @@ class ConversationController extends Controller
      */
     public function show(Request $request, BookingRequest $booking): JsonResponse
     {
+        // Services Firebase résolus après authorize : sans Firebase, un accès interdit reste un 403.
         $this->authorize('converse', $booking);
 
         $booking->loadMissing(['parent', 'aeshProfile.user']);
 
         try {
-            $this->provisioner->ensure($booking);
+            app(ConversationProvisioner::class)->ensure($booking);
         } catch (\Throwable $e) {
             // Firebase absent ou en panne : message neutre plutôt qu'une erreur technique.
             report($e);
