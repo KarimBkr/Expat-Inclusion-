@@ -6,11 +6,11 @@ Hors périmètre : tout ce que `CLAUDE.md` liste dans « Périmètre expliciteme
 
 Chaque jalon se termine par : `pnpm lint && pnpm build` (frontend), `php artisan test` (backend), puis un parcours manuel sur staging.
 
-## Jalon 1 — Parcours parent ✅ (code fait, à valider)
+## Jalon 1 — Parcours parent ✅
 
 - [x] Textes sans paiement (accueil, FAQ, dashboard, succès/annulé)
 - [x] Confirmation après envoi de demande, bandeau « demande acceptée », reset des filtres
-- [ ] Valider : lint + build, parcours inscription → profil → recherche → demande → confirmation → conversation
+- [x] Valider : lint + build, parcours inscription → profil → recherche → demande → confirmation → conversation (test e2e automatisé, octobre 2026)
 
 ## Jalon 2 — Parcours AESH
 

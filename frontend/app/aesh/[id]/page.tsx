@@ -34,18 +34,20 @@ export default function FicheAeshPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // Keyed on the role only: a refreshed user object must not reload the page.
+  const role = user?.role;
   useEffect(() => {
     if (authLoading) return;
-    if (!user) {
+    if (!role) {
       router.replace("/connexion");
       return;
     }
-    if (user.role !== "parent") {
+    if (role !== "parent") {
       router.replace("/dashboard");
       return;
     }
     load();
-  }, [user, authLoading, router, load]);
+  }, [role, authLoading, router, load]);
 
   if (authLoading || !user || loading) {
     return <Spinner label="Chargement de la fiche…" />;
