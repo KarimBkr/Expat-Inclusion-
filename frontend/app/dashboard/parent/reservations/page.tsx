@@ -203,13 +203,17 @@ function ParentBookingCard({
 
       {booking.status === "accepted" && (
         <div className="mt-5">
+          <p className="text-sm text-subtle mb-3">
+            L&apos;accompagnant a accepté. Confirmez pour finaliser, puis convenez du tarif avec lui
+            par messagerie.
+          </p>
           <button
             type="button"
             onClick={handlePay}
             disabled={paying}
             className="inline-flex px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
           >
-            {paying ? "Redirection…" : "Confirmer la réservation"}
+            {paying ? "Confirmation…" : "Confirmer la réservation"}
           </button>
         </div>
       )}

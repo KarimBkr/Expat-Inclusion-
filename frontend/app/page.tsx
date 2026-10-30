@@ -2,7 +2,6 @@ import {
   Briefcase,
   CalendarCheck,
   ChevronRight,
-  CreditCard,
   Euro,
   Globe,
   MessageCircle,
@@ -40,7 +39,8 @@ const steps = [
     icon: CalendarCheck,
     step: "03",
     title: "Démarrez l'accompagnement",
-    description: "Échangez directement via la messagerie sécurisée et réservez en toute confiance.",
+    description:
+      "Échangez via la messagerie sécurisée et convenez directement du tarif avec l'accompagnant.",
   },
 ];
 
@@ -48,7 +48,7 @@ const familyPoints = [
   { icon: Shield, text: "Candidatures examinées une à une par notre équipe" },
   { icon: Globe, text: "Disponibles dans 30+ pays du réseau AEFE" },
   { icon: MessageCircle, text: "Messagerie directe et sécurisée" },
-  { icon: CreditCard, text: "Paiement sécurisé via Stripe" },
+  { icon: Euro, text: "Mise en relation gratuite, tarif fixé directement avec l'AESH" },
 ];
 
 const aeshPoints = [
@@ -122,8 +122,8 @@ export default function HomePage() {
                 30+ pays AEFE
               </span>
               <span className="flex items-center gap-1.5">
-                <CreditCard size={15} className="text-primary shrink-0" />
-                Paiement sécurisé
+                <Euro size={15} className="text-primary shrink-0" />
+                Mise en relation gratuite
               </span>
             </div>
           </div>

@@ -23,10 +23,10 @@ export default function PaiementAnnulePage() {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-bold text-ink mb-3">Paiement annulé</h1>
+        <h1 className="text-2xl font-bold text-ink mb-3">Confirmation interrompue</h1>
         <p className="text-subtle text-sm mb-8">
-          Vous n&apos;avez rien payé. Votre demande reste acceptée — vous pouvez relancer le
-          paiement à tout moment depuis vos demandes.
+          Votre demande reste acceptée — vous pouvez confirmer la réservation à tout moment depuis
+          vos demandes.
         </p>
 
         <Link

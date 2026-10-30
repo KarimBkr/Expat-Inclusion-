@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "FAQ — Questions fréquentes",
   description:
-    "Toutes les réponses à vos questions sur Expat Inclusion : comment ça marche, profils AESH, paiement, sécurité des données.",
+    "Toutes les réponses à vos questions sur Expat Inclusion : comment ça marche, profils AESH, tarifs, sécurité des données.",
 };
 
 const categories = [
@@ -64,11 +64,11 @@ const categories = [
     ],
   },
   {
-    title: "Paiement & sécurité",
+    title: "Tarifs & sécurité",
     items: [
       {
-        q: "Comment fonctionne le paiement ?",
-        a: "Le paiement est géré via Stripe Checkout, une solution sécurisée conforme PCI DSS. Lorsque l'AESH accepte une demande, le parent est invité à payer en ligne. Expat Inclusion ne stocke aucune donnée bancaire.",
+        q: "Combien coûte la plateforme et comment fixe-t-on le tarif ?",
+        a: "La mise en relation est gratuite pendant la phase de lancement. Le tarif de l'accompagnement est fixé librement entre la famille et l'AESH, via la messagerie. Expat Inclusion ne gère aucun paiement et ne stocke aucune donnée bancaire.",
       },
       {
         q: "Mes données personnelles sont-elles sécurisées ?",
@@ -76,7 +76,7 @@ const categories = [
       },
       {
         q: "Puis-je annuler une réservation ?",
-        a: "Oui. Les conditions d'annulation sont précisées sur chaque profil AESH. Contactez notre équipe via le formulaire de contact pour toute situation particulière.",
+        a: "Oui. Vous pouvez annuler une demande depuis « Mes demandes » tant qu'elle n'est pas clôturée. Les conditions financières éventuelles sont à convenir avec l'AESH. Contactez notre équipe via le formulaire de contact pour toute situation particulière.",
       },
     ],
   },

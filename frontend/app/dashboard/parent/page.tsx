@@ -128,14 +128,13 @@ export default function DashboardParentPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <DashboardCard
           title="Mes demandes"
           value={bookingCount === null ? "—" : String(bookingCount)}
           description="Demandes de réservation"
           href="/dashboard/parent/reservations"
         />
-        <DashboardCard title="Mes paiements" value="—" description="Historique paiements" />
         <DashboardCard
           title="Mes conversations"
           value={String(conversations.length)}
@@ -150,7 +149,10 @@ export default function DashboardParentPage() {
         />
       </div>
 
-      <p className="mt-12 text-sm text-subtle text-center">Les paiements arrivent au Sprint 5.</p>
+      <p className="mt-12 text-sm text-subtle text-center">
+        Le tarif se fixe directement avec l&apos;AESH via la messagerie : la plateforme ne gère aucun
+        paiement.
+      </p>
     </div>
   );
 }

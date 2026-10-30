@@ -73,7 +73,7 @@ function PaiementSuccesContent() {
       <div className="min-h-full flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-subtle">Vérification du paiement…</p>
+          <p className="text-subtle">Vérification de la réservation…</p>
         </div>
       </div>
     );
@@ -120,16 +120,26 @@ function PaiementSuccesContent() {
         <p className="text-subtle text-sm mb-8">
           {error ||
             (confirmed
-              ? "Votre réservation est confirmée. L'accompagnant en est informé."
+              ? "Votre réservation est confirmée. Échangez maintenant avec l'accompagnant pour convenir des modalités et du tarif."
               : "La confirmation finale peut prendre quelques instants — actualisez cette page si le statut ne change pas.")}
         </p>
 
-        <Link
-          href="/dashboard/parent/reservations"
-          className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
-        >
-          Voir mes demandes
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {confirmed && (
+            <Link
+              href={`/dashboard/parent/conversations/${bookingId}`}
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Ouvrir la conversation
+            </Link>
+          )}
+          <Link
+            href="/dashboard/parent/reservations"
+            className="inline-flex items-center justify-center px-5 py-2.5 border border-line text-sm font-semibold rounded-xl hover:border-primary transition-colors"
+          >
+            Voir mes demandes
+          </Link>
+        </div>
       </div>
     </div>
   );

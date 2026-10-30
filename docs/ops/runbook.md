@@ -45,8 +45,9 @@ l'exige.
 4. Le nom de domaine réel, avec `app.` et `api.` sur le même domaine racine
    (requis pour le cookie SPA Sanctum — voir CLAUDE.md) — à pointer vers
    Vercel et Railway respectivement une fois les comptes créés.
-5. Un compte Stripe réel (clés `sk_live_...`, webhook configuré depuis le
-   dashboard Stripe, pas seulement `stripe-mock` ou un compte test).
+5. ~~Compte Stripe réel~~ — **non requis pour la V1** : le tarif se fixe hors
+   plateforme entre famille et AESH, la mise en relation est gratuite
+   (`STRIPE_PLATFORM_FEE_ENABLED=false`, voir plus bas).
 6. Le secret `FIREBASE_SERVICE_ACCOUNT` ajouté aux secrets GitHub Actions du
    repo, pour que le job `deploy-firestore-rules` de la CI puisse déployer les
    Security Rules automatiquement sur push `main` (sinon, déploiement manuel
@@ -63,8 +64,8 @@ associés. Points d'attention spécifiques à la production :
 | `APP_DEBUG` | `false` — jamais `true`, sous peine d'exposer stack traces et config |
 | `APP_URL` / `FRONTEND_URL` | domaines réels (`api.expat-inclusion.com` / `app.expat-inclusion.com`) |
 | `SANCTUM_STATEFUL_DOMAINS` | domaine frontend réel |
-| `STRIPE_SECRET` / `STRIPE_WEBHOOK_SECRET` | clés `sk_live_...` et secret du endpoint webhook configuré dans le dashboard Stripe (pas les clés test) |
-| `STRIPE_PLATFORM_FEE_ENABLED` | décision produit à confirmer avant ouverture — voir `docs/api/payments.md` |
+| `STRIPE_PLATFORM_FEE_ENABLED` | **`false` pour la V1** : aucune session Stripe, la demande acceptée passe à `confirmed` en un clic |
+| `STRIPE_SECRET` / `STRIPE_WEBHOOK_SECRET` | laisser vides en V1 ; à renseigner (clés `sk_live_...` + secret du webhook) uniquement à l'activation du paiement |
 | `FIREBASE_CREDENTIALS` | chemin vers le service account réel, jamais commité |
 | `QUEUE_CONNECTION` | `database` (déjà en place) — nécessite un worker actif (`php artisan queue:work`) pour les emails transactionnels (US-16) |
 
@@ -92,6 +93,16 @@ transactionnels (US-16) ne partent jamais.
 
 **Frontend Vercel** (*Root Directory* = `frontend`) : build (`pnpm build`) et
 démarrage gérés automatiquement par Vercel, aucune commande à fournir.
+
+## Activer le paiement plus tard (post-V1)
+
+Aucun changement de code : créer le compte Stripe réel, renseigner
+`STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` et `STRIPE_PLATFORM_FEE_AMOUNT`,
+configurer le webhook (`POST /api/stripe/webhook`) depuis le dashboard Stripe,
+puis passer `STRIPE_PLATFORM_FEE_ENABLED=true`. Rejouer
+`docs/qa/US-14-US-15-parcours-manuel.md` avant ouverture. Les textes de la
+landing, de la FAQ et du dashboard parent (« mise en relation gratuite »)
+sont à ajuster en même temps.
 
 ## Limites de débit (rate limiting)
 
@@ -136,7 +147,7 @@ monitoring externe simple (UptimeRobot ou équivalent).
 [ ] Hébergement backend + frontend choisi et provisionné
 [ ] Domaine réel configuré (api./app. même domaine racine)
 [ ] APP_ENV=production, APP_DEBUG=false vérifiés
-[ ] Compte Stripe réel connecté, webhook configuré depuis le dashboard
+[ ] STRIPE_PLATFORM_FEE_ENABLED=false (V1 sans paiement, aucun compte Stripe requis)
 [ ] FIREBASE_SERVICE_ACCOUNT ajouté aux secrets CI (ou déploiement manuel des Security Rules confirmé)
 [ ] Worker de queue actif et supervisé
 [ ] Sauvegarde MySQL planifiée
