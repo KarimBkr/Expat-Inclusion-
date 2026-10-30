@@ -58,3 +58,7 @@ coverage/
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# ── Fixtures de démo locales (jamais commitées) ──────────────────
+backend/database/seeders/DemoSeeder.php
+docs/qa/comptes-demo.md

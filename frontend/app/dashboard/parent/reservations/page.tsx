@@ -104,8 +104,8 @@ function MesReservationsContent() {
 
       {justSent && (
         <div className="mb-6 p-4 bg-primary-light border border-primary/20 rounded-xl text-sm text-ink">
-          Votre demande est envoyée. L&apos;accompagnant vous répondra bientôt : vous serez
-          prévenu par email et dans vos notifications.
+          Votre demande est envoyée. L&apos;accompagnant vous répondra bientôt : vous serez prévenu
+          par email et dans vos notifications.
         </div>
       )}
 

@@ -4,6 +4,6 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.expat-inclusion.
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return ["", "/faq", "/contact", "/mentions-legales", "/inscription", "/connexion"].map(
-    (path) => ({ url: `${baseUrl}${path}` }),
+    (path) => ({ url: `${baseUrl}${path}` })
   );
 }

@@ -171,8 +171,8 @@ export default function DashboardParentPage() {
       </div>
 
       <p className="mt-12 text-sm text-subtle text-center">
-        Le tarif se fixe directement avec l&apos;AESH via la messagerie : la plateforme ne gère aucun
-        paiement.
+        Le tarif se fixe directement avec l&apos;AESH via la messagerie : la plateforme ne gère
+        aucun paiement.
       </p>
     </div>
   );
