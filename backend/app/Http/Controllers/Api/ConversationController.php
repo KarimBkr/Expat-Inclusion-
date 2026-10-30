@@ -40,7 +40,14 @@ class ConversationController extends Controller
 
         $booking->loadMissing(['parent', 'aeshProfile.user']);
 
-        $this->provisioner->ensure($booking);
+        try {
+            $this->provisioner->ensure($booking);
+        } catch (\Throwable $e) {
+            // Firebase absent ou en panne : message neutre plutôt qu'une erreur technique.
+            report($e);
+
+            return response()->json(['message' => 'Messagerie momentanément indisponible.'], 503);
+        }
 
         return response()->json([
             'data' => $this->serialize($booking, $request->user()),

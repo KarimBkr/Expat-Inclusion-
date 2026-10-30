@@ -1,6 +1,11 @@
 "use client";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
+import { isFirebaseConfigured } from "@/lib/firebase";
 import {
   ensureFirebaseAuth,
   markConversationRead,
@@ -19,6 +24,27 @@ function formatTime(date: Date | null): string {
 }
 
 export function ConversationThread({ bookingId }: { bookingId: number }) {
+  if (!isFirebaseConfigured()) return <ChatUnavailable />;
+  return <Thread bookingId={bookingId} />;
+}
+
+function ChatUnavailable({ onRetry }: { onRetry?: () => void }) {
+  return (
+    <EmptyState
+      title="Messagerie momentanément indisponible"
+      hint="Vos échanges seront accessibles ici dès son rétablissement. Votre demande reste valable."
+      action={
+        onRetry && (
+          <Button size="sm" variant="outline" onClick={onRetry}>
+            Réessayer
+          </Button>
+        )
+      }
+    />
+  );
+}
+
+function Thread({ bookingId }: { bookingId: number }) {
   const [meta, setMeta] = useState<ConversationSummary | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -26,8 +52,11 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const [unavailable, setUnavailable] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt relance le chargement après « Réessayer »
   useEffect(() => {
     let unsub: (() => void) | undefined;
     let cancelled = false;
@@ -35,6 +64,7 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
     (async () => {
       setLoading(true);
       setError("");
+      setUnavailable(false);
       try {
         // Le back garantit que le document Firestore existe déjà avant de
         // répondre : aucune création côté client, les rules l'interdisent.
@@ -63,9 +93,11 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
           }
         );
       } catch (err) {
-        if (!cancelled) {
-          setError((err as Error).message || "Impossible d’ouvrir la conversation.");
-        }
+        if (cancelled) return;
+        // Pas de statut (SDK Firebase, réseau) ou 5xx : service de messagerie en panne.
+        const status = (err as { status?: number }).status;
+        if (status === undefined || status >= 500) setUnavailable(true);
+        else setError((err as Error).message || "Impossible d’ouvrir la conversation.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -75,7 +107,7 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
       cancelled = true;
       unsub?.();
     };
-  }, [bookingId]);
+  }, [bookingId, attempt]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -93,18 +125,17 @@ export function ConversationThread({ bookingId }: { bookingId: number }) {
   }
 
   if (loading) {
-    return (
-      <div className="py-16 flex justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner label="Ouverture de la conversation…" />;
   }
+
+  if (unavailable) return <ChatUnavailable onRetry={() => setAttempt((n) => n + 1)} />;
 
   if (!meta) {
     return (
-      <div className="p-3 bg-danger/10 text-danger text-sm rounded-lg">
-        {error || "Conversation introuvable."}
-      </div>
+      <ErrorState
+        message={error || "Conversation introuvable."}
+        onRetry={() => setAttempt((n) => n + 1)}
+      />
     );
   }
 

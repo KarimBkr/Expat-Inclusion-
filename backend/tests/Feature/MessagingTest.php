@@ -164,6 +164,31 @@ class MessagingTest extends TestCase
             ->assertOk();
     }
 
+    public function test_show_repond_503_si_firebase_indisponible(): void
+    {
+        $booking = $this->makeBookingThroughHistory();
+
+        $this->mock(ConversationProvisioner::class, function ($mock) {
+            $mock->shouldReceive('ensure')->andThrow(new \RuntimeException('Unable to determine the Firebase Project ID'));
+        });
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/bookings/{$booking->id}/conversation")
+            ->assertStatus(503)
+            ->assertJsonPath('message', 'Messagerie momentanément indisponible.');
+    }
+
+    public function test_api_repond_503_si_firebase_non_configure(): void
+    {
+        $booking = $this->makeBookingThroughHistory();
+        $this->app->bind(FirebaseAuth::class, fn () => throw new \Kreait\Firebase\Exception\RuntimeException('Unable to determine the Firebase Project ID'));
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/bookings/{$booking->id}/conversation")
+            ->assertStatus(503)
+            ->assertJsonPath('message', 'Messagerie momentanément indisponible.');
+    }
+
     /**
      * Trou de sécurité corrigé : annuler une demande jamais acceptée ne doit
      * pas permettre d'obtenir un accès à une conversation qui n'a jamais

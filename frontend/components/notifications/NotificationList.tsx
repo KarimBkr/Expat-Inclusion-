@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { listNotifications, markNotificationRead } from "@/services/notifications";
 import type { AppNotification } from "@/types/notification";
 
@@ -19,7 +22,9 @@ export function NotificationList() {
   const [items, setItems] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt relance le chargement après « Réessayer »
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -37,7 +42,7 @@ export function NotificationList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   async function handleOpen(notification: AppNotification) {
     if (!notification.read_at) {
@@ -52,25 +57,19 @@ export function NotificationList() {
   }
 
   if (loading) {
-    return (
-      <div className="py-16 flex justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner label="Chargement de vos notifications…" />;
   }
 
   if (error) {
-    return <div className="p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>;
+    return <ErrorState message={error} onRetry={() => setAttempt((n) => n + 1)} />;
   }
 
   if (items.length === 0) {
     return (
-      <div className="bg-cream border border-line rounded-2xl p-12 text-center">
-        <p className="font-medium text-ink mb-1">Aucune notification</p>
-        <p className="text-sm text-subtle">
-          Vous serez prévenu ici de toute nouvelle demande ou réponse.
-        </p>
-      </div>
+      <EmptyState
+        title="Aucune notification"
+        hint="Vous serez prévenu ici de toute nouvelle demande ou réponse."
+      />
     );
   }
 

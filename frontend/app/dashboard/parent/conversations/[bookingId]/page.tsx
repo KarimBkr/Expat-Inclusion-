@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ConversationThread } from "@/components/messaging/ConversationThread";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ParentConversationThreadPage() {
@@ -22,11 +23,7 @@ export default function ParentConversationThreadPage() {
   }, [user, loading, router]);
 
   if (loading || !user || !Number.isFinite(bookingId) || bookingId <= 0) {
-    return (
-      <div className="min-h-full flex items-center justify-center py-24">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner />;
   }
 
   return (

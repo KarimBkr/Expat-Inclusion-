@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Kreait\Firebase\Exception\FirebaseException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->throttleApi();
-        $middleware->alias(['role' => \App\Http\Middleware\EnsureRole::class]);
+        $middleware->alias(['role' => EnsureRole::class]);
 
         // API pure, aucune route web `login` : sans ceci, un visiteur non
         // authentifié qui omet l'en-tête Accept: application/json déclenche
@@ -28,4 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // Firebase non configuré ou en panne : la messagerie est indisponible, pas l'API entière.
+        $exceptions->render(fn (FirebaseException $e, Request $request) => $request->is('api/*')
+            ? response()->json(['message' => 'Messagerie momentanément indisponible.'], 503)
+            : null);
     })->create();

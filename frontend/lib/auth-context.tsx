@@ -7,6 +7,8 @@ import type { User } from "@/types/auth";
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  /** /me a échoué pour une autre raison qu’une session absente (réseau, 5xx). */
+  error: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -17,13 +19,17 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
       const me = await authService.getMe();
       setUser(me);
-    } catch {
+      setError(false);
+    } catch (err) {
       setUser(null);
+      const status = (err as { status?: number }).status;
+      setError(status === undefined || status >= 500);
     }
   }, []);
 
@@ -44,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );

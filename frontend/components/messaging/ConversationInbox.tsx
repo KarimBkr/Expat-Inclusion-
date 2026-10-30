@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useUnreadConversations } from "@/lib/use-unread-conversations";
 import { listConversations } from "@/services/messaging";
 import type { ConversationSummary } from "@/types/messaging";
@@ -25,8 +28,10 @@ export function ConversationInbox({
   const [items, setItems] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const { unread } = useUnreadConversations(items);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt relance le chargement après « Réessayer »
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -44,27 +49,18 @@ export function ConversationInbox({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   if (loading) {
-    return (
-      <div className="py-16 flex justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner label="Chargement de vos conversations…" />;
   }
 
   if (error) {
-    return <div className="p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>;
+    return <ErrorState message={error} onRetry={() => setAttempt((n) => n + 1)} />;
   }
 
   if (items.length === 0) {
-    return (
-      <div className="bg-cream border border-line rounded-2xl p-12 text-center">
-        <p className="font-medium text-ink mb-1">Aucune conversation ouverte</p>
-        <p className="text-sm text-subtle">{emptyHint}</p>
-      </div>
-    );
+    return <EmptyState title="Aucune conversation ouverte" hint={emptyHint} />;
   }
 
   return (

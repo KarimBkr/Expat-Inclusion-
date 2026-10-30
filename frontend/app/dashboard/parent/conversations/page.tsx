@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ConversationInbox } from "@/components/messaging/ConversationInbox";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ParentConversationsPage() {
@@ -20,11 +21,7 @@ export default function ParentConversationsPage() {
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return (
-      <div className="min-h-full flex items-center justify-center py-24">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner />;
   }
 
   return (

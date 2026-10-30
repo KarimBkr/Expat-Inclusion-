@@ -1,15 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 
 export default function DashboardRedirectPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, error, refresh } = useAuth();
   const router = useRouter();
+  const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || retrying || error) return;
     if (!user) {
       router.replace("/connexion");
       return;
@@ -23,11 +26,21 @@ export default function DashboardRedirectPage() {
     } else {
       router.replace("/");
     }
-  }, [user, loading, router]);
+  }, [user, loading, retrying, error, router]);
 
-  return (
-    <div className="min-h-full flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (error && !retrying) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-24">
+        <ErrorState
+          message="Impossible de récupérer votre compte pour le moment. Vérifiez votre connexion puis réessayez."
+          onRetry={() => {
+            setRetrying(true);
+            refresh().finally(() => setRetrying(false));
+          }}
+        />
+      </div>
+    );
+  }
+
+  return <Spinner label="Ouverture de votre espace…" />;
 }
