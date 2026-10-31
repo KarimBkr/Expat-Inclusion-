@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
+import { siteUrl } from "@/lib/site";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.expat-inclusion.com";
-
+// Static public pages only: AESH profiles are served to logged-in parents, no public endpoint lists them.
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ["", "/faq", "/contact", "/mentions-legales", "/inscription", "/connexion"].map(
-    (path) => ({ url: `${baseUrl}${path}` })
-  );
+  return ["", "/faq", "/contact", "/mentions-legales"].map((path) => ({
+    url: `${siteUrl}${path}`,
+  }));
 }

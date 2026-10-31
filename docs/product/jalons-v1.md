@@ -28,9 +28,9 @@ Chaque jalon se termine par : `pnpm lint && pnpm build` (frontend), `php artisan
 
 ## Jalon 4 — Visiteur et contenu
 
-- [ ] Header, footer, contact, mentions légales cohérents avec « pas de paiement »
-- [ ] Relecture des textes et emails (ton, RGPD, aucune donnée médicale)
-- [ ] SEO : titres, descriptions, `sitemap`, `robots`, `NEXT_PUBLIC_APP_URL` défini
+- [x] Header, footer, contact, mentions légales cohérents avec « pas de paiement »
+- [x] Relecture des textes et emails (ton, RGPD, aucune donnée médicale)
+- [x] SEO : titres, descriptions, `sitemap`, `robots`, `NEXT_PUBLIC_APP_URL` défini
 
 ## Jalon 5 — Sécurité et recette
 

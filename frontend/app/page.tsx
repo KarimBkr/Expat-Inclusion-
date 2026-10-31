@@ -16,12 +16,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "AESH qualifiés pour familles expatriées — Réseau AEFE mondial",
-  description:
-    "Un pont entre l'accompagnement spécialisé et les familles expatriées : AESH vérifiés dans le réseau AEFE, mise en relation gratuite.",
-};
+export const metadata: Metadata = pageMetadata(
+  "AESH qualifiés pour familles expatriées — Réseau AEFE mondial",
+  "Un pont entre l'accompagnement spécialisé et les familles expatriées : AESH vérifiés dans le réseau AEFE, mise en relation gratuite.",
+  "/"
+);
 
 const parentSteps = [
   {

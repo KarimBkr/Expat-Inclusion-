@@ -1,11 +1,12 @@
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "FAQ — Questions fréquentes",
-  description:
-    "Toutes les réponses à vos questions sur Expat Inclusion : comment ça marche, profils AESH, gratuité, sécurité des données.",
-};
+export const metadata: Metadata = pageMetadata(
+  "FAQ — Questions fréquentes",
+  "Toutes les réponses à vos questions sur Expat Inclusion : comment ça marche, profils AESH, gratuité, sécurité des données.",
+  "/faq"
+);
 
 const categories = [
   {

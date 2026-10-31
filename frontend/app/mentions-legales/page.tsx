@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Mentions légales",
-  description: "Mentions légales de la plateforme Expat Inclusion.",
-};
+export const metadata: Metadata = pageMetadata(
+  "Mentions légales",
+  "Mentions légales de la plateforme Expat Inclusion.",
+  "/mentions-legales"
+);
 
 export default function MentionsLegalesPage() {
   return (

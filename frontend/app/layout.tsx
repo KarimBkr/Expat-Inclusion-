@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { AuthProvider } from "@/lib/auth-context";
+import { SITE_NAME, siteUrl } from "@/lib/site";
 
 const inter = Inter({
   variable: "--font-jakarta",
@@ -20,6 +21,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Expat Inclusion — AESH pour familles expatriées",
     template: "%s | Expat Inclusion",
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
   description:
     "Expat Inclusion connecte les familles francophones du réseau AEFE avec des AESH spécialisés (TSA, TDA/H, troubles Dys, EIP) partout dans le monde.",
   openGraph: {
-    siteName: "Expat Inclusion",
+    siteName: SITE_NAME,
     locale: "fr_FR",
     type: "website",
   },

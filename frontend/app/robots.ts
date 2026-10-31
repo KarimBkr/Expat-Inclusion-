@@ -1,10 +1,9 @@
 import type { MetadataRoute } from "next";
-
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.expat-inclusion.com";
+import { siteUrl } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/dashboard/", "/aesh/"] },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    rules: { userAgent: "*", allow: ["/", "/aesh/"], disallow: ["/dashboard"] },
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }
