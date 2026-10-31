@@ -3,6 +3,13 @@
 > Guide complet pour démarrer le projet en local.  
 > Stack : Next.js · Laravel · MySQL (Docker) · Firebase · Stripe
 
+## Lancement local rapide (V1, sans paiement)
+
+Pour tester sans Docker : backend en SQLite (`DB_CONNECTION=sqlite`, `MAIL_MAILER=log`,
+`STRIPE_PLATFORM_FEE_ENABLED=false`), puis `php artisan migrate --seed && php artisan serve`
+dans `backend/` et `pnpm dev` dans `frontend/`. Étapes complètes, création des comptes de test
+et liste des tests manuels par rôle : **[`TEST_GUIDE.md`](TEST_GUIDE.md)**.
+
 ---
 
 ## Prérequis
