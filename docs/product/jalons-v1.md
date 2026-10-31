@@ -23,8 +23,8 @@ Chaque jalon se termine par : `pnpm lint && pnpm build` (frontend), `php artisan
 
 - [x] Vérification / rejet / publication des profils AESH, notes internes
 - [x] Import CSV AESH et taxonomies (`docs/qa/US-20-parcours-manuel.md`)
-- [ ] Cockpit : réservations, utilisateurs, suspension / réactivation
-- [ ] Décision : liste des paiements admin abandonnée (le détail d'une réservation suffit)
+- [x] Cockpit : réservations, utilisateurs, suspension / réactivation
+- [x] Décision : liste des paiements admin abandonnée (le détail d'une réservation suffit)
 
 ## Jalon 4 — Visiteur et contenu
 

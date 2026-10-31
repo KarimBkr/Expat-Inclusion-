@@ -20,10 +20,14 @@ class UserController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $role = $request->query('role');
+        $search = trim((string) $request->query('search', ''));
 
         $users = User::query()
             ->with('aeshProfile')
             ->when($role, fn ($q) => $q->where('role', $role))
+            ->when($search !== '', fn ($q) => $q->where(fn ($q) => $q
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")))
             ->latest()
             ->get();
 

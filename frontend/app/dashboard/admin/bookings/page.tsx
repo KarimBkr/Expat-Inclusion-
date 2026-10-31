@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth-context";
 import { addBookingNote, getBooking, listBookings } from "@/services/admin-bookings";
 import type { AdminBooking, BookingStatus } from "@/types/admin";
@@ -26,15 +29,17 @@ export default function AdminBookingsPage() {
   const [listLoading, setListLoading] = useState(true);
   const [actionPending, setActionPending] = useState(false);
   const [noteBody, setNoteBody] = useState("");
+  const [listError, setListError] = useState("");
   const [error, setError] = useState("");
 
   const loadList = useCallback(async () => {
     setListLoading(true);
+    setListError("");
     try {
       const data = await listBookings(filter === "all" ? undefined : filter);
       setBookings(data);
     } catch {
-      setError("Impossible de charger les demandes.");
+      setListError("Impossible de charger les demandes.");
     } finally {
       setListLoading(false);
     }
@@ -75,11 +80,7 @@ export default function AdminBookingsPage() {
   }
 
   if (loading || !user) {
-    return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Spinner />;
   }
 
   return (
@@ -95,13 +96,18 @@ export default function AdminBookingsPage() {
         </p>
       </div>
 
-      {error && <div className="mb-4 p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
+      {error && (
+        <div role="alert" className="mb-4 p-3 bg-danger/10 text-danger text-sm rounded-lg">
+          {error}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2 mb-6">
         {FILTERS.map((f) => (
           <button
             key={f.value}
             type="button"
+            aria-pressed={filter === f.value}
             onClick={() => setFilter(f.value)}
             className={`px-4 py-2 text-sm rounded-xl border transition-colors ${
               filter === f.value
@@ -115,13 +121,19 @@ export default function AdminBookingsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-card border border-line rounded-2xl overflow-hidden">
+        <section
+          aria-label="Liste des demandes"
+          className="bg-card border border-line rounded-2xl overflow-hidden"
+        >
           {listLoading ? (
-            <div className="p-12 flex justify-center">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
+            <Spinner label="Chargement des demandes…" />
+          ) : listError ? (
+            <ErrorState message={listError} onRetry={loadList} />
           ) : bookings.length === 0 ? (
-            <p className="p-8 text-sm text-subtle text-center">Aucune demande pour ce filtre.</p>
+            <EmptyState
+              title="Aucune demande pour ce filtre"
+              hint="Les demandes envoyées par les parents apparaîtront ici."
+            />
           ) : (
             <ul>
               {bookings.map((b) => (
@@ -143,20 +155,24 @@ export default function AdminBookingsPage() {
                       <span className="text-xs px-2 py-0.5 rounded-full bg-cream text-subtle">
                         {BOOKING_STATUS_LABELS[b.status]}
                       </span>
-                      {b.payments?.some((p) => p.status === "paid") && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary">
-                          Payé
-                        </span>
-                      )}
+                      {b.payments_enabled !== false &&
+                        b.payments?.some((p) => p.status === "paid") && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary">
+                            Payé
+                          </span>
+                        )}
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </section>
 
-        <div className="bg-card border border-line rounded-2xl p-6">
+        <section
+          aria-label="Détail de la demande"
+          className="bg-card border border-line rounded-2xl p-6"
+        >
           {!selected ? (
             <p className="text-sm text-subtle text-center py-12">
               Sélectionnez une demande pour voir le détail.
@@ -185,39 +201,41 @@ export default function AdminBookingsPage() {
                 )}
               </div>
 
-              {selected.payments && selected.payments.length > 0 && (
-                <div className="border-t border-line pt-4">
-                  <h3 className="text-sm font-semibold text-ink mb-3">Paiement</h3>
-                  <ul className="space-y-2">
-                    {selected.payments.map((p) => (
-                      <li key={p.id} className="text-sm bg-cream rounded-xl p-3">
-                        {(p.amount / 100).toFixed(2)} {p.currency.toUpperCase()} ·{" "}
-                        <span
-                          className={
-                            p.status === "paid"
-                              ? "text-primary font-medium"
-                              : p.status === "failed"
-                                ? "text-danger"
-                                : "text-subtle"
-                          }
-                        >
-                          {p.status}
-                        </span>
-                        {p.paid_at && (
-                          <span className="text-xs text-subtle">
-                            {" "}
-                            · {new Date(p.paid_at).toLocaleDateString("fr-FR")}
+              {selected.payments_enabled !== false &&
+                selected.payments &&
+                selected.payments.length > 0 && (
+                  <div className="border-t border-line pt-4">
+                    <h3 className="text-sm font-semibold text-ink mb-3">Paiement</h3>
+                    <ul className="space-y-2">
+                      {selected.payments.map((p) => (
+                        <li key={p.id} className="text-sm bg-cream rounded-xl p-3">
+                          {(p.amount / 100).toFixed(2)} {p.currency.toUpperCase()} ·{" "}
+                          <span
+                            className={
+                              p.status === "paid"
+                                ? "text-primary font-medium"
+                                : p.status === "failed"
+                                  ? "text-danger"
+                                  : "text-subtle"
+                            }
+                          >
+                            {p.status}
                           </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                          {p.paid_at && (
+                            <span className="text-xs text-subtle">
+                              {" "}
+                              · {new Date(p.paid_at).toLocaleDateString("fr-FR")}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
               {selected.histories && selected.histories.length > 0 && (
                 <div className="border-t border-line pt-4">
-                  <h3 className="text-sm font-semibold text-ink mb-3">Historique</h3>
+                  <h3 className="text-sm font-semibold text-ink mb-3">Historique des statuts</h3>
                   <ul className="space-y-1">
                     {selected.histories.map((h) => (
                       <li key={h.id} className="text-xs text-subtle">
@@ -250,6 +268,7 @@ export default function AdminBookingsPage() {
                 <div className="flex gap-2">
                   <input
                     type="text"
+                    aria-label="Note interne"
                     value={noteBody}
                     onChange={(e) => setNoteBody(e.target.value)}
                     placeholder="Ajouter une note interne…"
@@ -272,7 +291,7 @@ export default function AdminBookingsPage() {
               </div>
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

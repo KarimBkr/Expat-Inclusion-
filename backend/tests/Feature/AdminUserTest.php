@@ -41,6 +41,23 @@ class AdminUserTest extends TestCase
             ->assertJsonPath('data.0.role', 'parent');
     }
 
+    public function test_admin_peut_rechercher_par_nom_ou_email(): void
+    {
+        User::factory()->create(['role' => 'parent', 'name' => 'Hugo Famille', 'email' => 'hugo@example.test']);
+        User::factory()->create(['role' => 'parent', 'name' => 'Nadia Famille', 'email' => 'nadia@example.test']);
+
+        $this->actingAs($this->admin)
+            ->getJson('/api/admin/users?search=hugo')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Hugo Famille');
+
+        $this->actingAs($this->admin)
+            ->getJson('/api/admin/users?role=parent&search=example.test')
+            ->assertOk()
+            ->assertJsonCount(2, 'data');
+    }
+
     public function test_admin_peut_suspendre_un_parent(): void
     {
         $parent = User::factory()->create(['role' => 'parent']);

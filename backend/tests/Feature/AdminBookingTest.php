@@ -100,6 +100,16 @@ class AdminBookingTest extends TestCase
             ->assertJsonPath('data.payments.0.status', 'paid');
     }
 
+    public function test_le_detail_signale_les_frais_desactives(): void
+    {
+        config(['services.stripe.platform_fee_enabled' => false]);
+
+        $this->actingAs($this->admin)
+            ->getJson("/api/admin/bookings/{$this->booking->id}")
+            ->assertOk()
+            ->assertJsonPath('data.payments_enabled', false);
+    }
+
     public function test_admin_peut_ajouter_une_note_sur_une_demande(): void
     {
         $this->actingAs($this->admin)

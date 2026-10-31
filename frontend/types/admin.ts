@@ -100,6 +100,7 @@ export interface AdminBooking {
   school_level?: { id: number; name: string };
   parent?: { id: number; name: string; email: string };
   aesh?: { id: number; user_id: number; name: string | null; email: string | null };
+  payments_enabled?: boolean;
   payments?: AdminPayment[];
   histories?: AdminBookingHistory[];
   admin_notes?: AdminNote[];
@@ -114,6 +115,12 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
 };
 
 export type UserRole = "parent" | "aesh" | "admin";
+
+export const USER_ROLE_LABELS: Record<UserRole, string> = {
+  parent: "Parent",
+  aesh: "AESH",
+  admin: "Admin",
+};
 
 export interface AdminUser {
   id: number;

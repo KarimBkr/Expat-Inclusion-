@@ -35,6 +35,7 @@ class AdminBookingResource extends JsonResource
                 'name'    => $this->aeshProfile->relationLoaded('user') ? $this->aeshProfile->user->name : null,
                 'email'   => $this->aeshProfile->relationLoaded('user') ? $this->aeshProfile->user->email : null,
             ]),
+            'payments_enabled' => (bool) config('services.stripe.platform_fee_enabled'),
             'payments'        => PaymentResource::collection($this->whenLoaded('payments')),
             'histories'       => BookingStatusHistoryResource::collection($this->whenLoaded('statusHistories')),
             'admin_notes'     => AdminNoteResource::collection($this->whenLoaded('adminNotes')),

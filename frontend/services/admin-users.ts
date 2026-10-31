@@ -28,8 +28,11 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   return data as T;
 }
 
-export async function listUsers(role?: string): Promise<AdminUser[]> {
-  const qs = role ? `?role=${encodeURIComponent(role)}` : "";
+export async function listUsers(role?: string, search?: string): Promise<AdminUser[]> {
+  const params = new URLSearchParams();
+  if (role) params.set("role", role);
+  if (search) params.set("search", search);
+  const qs = params.size ? `?${params}` : "";
   const res = await apiFetch<{ data: AdminUser[] }>(`/admin/users${qs}`);
   return res.data;
 }

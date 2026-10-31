@@ -19,7 +19,12 @@ Query optionnel : `?status=requested|accepted|declined|cancelled|confirmed`.
 ### GET /api/admin/bookings/{id}
 
 Détail complet : parent, AESH, modalité, niveau scolaire, paiements,
-historique de statut, notes internes.
+historique de statut, notes internes. `payments_enabled` (booléen, reflète
+`STRIPE_PLATFORM_FEE_ENABLED`) : à `false`, le frontend masque le badge « Payé »
+et la section « Paiement ».
+
+> Pas de liste admin des paiements : le détail d'une demande suffit tant que
+> les frais de mise en relation sont désactivés (décision jalons-v1, Jalon 3).
 
 ### POST /api/admin/bookings/{id}/notes
 
@@ -30,7 +35,8 @@ parent injoignable). Réutilise `AdminNote` (voir ci-dessous).
 
 ### GET /api/admin/users
 
-Query optionnel : `?role=parent|aesh|admin`.
+Query optionnels : `?role=parent|aesh|admin` et `?search=...` (nom ou email,
+sous-chaîne), combinables.
 
 ### GET /api/admin/users/{id}
 
