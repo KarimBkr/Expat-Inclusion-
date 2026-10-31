@@ -33,6 +33,8 @@ Sanctum documentée dans le parcours US-11/US-12).
 | 6 | AESH refuse avec motif | Email « Votre demande a été refusée » reçu par le parent, motif visible |
 | 7 | Parent annule une demande acceptée | Email « Une réservation a été annulée » reçu par **l'AESH**, pas par le parent |
 | 8 | AESH annule une demande acceptée | Email reçu par **le parent**, pas par l'AESH |
+| 9 | Admin approuve une candidature AESH | Email « Votre candidature a été examinée par notre équipe » reçu par l'AESH, bouton vers `/dashboard/aesh` |
+| 10 | Admin rejette une candidature avec motif | Email « Votre candidature nécessite des compléments », motif visible, bouton vers `/dashboard/aesh/documents` |
 
 ## Parcours nominal — notifications dashboard
 

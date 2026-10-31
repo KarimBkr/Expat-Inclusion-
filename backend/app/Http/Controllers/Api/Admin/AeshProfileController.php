@@ -11,6 +11,7 @@ use App\Http\Resources\AeshProfileAdminResource;
 use App\Models\AdminNote;
 use App\Models\AeshDocument;
 use App\Models\AeshProfile;
+use App\Notifications\AeshProfileReviewedNotification;
 use App\Notifications\InterviewInvitationNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -61,6 +62,8 @@ class AeshProfileController extends Controller
             'rejection_reason'    => null,
         ]);
 
+        $profile->user->notify(new AeshProfileReviewedNotification($profile));
+
         return response()->json([
             'message' => 'Profil AESH approuvé.',
             'data'    => new AeshProfileAdminResource($profile->fresh(['user'])),
@@ -82,6 +85,8 @@ class AeshProfileController extends Controller
             'rejection_reason'    => $request->validated('rejection_reason'),
             'published_at'        => null,
         ]);
+
+        $profile->user->notify(new AeshProfileReviewedNotification($profile));
 
         return response()->json([
             'message' => 'Profil AESH rejeté.',

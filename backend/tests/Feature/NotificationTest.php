@@ -2,7 +2,23 @@
 
 namespace Tests\Feature;
 
+use App\Enums\BookingStatus;
+use App\Mail\AeshProfileReviewedMail;
+use App\Mail\BookingRequestAcceptedMail;
+use App\Mail\BookingRequestCancelledMail;
+use App\Mail\BookingRequestDeclinedMail;
+use App\Mail\BookingRequestReceivedMail;
+use App\Mail\ContactReceived;
+use App\Models\AeshProfile;
+use App\Models\BookingRequest;
+use App\Models\Modality;
+use App\Models\SchoolLevel;
 use App\Models\User;
+use App\Notifications\AeshProfileReviewedNotification;
+use Database\Seeders\ModalitySeeder;
+use Database\Seeders\SchoolLevelSeeder;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Str;
@@ -100,5 +116,77 @@ class NotificationTest extends TestCase
     public function test_visiteur_non_authentifie_refuse(): void
     {
         $this->getJson('/api/notifications')->assertStatus(401);
+    }
+
+    // ── Emails transactionnels (US-16) ────────────────────────────────────────
+
+    private function aeshProfile(string $status, ?string $reason = null): AeshProfile
+    {
+        return AeshProfile::create([
+            'user_id'             => User::factory()->create(['role' => 'aesh', 'name' => 'Sarah Martin'])->id,
+            'bio'                 => 'Accompagnante spécialisée.',
+            'timezone'            => 'Europe/Paris',
+            'verification_status' => $status,
+            'rejection_reason'    => $reason,
+        ]);
+    }
+
+    /** Sujet clair, un seul CTA, pied RGPD, aucun texte de paiement quand les frais sont désactivés. */
+    private function assertEmailConforme(Mailable $mail, string $subject, string $ctaPath, array $absents = []): void
+    {
+        $html = $mail->render();
+
+        $this->assertSame("[Expat Inclusion] {$subject}", $mail->envelope()->subject);
+        $this->assertSame(1, substr_count($html, 'border-radius:10px;">'), "un seul CTA : {$subject}");
+        $this->assertStringContainsString($ctaPath, $html);
+        $this->assertStringContainsString('RGPD', $html);
+        $this->assertDoesNotMatchRegularExpression('/paiement|payer|payé|stripe|tarif|€/i', $html);
+        $this->assertStringNotContainsString('profil vérifié', $html);
+        foreach ($absents as $absent) {
+            $this->assertStringNotContainsString($absent, $html);
+        }
+    }
+
+    public function test_chaque_email_transactionnel_est_conforme_frais_desactives(): void
+    {
+        config(['services.stripe.platform_fee_enabled' => false, 'app.frontend_url' => 'http://front.test']);
+        $this->seed([ModalitySeeder::class, SchoolLevelSeeder::class]);
+
+        $booking = BookingRequest::create([
+            'parent_id'       => $this->user->id,
+            'aesh_profile_id' => $this->aeshProfile(AeshProfile::STATUS_PUBLISHED)->id,
+            'status'          => BookingStatus::Requested->value,
+            'message'         => 'Notre fils a un trouble du spectre autistique.',
+            'modality_id'     => Modality::first()->id,
+            'school_level_id' => SchoolLevel::first()->id,
+            'start_date'      => now()->addWeek()->toDateString(),
+            'hours_per_week'  => 6,
+        ]);
+        $medical = ['trouble du spectre autistique'];
+
+        $this->assertEmailConforme(new BookingRequestReceivedMail($booking), 'Nouvelle demande de réservation', 'http://front.test/dashboard/aesh/demandes', $medical);
+        $this->assertEmailConforme(new BookingRequestAcceptedMail($booking), 'Votre demande a été acceptée', "http://front.test/dashboard/parent/conversations/{$booking->id}", $medical);
+        $this->assertEmailConforme(new BookingRequestDeclinedMail($booking, 'Plus de disponibilité.'), 'Votre demande a été refusée', 'http://front.test/dashboard/parent/recherche', $medical);
+        $this->assertEmailConforme(new BookingRequestCancelledMail($booking, $this->user, null), 'Une réservation a été annulée', 'http://front.test/dashboard/parent/reservations', $medical);
+        $this->assertEmailConforme(new AeshProfileReviewedMail($this->aeshProfile(AeshProfile::STATUS_APPROVED)), 'Votre candidature a été examinée par notre équipe', 'http://front.test/dashboard/aesh"');
+        $this->assertEmailConforme(new AeshProfileReviewedMail($this->aeshProfile(AeshProfile::STATUS_REJECTED, 'Merci d’ajouter votre CV.')), 'Votre candidature nécessite des compléments', 'http://front.test/dashboard/aesh/documents');
+        $this->assertEmailConforme(new ContactReceived([
+            'name' => 'Marie', 'email' => 'marie@exemple.com', 'role' => 'parent', 'subject' => 'Question', 'message' => 'Bonjour',
+        ]), 'Question', 'mailto:marie@exemple.com');
+    }
+
+    public function test_approbation_et_rejet_previennent_laesh(): void
+    {
+        Notification::fake();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $approved = $this->aeshProfile(AeshProfile::STATUS_PENDING);
+        $rejected = $this->aeshProfile(AeshProfile::STATUS_PENDING);
+
+        $this->actingAs($admin)->postJson("/api/admin/aesh-profiles/{$approved->id}/approve")->assertOk();
+        $this->actingAs($admin)->postJson("/api/admin/aesh-profiles/{$rejected->id}/reject", ['rejection_reason' => 'Merci d’ajouter votre CV.'])->assertOk();
+
+        Notification::assertSentTo($approved->user, AeshProfileReviewedNotification::class);
+        Notification::assertSentTo($rejected->user, AeshProfileReviewedNotification::class);
+        Notification::assertCount(2);
     }
 }
