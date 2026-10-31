@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Middleware\EnsureNotSuspended;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Kreait\Firebase\Exception\FirebaseException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -17,7 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->throttleApi();
-        $middleware->alias(['role' => EnsureRole::class]);
+        $middleware->alias(['role' => EnsureRole::class, 'not-suspended' => EnsureNotSuspended::class]);
+        // Rôle et suspension vérifiés avant la résolution des modèles : 403, jamais 404 révélateur.
+        $middleware->prependToPriorityList(SubstituteBindings::class, EnsureNotSuspended::class);
+        $middleware->prependToPriorityList(SubstituteBindings::class, EnsureRole::class);
 
         // API pure, aucune route web `login` : sans ceci, un visiteur non
         // authentifié qui omet l'en-tête Accept: application/json déclenche

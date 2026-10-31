@@ -22,7 +22,7 @@ use App\Http\Controllers\Api\TaxonomyController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public ────────────────────────────────────────────────────────────────────
-Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1,contact');
 Route::get('/taxonomies', [TaxonomyController::class, 'index']);
 
 // Stripe appelle ce endpoint directement (serveur à serveur) : pas de session
@@ -30,18 +30,19 @@ Route::get('/taxonomies', [TaxonomyController::class, 'index']);
 // corps de la requête (US-15), vérifiée dans le controller lui-même.
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+// Limites par IP contre le bourrage d'identifiants et l'abus d'envoi d'e-mails.
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1,register');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1,login');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1,forgot-password');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1,reset-password');
 
 // ── Authentifié ───────────────────────────────────────────────────────────────
-Route::middleware('auth:sanctum')->group(function (): void {
+Route::middleware(['auth:sanctum', 'not-suspended'])->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
     Route::post('/email/resend', [AuthController::class, 'resendVerification'])
-        ->middleware('throttle:6,1');
+        ->middleware('throttle:6,1,email-resend');
     Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
         ->middleware('signed')
         ->name('verification.verify');
@@ -56,12 +57,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/{booking}/cancel', [BookingRequestController::class, 'cancel']);
         Route::get('/{booking}/conversation', [ConversationController::class, 'show']);
         Route::post('/{booking}/pay', [PaymentController::class, 'store'])
-            ->middleware(['role:parent', 'throttle:10,1']);
+            ->middleware(['role:parent', 'throttle:10,1,pay']);
     });
 
     // Messagerie Firebase (US-13) — token custom + inbox des threads acceptés
     Route::post('/firebase/token', [FirebaseTokenController::class, 'store'])
-        ->middleware('throttle:30,1');
+        ->middleware('throttle:30,1,firebase-token');
     Route::get('/conversations', [ConversationController::class, 'index']);
 
     // Notifications dashboard (US-16)
@@ -112,7 +113,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/aesh-documents/{document}/download', [AdminAeshProfileController::class, 'downloadDocument']);
 
         Route::post('/aesh-import', [AeshImportController::class, 'store'])
-            ->middleware('throttle:10,1');
+            ->middleware('throttle:10,1,aesh-import');
 
         // Cockpit admin (US-19) — visibilité transverse réservations/utilisateurs
         Route::get('/bookings', [AdminBookingController::class, 'index']);
