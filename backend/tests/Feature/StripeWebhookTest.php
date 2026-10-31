@@ -110,6 +110,18 @@ class StripeWebhookTest extends TestCase
         ];
     }
 
+    public function test_webhook_refuse_quand_le_secret_est_vide(): void
+    {
+        config(['services.stripe.webhook_secret' => '']);
+        $booking = $this->makeBooking();
+        $this->makePayment($booking, 'cs_test_forge');
+        $payload = json_encode($this->checkoutCompletedEvent('cs_test_forge'));
+        $signature = 't='.time().',v1='.hash_hmac('sha256', time().".{$payload}", '');
+
+        $this->postWebhook($payload, $signature)->assertStatus(500);
+        $this->assertSame(Payment::STATUS_PENDING, Payment::first()->status);
+    }
+
     private function postWebhook(string $payload, string $signature)
     {
         return $this->call(

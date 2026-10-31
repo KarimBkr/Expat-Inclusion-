@@ -21,6 +21,13 @@ class StripeWebhookController extends Controller
 
     public function handle(Request $request): JsonResponse
     {
+        // Le SDK Stripe accepte une clé vide : n'importe qui pourrait signer un faux paiement.
+        if (blank(config('services.stripe.webhook_secret'))) {
+            report(new \RuntimeException('STRIPE_WEBHOOK_SECRET manquant : webhook refusé.'));
+
+            return response()->json(['message' => 'Webhook non configuré.'], 500);
+        }
+
         try {
             $event = Webhook::constructEvent(
                 $request->getContent(),

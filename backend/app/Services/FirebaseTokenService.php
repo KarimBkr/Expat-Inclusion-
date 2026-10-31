@@ -37,6 +37,15 @@ class FirebaseTokenService
     }
 
     /**
+     * Coupe la messagerie d'un compte suspendu (jetons de rafraîchissement).
+     * shortcut: un jeton d'identité déjà émis reste valable jusqu'à 1 h, les règles Firestore ignorent la suspension.
+     */
+    public function revokeFor(User $user): void
+    {
+        $this->auth->revokeRefreshTokens((string) $user->id);
+    }
+
+    /**
      * Demandes ouvrant droit à une conversation pour cet utilisateur : celles
      * qui ont un jour été acceptées, même si elles ont depuis été annulées —
      * l'historique des échanges ne doit pas disparaître avec le statut.

@@ -63,7 +63,7 @@ class AeshCsvImportService
 
         foreach ($rows as $index => $row) {
             $lineNumber = $index + 2; // ligne 1 = en-tête
-            $data = array_combine($header, array_pad($row, count($header), null));
+            $data = array_combine($header, array_slice(array_pad($row, count($header), null), 0, count($header)));
 
             try {
                 $user = DB::transaction(fn () => $this->importRow($data));

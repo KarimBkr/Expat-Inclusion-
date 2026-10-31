@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Kreait\Firebase\Contract\Auth as FirebaseAuth;
+use Mockery;
 use Tests\TestCase;
 
 class AdminUserTest extends TestCase
@@ -67,6 +69,27 @@ class AdminUserTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.suspended_at', fn ($value) => $value !== null);
 
+        $this->assertNotNull($parent->fresh()->suspended_at);
+    }
+
+    public function test_la_suspension_coupe_la_messagerie_firebase(): void
+    {
+        $parent = User::factory()->create(['role' => 'parent']);
+        $auth = Mockery::mock(FirebaseAuth::class);
+        $auth->shouldReceive('revokeRefreshTokens')->once()->with((string) $parent->id);
+        $this->app->instance(FirebaseAuth::class, $auth);
+
+        $this->actingAs($this->admin)->postJson("/api/admin/users/{$parent->id}/suspend")->assertOk();
+    }
+
+    public function test_la_suspension_aboutit_meme_si_firebase_est_indisponible(): void
+    {
+        $parent = User::factory()->create(['role' => 'parent']);
+        $auth = Mockery::mock(FirebaseAuth::class);
+        $auth->shouldReceive('revokeRefreshTokens')->andThrow(new \RuntimeException('Firebase down'));
+        $this->app->instance(FirebaseAuth::class, $auth);
+
+        $this->actingAs($this->admin)->postJson("/api/admin/users/{$parent->id}/suspend")->assertOk();
         $this->assertNotNull($parent->fresh()->suspended_at);
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AdminUserResource;
 use App\Models\User;
+use App\Services\FirebaseTokenService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -52,6 +53,13 @@ class UserController extends Controller
         }
 
         $user->update(['suspended_at' => now()]);
+
+        // Firebase indisponible ou non configuré : la suspension côté API reste effective.
+        try {
+            app(FirebaseTokenService::class)->revokeFor($user);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return response()->json([
             'message' => 'Compte suspendu.',

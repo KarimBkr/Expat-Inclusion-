@@ -67,6 +67,17 @@ class AeshSearchTest extends TestCase
             ->assertJsonPath('data.0.verification_status', 'published');
     }
 
+    public function test_un_aesh_suspendu_n_apparait_plus(): void
+    {
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED);
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED)->user->update(['suspended_at' => now()]);
+
+        $this->actingAs($this->parent)
+            ->getJson('/api/parent/aesh-search')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
     public function test_filtre_par_pays(): void
     {
         $fr = Country::where('code', 'FR')->first()->id;

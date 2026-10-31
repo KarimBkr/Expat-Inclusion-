@@ -85,6 +85,15 @@ class AeshCsvImportTest extends TestCase
         $this->assertStringNotContainsString('password', strtolower(json_encode($response->json())));
     }
 
+    public function test_une_ligne_avec_colonnes_en_trop_ne_casse_pas_l_import(): void
+    {
+        $this->actingAs($this->admin)
+            ->postJson('/api/admin/aesh-import', ['file' => $this->csv($this->validRow().',colonne,en-trop')])
+            ->assertOk();
+
+        $this->assertDatabaseHas('users', ['email' => 'samira@example.com']);
+    }
+
     public function test_import_partiel_une_ligne_valide_une_invalide(): void
     {
         $rows = $this->validRow('valide@example.com')."\n".implode(',', [

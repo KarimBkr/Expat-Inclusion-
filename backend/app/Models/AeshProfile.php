@@ -108,7 +108,8 @@ class AeshProfile extends Model
     /** @param  \Illuminate\Database\Eloquent\Builder<AeshProfile>  $query */
     public function scopePublished(Builder $query): void
     {
-        $query->where('verification_status', self::STATUS_PUBLISHED);
+        $query->where('verification_status', self::STATUS_PUBLISHED)
+            ->whereHas('user', fn (Builder $q) => $q->whereNull('suspended_at'));
     }
 
     public function isComplete(): bool

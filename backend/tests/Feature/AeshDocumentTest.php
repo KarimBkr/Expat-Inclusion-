@@ -133,6 +133,31 @@ class AeshDocumentTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_aesh_ne_peut_pas_telecharger_le_document_d_un_autre(): void
+    {
+        $autreAesh = User::factory()->create(['role' => 'aesh']);
+        $autreProfile = AeshProfile::create([
+            'user_id'     => $autreAesh->id,
+            'bio'         => 'Une présentation suffisamment longue pour passer la validation minimale requise.',
+            'timezone'    => 'Europe/Paris',
+        ]);
+        Storage::disk('local')->put('aesh-documents/2/diplome.pdf', '%PDF-1.4');
+        $document = $autreProfile->documents()->create([
+            'type'          => 'diploma',
+            'original_name' => 'diplome.pdf',
+            'path'          => 'aesh-documents/2/diplome.pdf',
+            'size'          => 8,
+        ]);
+
+        $this->actingAs($this->aesh)
+            ->get("/api/aesh/documents/{$document->id}/download")
+            ->assertStatus(403);
+
+        $this->actingAs($autreAesh)
+            ->get("/api/aesh/documents/{$document->id}/download")
+            ->assertOk();
+    }
+
     public function test_parent_ne_peut_pas_acceder_aux_documents(): void
     {
         $parent = User::factory()->create(['role' => 'parent']);
