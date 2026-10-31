@@ -256,7 +256,7 @@ function ParentBookingCard({
         <div className="mt-5">
           <Link
             href={`/dashboard/parent/conversations/${booking.id}`}
-            className="inline-flex px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            className="inline-flex min-h-11 items-center px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
           >
             Ouvrir la conversation
           </Link>

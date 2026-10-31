@@ -105,7 +105,12 @@ export default function AeshImportPage() {
 
       <div className="bg-card border border-line rounded-2xl p-6 mb-6">
         <h2 className="text-sm font-semibold text-ink mb-3">Format attendu</h2>
-        <div className="overflow-x-auto">
+        <section
+          className="overflow-x-auto"
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: zone défilante horizontale, doit être atteignable au clavier (WCAG 2.1.1)
+          tabIndex={0}
+          aria-label="Colonnes du format attendu"
+        >
           <table className="w-full text-xs">
             <thead>
               <tr className="text-left text-subtle border-b border-line">
@@ -124,7 +129,7 @@ export default function AeshImportPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </section>
         <a
           href={TEMPLATE_HREF}
           download="modele-import-aesh.csv"

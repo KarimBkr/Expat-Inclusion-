@@ -2,16 +2,16 @@
 
 @theme {
   /* Palette — dys-ponible.fr */
-  --color-primary: oklch(0.55 0.09 152);
+  --color-primary: oklch(0.5 0.09 152);
   --color-primary-light: oklch(0.94 0.03 152);
-  --color-primary-dark: oklch(0.42 0.09 152);
+  --color-primary-dark: oklch(0.4 0.09 152);
   --color-primary-900: oklch(0.28 0.06 152);
   --color-cream: oklch(0.97 0.013 80);
   --color-card: oklch(0.995 0.005 85);
   --color-ink: oklch(0.16 0.02 255);
-  --color-subtle: oklch(0.62 0.01 255);
+  --color-subtle: oklch(0.5 0.01 255);
   --color-line: oklch(0.88 0.018 152);
-  --color-danger: oklch(0.577 0.245 27.325);
+  --color-danger: oklch(0.5 0.2 27.325);
 }
 
 @theme inline {
@@ -64,4 +64,12 @@ details[open] summary .accordion-chevron {
 .accordion-chevron {
   transition: transform 0.2s ease;
   flex-shrink: 0;
+}
+
+/* Cible tactile 44 px (WCAG 2.5.5, DESIGN.md) : boutons principaux et puces/onglets bascule. */
+@layer base {
+  button.bg-primary,
+  [aria-pressed] {
+    min-height: 2.75rem;
+  }
 }

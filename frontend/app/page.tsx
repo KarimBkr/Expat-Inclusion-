@@ -235,7 +235,7 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
-          <p className="text-center text-white/80 max-w-2xl mx-auto">{MONEY_LINE}</p>
+          <p className="text-center text-white/90 max-w-2xl mx-auto">{MONEY_LINE}</p>
         </div>
       </section>
 
@@ -246,7 +246,7 @@ export default function HomePage() {
             {stats.map(({ value, label }) => (
               <div key={label}>
                 <div className="text-5xl font-bold mb-2 font-heading">{value}</div>
-                <div className="text-white/70 text-sm font-medium">{label}</div>
+                <div className="text-white/90 text-sm font-medium">{label}</div>
               </div>
             ))}
           </div>

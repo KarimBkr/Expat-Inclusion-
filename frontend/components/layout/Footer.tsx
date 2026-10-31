@@ -20,14 +20,14 @@ export default function Footer() {
               </span>
               <span className="font-heading font-semibold text-lg">Expat Inclusion</span>
             </div>
-            <p className="text-white/65 text-sm leading-relaxed">
+            <p className="text-white/80 text-sm leading-relaxed">
               Un pont entre l&apos;accompagnement spécialisé et les familles expatriées du réseau
               AEFE.
             </p>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-5">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-5">
               Navigation
             </h3>
             <ul className="flex flex-col gap-2.5">
@@ -35,7 +35,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white/65 hover:text-white transition-colors"
+                    className="text-sm text-white/80 hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -45,10 +45,10 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-5">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-5">
               Nous contacter
             </h3>
-            <p className="text-sm text-white/65 leading-relaxed">
+            <p className="text-sm text-white/80 leading-relaxed">
               Une question ?{" "}
               <Link
                 href="/contact"
@@ -57,11 +57,11 @@ export default function Footer() {
                 Écrivez-nous
               </Link>
             </p>
-            <p className="text-sm text-white/50 mt-2">contact@expat-inclusion.com</p>
+            <p className="text-sm text-white/75 mt-2">contact@expat-inclusion.com</p>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-12 pt-6 text-center text-xs text-white/35">
+        <div className="border-t border-white/10 mt-12 pt-6 text-center text-xs text-white/70">
           © {new Date().getFullYear()} Expat Inclusion — Tous droits réservés
         </div>
       </div>
