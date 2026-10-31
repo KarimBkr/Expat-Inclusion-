@@ -23,7 +23,7 @@ Un parent avec profil ; au moins deux AESH publiés (pays et spécialités diff�
 | 2 | Filtres | Filtrer par pays puis par trouble | Seuls les profils correspondants restent |
 | 3 | Filtres | Combinaison sans résultat | État vide avec « Réinitialiser les filtres » |
 | 4 | État vide | « Réinitialiser les filtres » | Tous les profils reviennent |
-| 5 | Carte | « Voir le profil → » | `/aesh/{id}` : nom, bio, langues, modalités, badges « Candidature examinée par notre équipe », « ✓ Compétences vérifiées par entretien » |
+| 5 | Carte | « Voir le profil → » | `/aesh/{id}` : nom, bio, langues, modalités, badges « Profil vérifié par notre équipe », « ✓ Compétences vérifiées par entretien » |
 | 6 | Fiche | Chercher un tarif, un email, un téléphone | Aucun |
 | 7 | Fiche | « Envoyer une demande » | Formulaire de demande (US-11) |
 | 8 | 375 px | Refaire 1–5 | Filtres et cartes utilisables, pas de défilement horizontal |

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { formatDate } from "@/components/booking/BookingSummary";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Spinner } from "@/components/ui/Spinner";
@@ -13,7 +14,7 @@ import { BOOKING_STATUS_LABELS } from "@/types/admin";
 
 const FILTERS: { value: BookingStatus | "all"; label: string }[] = [
   { value: "all", label: "Toutes" },
-  { value: "requested", label: "Demandées" },
+  { value: "requested", label: "En attente" },
   { value: "accepted", label: "Acceptées" },
   { value: "confirmed", label: "Confirmées" },
   { value: "declined", label: "Refusées" },
@@ -89,7 +90,7 @@ export default function AdminBookingsPage() {
         <Link href="/dashboard/admin" className="text-sm text-subtle hover:text-ink">
           ← Administration
         </Link>
-        <h1 className="text-2xl font-bold text-ink mt-3">Demandes de réservation</h1>
+        <h1 className="text-2xl font-bold text-ink mt-3">Demandes de mise en relation</h1>
         <p className="text-sm text-subtle mt-1">
           Visibilité transverse pour le support — les décisions (accepter, refuser, annuler) restent
           au parent et à l&apos;AESH.
@@ -149,7 +150,7 @@ export default function AdminBookingsPage() {
                       {b.parent?.name ?? "Parent"} → {b.aesh?.name ?? "AESH"}
                     </p>
                     <p className="text-xs text-subtle mt-0.5">
-                      {b.start_date} · {b.hours_per_week}h/semaine
+                      {formatDate(b.start_date)} · {b.hours_per_week} h / semaine
                     </p>
                     <span className="inline-flex flex-wrap gap-1.5 mt-2">
                       <span className="text-xs px-2 py-0.5 rounded-full bg-cream text-subtle">
@@ -192,7 +193,7 @@ export default function AdminBookingsPage() {
                 {selected.modality && (
                   <p className="text-sm text-subtle">
                     {selected.modality.name} · {selected.school_level?.name} ·{" "}
-                    {selected.hours_per_week}h/semaine
+                    {selected.hours_per_week} h / semaine
                   </p>
                 )}
                 <p className="mt-3 text-sm text-ink bg-cream rounded-xl p-4">{selected.message}</p>

@@ -107,7 +107,7 @@ export interface AdminBooking {
 }
 
 export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
-  requested: "Demandée",
+  requested: "En attente",
   accepted: "Acceptée",
   declined: "Refusée",
   cancelled: "Annulée",

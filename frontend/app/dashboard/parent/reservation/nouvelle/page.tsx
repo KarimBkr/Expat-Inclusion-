@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/auth-context";
 import { validateBookingForm } from "@/lib/booking-form";
 import { getAeshDetail } from "@/services/aesh-detail";
 import { createBooking } from "@/services/booking";
-import { getTaxonomies } from "@/services/parent-profile";
+import { getParentProfile, getTaxonomies } from "@/services/parent-profile";
 import type { AeshDetail } from "@/types/aesh-detail";
 import type { Taxonomies } from "@/types/parent-profile";
 
@@ -53,10 +53,14 @@ function NouvelleDemandeForm() {
   const load = useCallback(() => {
     setLoading(true);
     setLoadError("");
-    Promise.all([getAeshDetail(aeshId), getTaxonomies()])
-      .then(([detail, taxo]) => {
+    Promise.all([getAeshDetail(aeshId), getTaxonomies(), getParentProfile().catch(() => null)])
+      .then(([detail, taxo, parent]) => {
         setAesh(detail);
         setTaxonomies(taxo);
+        // Prefill the child's level from the brief when the AESH covers it.
+        const level = parent?.profile?.school_level_id;
+        const levels = detail.school_levels.length ? detail.school_levels : taxo.school_levels;
+        if (level && levels.some((l) => l.id === level)) setSchoolLevelId(String(level));
       })
       .catch((err: Error & { status?: number }) =>
         setLoadError(err.status === 404 ? "notfound" : "failed")
@@ -158,9 +162,9 @@ function NouvelleDemandeForm() {
           </p>
           <h1 className="text-xl font-bold text-ink mb-2">Demande envoyée</h1>
           <p className="text-sm text-subtle mb-6">
-            {aesh.name} a reçu votre demande. Vous recevrez une notification dès qu&apos;une réponse
+            {`${aesh.name} a reçu votre demande. Vous recevrez une notification dès qu'une réponse
             sera donnée ; si elle est acceptée, vous pourrez confirmer la mise en relation et
-            échanger par messagerie.
+            échanger par messagerie.`}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -192,8 +196,8 @@ function NouvelleDemandeForm() {
 
       <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Envoyer une demande</h1>
       <p className="text-subtle text-sm mb-8">
-        {aesh.name} recevra votre demande et pourra l&apos;accepter ou la refuser. Vous ne payez
-        rien à cette étape.
+        {`${aesh.name} recevra votre demande et pourra l'accepter ou la refuser. La mise en relation
+        est gratuite.`}
       </p>
 
       <div className="bg-card border border-line rounded-2xl p-5 mb-6">
@@ -224,11 +228,13 @@ function NouvelleDemandeForm() {
             required
           >
             <option value="">Sélectionnez</option>
-            {taxonomies?.modalities.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
+            {(aesh.modalities.length ? aesh.modalities : (taxonomies?.modalities ?? [])).map(
+              (m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              )
+            )}
           </select>
         </Field>
 
@@ -245,7 +251,10 @@ function NouvelleDemandeForm() {
             required
           >
             <option value="">Sélectionnez</option>
-            {taxonomies?.school_levels.map((level) => (
+            {(aesh.school_levels.length
+              ? aesh.school_levels
+              : (taxonomies?.school_levels ?? [])
+            ).map((level) => (
               <option key={level.id} value={level.id}>
                 {level.name}
               </option>

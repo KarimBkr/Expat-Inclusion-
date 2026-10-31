@@ -23,6 +23,7 @@ export type AeshSearchSort = "recent" | "experience";
 
 export interface SearchFilters {
   country_id?: number;
+  specialization_id?: number;
   modality_id?: number;
   school_level_id?: number;
   language_id?: number;

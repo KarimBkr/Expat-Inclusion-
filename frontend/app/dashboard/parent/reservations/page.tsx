@@ -65,7 +65,7 @@ export default function MesReservationsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-ink mb-2">Mes demandes de réservation</h1>
+      <h1 className="text-2xl font-bold text-ink mb-2">Mes demandes de mise en relation</h1>
       <p className="text-subtle text-sm mb-8">
         Suivez l&apos;état de vos demandes et annulez celles qui ne sont plus d&apos;actualité.
       </p>

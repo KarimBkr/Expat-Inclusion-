@@ -99,7 +99,7 @@ export default function FicheAesh() {
         </p>
 
         <div className="flex flex-wrap gap-2 mt-5">
-          <Badge label="Candidature examinée par notre équipe" />
+          <Badge label="Profil vérifié par notre équipe" />
           {aesh.interview_verified_at && <Badge label="✓ Compétences vérifiées par entretien" />}
           {aesh.published_at && (
             <span className="text-xs px-2.5 py-1 rounded-full bg-cream text-subtle border border-line">
@@ -128,8 +128,7 @@ export default function FicheAesh() {
         <div>
           <p className="font-semibold text-white">Cet accompagnant correspond à votre besoin ?</p>
           <p className="text-sm text-white/70 mt-1">
-            Envoyez une demande de mise en relation. {aesh.name} pourra l&apos;accepter ou la
-            refuser.
+            {`Envoyez une demande de mise en relation. ${aesh.name} pourra l'accepter ou la refuser.`}
           </p>
         </div>
         <Link
@@ -141,7 +140,8 @@ export default function FicheAesh() {
       </div>
 
       <p className="mt-4 text-xs text-subtle text-center">
-        Les coordonnées de l&apos;accompagnant sont communiquées après acceptation de la demande.
+        Une fois la demande acceptée, vous échangez avec l&apos;accompagnant via la messagerie
+        sécurisée.
       </p>
     </div>
   );

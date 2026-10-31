@@ -64,7 +64,7 @@ export default function DashboardParentPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex items-center justify-between gap-4 mb-10">
         <div>
           <h1 className="text-2xl font-bold text-ink">Bonjour, {user.name}</h1>
           <p className="text-subtle mt-1">Espace parent · Expat Inclusion</p>
@@ -72,7 +72,7 @@ export default function DashboardParentPage() {
         <button
           type="button"
           onClick={handleLogout}
-          className="text-sm text-subtle hover:text-ink transition-colors"
+          className="md:hidden shrink-0 whitespace-nowrap min-h-11 text-sm text-subtle hover:text-ink transition-colors"
         >
           Se déconnecter
         </button>
@@ -105,7 +105,7 @@ export default function DashboardParentPage() {
         <DashboardCard
           title="Mes demandes"
           value={bookingCount === null ? "—" : String(bookingCount)}
-          description="Demandes de réservation"
+          description="Demandes de mise en relation"
           href="/dashboard/parent/reservations"
         />
         <DashboardCard
@@ -142,7 +142,7 @@ function NextActionCard({
   const action = !profileComplete
     ? {
         title: "Complétez votre profil parent",
-        text: "Renseignez votre pays, le brief enfant et vos consentements pour accéder à la recherche d'AESH.",
+        text: "Renseignez votre pays, le brief enfant et vos consentements pour que les AESH comprennent votre besoin.",
         cta: "Compléter mon profil",
         href: "/dashboard/parent/profil",
       }

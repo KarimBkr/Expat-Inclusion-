@@ -37,7 +37,7 @@ const LINKS: Record<Role, NavLink[]> = {
     { label: "Accueil", href: "/dashboard/admin" },
     { label: "AESH", href: "/dashboard/admin/aesh" },
     { label: "Import", href: "/dashboard/admin/aesh-import" },
-    { label: "Réservations", href: "/dashboard/admin/bookings" },
+    { label: "Demandes", href: "/dashboard/admin/bookings" },
     { label: "Utilisateurs", href: "/dashboard/admin/users" },
     {
       label: "Taxonomies",
@@ -49,7 +49,8 @@ const LINKS: Record<Role, NavLink[]> = {
 
 function isActive(link: NavLink, pathname: string, home: string): boolean {
   if (link.href === home) return pathname === home;
-  return pathname.startsWith(link.match ?? link.href);
+  if (link.match) return pathname.startsWith(link.match);
+  return pathname === link.href || pathname.startsWith(`${link.href}/`);
 }
 
 export function DashboardNav({ space }: { space: Role }) {

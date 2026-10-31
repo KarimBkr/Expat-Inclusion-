@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\AeshProfile;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreBookingRequestRequest extends FormRequest
 {
@@ -21,6 +23,26 @@ class StoreBookingRequestRequest extends FormRequest
             'start_date'      => ['required', 'date', 'after_or_equal:today'],
             'hours_per_week'  => ['required', 'integer', 'min:1', 'max:40'],
         ];
+    }
+
+    /** The request must match what the AESH offers (when the AESH declared it). */
+    public function after(): array
+    {
+        return [function (Validator $validator) {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+            $profile = AeshProfile::with(['modalities:id', 'schoolLevels:id'])->find($this->integer('aesh_profile_id'));
+            $checks = [
+                'modality_id'     => [$profile->modalities, 'Cet accompagnant ne propose pas cette modalité.'],
+                'school_level_id' => [$profile->schoolLevels, 'Cet accompagnant n\'intervient pas à ce niveau scolaire.'],
+            ];
+            foreach ($checks as $field => [$offered, $message]) {
+                if ($offered->isNotEmpty() && ! $offered->contains('id', $this->integer($field))) {
+                    $validator->errors()->add($field, $message);
+                }
+            }
+        }];
     }
 
     public function messages(): array

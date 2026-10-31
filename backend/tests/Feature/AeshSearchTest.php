@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\Language;
 use App\Models\Modality;
 use App\Models\SchoolLevel;
+use App\Models\Specialization;
 use App\Models\User;
 use Database\Seeders\CountrySeeder;
 use Database\Seeders\LanguageSeeder;
@@ -101,6 +102,19 @@ class AeshSearchTest extends TestCase
 
         $this->actingAs($this->parent)
             ->getJson("/api/parent/aesh-search?modality_id={$modality}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_filtre_par_type_de_trouble(): void
+    {
+        [$tsa, $dys] = Specialization::limit(2)->pluck('id')->all();
+
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED, ['specializations' => [$tsa]]);
+        $this->makeProfile(AeshProfile::STATUS_PUBLISHED, ['specializations' => [$dys]]);
+
+        $this->actingAs($this->parent)
+            ->getJson("/api/parent/aesh-search?specialization_id={$tsa}")
             ->assertOk()
             ->assertJsonCount(1, 'data');
     }

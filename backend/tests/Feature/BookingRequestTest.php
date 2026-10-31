@@ -88,6 +88,22 @@ class BookingRequestTest extends TestCase
 
     // ── US-11 · création ──────────────────────────────────────────────────────
 
+    public function test_la_demande_doit_correspondre_a_l_offre_de_l_aesh(): void
+    {
+        [$offered, $other] = Modality::limit(2)->pluck('id')->all();
+        $this->profile->modalities()->sync([$offered]);
+        $this->profile->schoolLevels()->sync([SchoolLevel::first()->id]);
+
+        $this->actingAs($this->parent)
+            ->postJson('/api/bookings', $this->payload(['modality_id' => $other]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['modality_id']);
+
+        $this->actingAs($this->parent)
+            ->postJson('/api/bookings', $this->payload(['modality_id' => $offered]))
+            ->assertCreated();
+    }
+
     public function test_un_parent_cree_une_demande(): void
     {
         $this->actingAs($this->parent)

@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
         <button
           type="button"
           onClick={handleLogout}
-          className="min-h-11 text-sm text-subtle hover:text-ink transition-colors"
+          className="md:hidden shrink-0 whitespace-nowrap min-h-11 text-sm text-subtle hover:text-ink transition-colors"
         >
           Se déconnecter
         </button>
@@ -154,7 +154,7 @@ export default function AdminDashboardPage() {
           {TAXONOMY_TYPES.map((t) => (
             <Link key={t.type} href={`/dashboard/admin/taxonomies/${t.type}`} className={cardClass}>
               <span className="block font-semibold text-ink">{t.label}</span>
-              <span className="block text-xs text-subtle mt-1">{t.singular}</span>
+              <span className="block text-xs text-subtle mt-1">Gérer les valeurs proposées</span>
             </Link>
           ))}
         </div>

@@ -32,7 +32,7 @@ function ChatUnavailable({ onRetry }: { onRetry?: () => void }) {
   return (
     <EmptyState
       title="Messagerie momentanément indisponible"
-      hint="Vos échanges seront accessibles ici dès son rétablissement. Votre demande reste valable."
+      hint="Vos échanges seront accessibles ici dès son rétablissement. Votre demande reste valable ; en cas d'urgence, écrivez-nous via la page Contact."
       action={
         onRetry && (
           <Button size="sm" variant="outline" onClick={onRetry}>

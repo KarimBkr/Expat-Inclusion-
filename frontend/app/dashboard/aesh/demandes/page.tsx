@@ -145,6 +145,7 @@ export default function DemandesRecuesPage() {
                 setNotice(message);
                 load(filter);
               }}
+              onStart={() => setNotice("")}
             />
           ))}
         </div>
@@ -156,9 +157,11 @@ export default function DemandesRecuesPage() {
 function AeshBookingCard({
   booking,
   onChanged,
+  onStart,
 }: {
   booking: BookingRequest;
   onChanged: (notice: string) => void;
+  onStart: () => void;
 }) {
   const [pending, setPending] = useState<PendingAction>(null);
   const [accepting, setAccepting] = useState(false);
@@ -258,14 +261,20 @@ function AeshBookingCard({
             <>
               <button
                 type="button"
-                onClick={() => setPending("accept")}
+                onClick={() => {
+                  onStart();
+                  setPending("accept");
+                }}
                 className="min-h-11 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
               >
                 Accepter
               </button>
               <button
                 type="button"
-                onClick={() => setPending("decline")}
+                onClick={() => {
+                  onStart();
+                  setPending("decline");
+                }}
                 className="min-h-11 px-4 py-2 border border-line text-sm font-medium text-danger rounded-xl hover:border-danger transition-colors"
               >
                 Refuser
@@ -284,7 +293,10 @@ function AeshBookingCard({
               )}
               <button
                 type="button"
-                onClick={() => setPending("cancel")}
+                onClick={() => {
+                  onStart();
+                  setPending("cancel");
+                }}
                 className="min-h-11 px-4 py-2 border border-line text-sm font-medium text-danger rounded-xl hover:border-danger transition-colors"
               >
                 Annuler l&apos;accompagnement

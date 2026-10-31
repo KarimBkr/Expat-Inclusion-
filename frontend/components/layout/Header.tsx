@@ -44,15 +44,16 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-subtle hover:text-primary transition-colors font-medium"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {!user &&
+              navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-subtle hover:text-primary transition-colors font-medium"
+                >
+                  {link.label}
+                </Link>
+              ))}
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -90,19 +91,29 @@ export default function Header() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="md:hidden p-2 text-ink rounded-lg hover:bg-primary-light transition-colors"
-            onClick={() => setOpen(!open)}
-            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-            aria-expanded={open}
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Logged in: the dashboard has its own menu, so mobile only gets a way back to it. */}
+          {user ? (
+            <Link
+              href="/dashboard"
+              className="md:hidden inline-flex items-center min-h-11 px-3 text-sm font-medium text-ink hover:text-primary transition-colors"
+            >
+              Mon espace
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="md:hidden p-2 text-ink rounded-lg hover:bg-primary-light transition-colors"
+              onClick={() => setOpen(!open)}
+              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={open}
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          )}
         </div>
       </div>
 
-      {open && (
+      {open && !user && (
         <div className="md:hidden bg-card border-t border-line">
           <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => (

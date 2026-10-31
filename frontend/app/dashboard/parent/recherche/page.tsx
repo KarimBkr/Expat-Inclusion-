@@ -110,17 +110,23 @@ export default function RechercheAeshPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-ink mb-2">Trouver un AESH</h1>
         <p className="text-subtle text-sm">
-          Filtrez selon le pays, la langue parlée, la modalité et le niveau scolaire, puis triez par
-          expérience.
+          Filtrez selon le pays, le type de trouble, la langue parlée, la modalité et le niveau
+          scolaire, puis triez par expérience.
         </p>
       </div>
 
-      <div className="bg-card border border-line rounded-2xl p-5 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="bg-card border border-line rounded-2xl p-5 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <FilterSelect
           label="Pays"
           value={filters.country_id}
           onChange={(v) => updateFilter("country_id", v)}
           options={taxonomies?.countries ?? []}
+        />
+        <FilterSelect
+          label="Type de trouble"
+          value={filters.specialization_id}
+          onChange={(v) => updateFilter("specialization_id", v)}
+          options={taxonomies?.specializations ?? []}
         />
         <FilterSelect
           label="Langue parlée"
@@ -142,7 +148,7 @@ export default function RechercheAeshPage() {
         />
         <SortSelect value={filters.sort} onChange={updateSort} />
         {hasFilters && (
-          <div className="sm:col-span-2 lg:col-span-5 flex justify-end">
+          <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
             <button
               type="button"
               onClick={resetFilters}
@@ -288,13 +294,13 @@ function AeshCard({ aesh }: { aesh: AeshSearchResult }) {
           <h2 className="font-bold text-ink">{aesh.name}</h2>
           {aesh.experience_years !== null && (
             <p className="text-xs text-subtle mt-0.5">
-              {aesh.experience_years} ans d&apos;expérience
+              {`${aesh.experience_years} ans d'expérience`}
             </p>
           )}
         </div>
         <div className="shrink-0 flex flex-col items-end gap-1">
           <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary font-medium">
-            Candidature examinée
+            Profil vérifié
           </span>
           {aesh.interview_verified_at && (
             <span className="text-xs px-2 py-0.5 rounded-full bg-primary-light text-primary font-medium">

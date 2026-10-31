@@ -16,6 +16,7 @@ class SearchAeshRequest extends FormRequest
     {
         return [
             'country_id'      => ['nullable', 'integer', 'exists:countries,id'],
+            'specialization_id' => ['nullable', 'integer', 'exists:specializations,id'],
             'modality_id'     => ['nullable', 'integer', 'exists:modalities,id'],
             'school_level_id' => ['nullable', 'integer', 'exists:school_levels,id'],
             'language_id'     => ['nullable', 'integer', 'exists:languages,id'],
