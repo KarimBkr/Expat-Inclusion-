@@ -21,8 +21,8 @@ Chaque jalon se termine par : `pnpm lint && pnpm build` (frontend), `php artisan
 
 ## Jalon 3 — Parcours admin
 
-- [ ] Vérification / rejet / publication des profils AESH, notes internes
-- [ ] Import CSV AESH et taxonomies (`docs/qa/US-20-parcours-manuel.md`)
+- [x] Vérification / rejet / publication des profils AESH, notes internes
+- [x] Import CSV AESH et taxonomies (`docs/qa/US-20-parcours-manuel.md`)
 - [ ] Cockpit : réservations, utilisateurs, suspension / réactivation
 - [ ] Décision : liste des paiements admin abandonnée (le détail d'une réservation suffit)
 

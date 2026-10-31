@@ -19,15 +19,31 @@ const CSV_COLUMNS = [
     required: true,
     description: "Slugs séparés par ; — ex. tsa;tdah",
   },
-  { name: "language_codes", required: true, description: "Codes séparés par ; — ex. fr;en" },
+  {
+    name: "language_codes",
+    required: true,
+    description: "Codes séparés par ; — ex. fr;en",
+  },
   {
     name: "modality_slugs",
     required: true,
     description: "Slugs séparés par ; — ex. presentiel;distanciel",
   },
-  { name: "country_codes", required: true, description: "Codes séparés par ; — ex. FR;MA" },
-  { name: "school_level_slugs", required: false, description: "Slugs séparés par ;" },
+  {
+    name: "country_codes",
+    required: true,
+    description: "Codes séparés par ; — ex. FR;MA",
+  },
+  {
+    name: "school_level_slugs",
+    required: false,
+    description: "Slugs séparés par ;",
+  },
 ];
+
+const TEMPLATE_HREF = `data:text/csv;charset=utf-8,${encodeURIComponent(
+  `${CSV_COLUMNS.map((col) => col.name).join(",")}\n`
+)}`;
 
 export default function AeshImportPage() {
   const { user, loading: authLoading } = useAuth();
@@ -109,6 +125,13 @@ export default function AeshImportPage() {
             </tbody>
           </table>
         </div>
+        <a
+          href={TEMPLATE_HREF}
+          download="modele-import-aesh.csv"
+          className="inline-block mt-4 text-sm font-medium text-primary hover:underline"
+        >
+          Télécharger le modèle CSV
+        </a>
         <p className="text-xs text-subtle mt-4">
           Le mot de passe du compte créé est aléatoire et n&apos;est jamais communiqué : l&apos;AESH
           l&apos;initialise via « mot de passe oublié » sur son adresse email réelle.
@@ -132,7 +155,11 @@ export default function AeshImportPage() {
           />
         </div>
 
-        {error && <div className="p-3 bg-danger/10 text-danger text-sm rounded-lg">{error}</div>}
+        {error && (
+          <div role="alert" className="p-3 bg-danger/10 text-danger text-sm rounded-lg">
+            {error}
+          </div>
+        )}
 
         <button
           type="submit"
@@ -143,11 +170,39 @@ export default function AeshImportPage() {
         </button>
       </form>
 
+      {!report && !submitting && (
+        <p className="mt-6 p-6 border border-dashed border-line rounded-2xl text-sm text-subtle text-center">
+          Aucun import lancé pour le moment. Choisissez un fichier CSV au format ci-dessus : le
+          rapport détaillé ligne par ligne s&apos;affichera ici.
+        </p>
+      )}
+
       {report && (
-        <div className="mt-6 space-y-4">
-          <div className="p-4 bg-primary-light border border-primary/20 rounded-xl text-sm text-ink">
-            {report.message}
+        <section aria-label="Résultat de l'import" className="mt-6 space-y-4">
+          <div role="status" className="grid grid-cols-2 gap-3">
+            <p className="p-4 bg-primary-light border border-primary/20 rounded-xl text-sm text-ink">
+              <span className="block text-2xl font-bold text-primary">
+                {report.imported.length}
+              </span>
+              profil(s) importé(s)
+            </p>
+            <p className="p-4 bg-danger/5 border border-danger/20 rounded-xl text-sm text-ink">
+              <span className="block text-2xl font-bold text-danger">{report.errors.length}</span>
+              ligne(s) en erreur
+            </p>
           </div>
+          {report.imported.length > 0 && (
+            <p className="text-sm text-subtle">
+              Les profils importés sont « en attente » :{" "}
+              <Link
+                href="/dashboard/admin/aesh"
+                className="font-medium text-primary hover:underline"
+              >
+                les vérifier
+              </Link>
+              .
+            </p>
+          )}
 
           {report.imported.length > 0 && (
             <div className="bg-card border border-line rounded-2xl p-6">
@@ -183,7 +238,7 @@ export default function AeshImportPage() {
               </ul>
             </div>
           )}
-        </div>
+        </section>
       )}
     </div>
   );

@@ -64,8 +64,8 @@ export async function updateTaxonomy(
   });
 }
 
-export async function deleteTaxonomy(type: TaxonomyType, id: number): Promise<void> {
-  await apiFetch<{ message: string }>(`/admin/taxonomies/${type}/${id}`, {
+export async function deleteTaxonomy(type: TaxonomyType, id: number): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/admin/taxonomies/${type}/${id}`, {
     method: "DELETE",
   });
 }

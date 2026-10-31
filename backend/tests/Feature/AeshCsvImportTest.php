@@ -153,7 +153,7 @@ class AeshCsvImportTest extends TestCase
         $response->assertJsonCount(0, 'imported')
             ->assertJsonCount(1, 'errors');
 
-        $this->assertStringContainsString('inexistant', $response->json('errors.0.errors.0'));
+        $this->assertSame('Valeurs inconnues pour specialization_slugs : inexistant', $response->json('errors.0.errors.0'));
     }
 
     public function test_colonnes_manquantes_rejetees_avant_tout_traitement(): void

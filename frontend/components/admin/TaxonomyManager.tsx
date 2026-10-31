@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Spinner } from "@/components/ui/Spinner";
 import {
   createTaxonomy,
   deleteTaxonomy,
@@ -24,7 +27,13 @@ type FieldDef = {
 
 const FIELDS: Record<TaxonomyType, FieldDef[]> = {
   countries: [
-    { key: "code", label: "Code ISO (2 lettres)", type: "text", maxLength: 2, placeholder: "FR" },
+    {
+      key: "code",
+      label: "Code ISO (2 lettres)",
+      type: "text",
+      maxLength: 2,
+      placeholder: "FR",
+    },
     { key: "name", label: "Nom", type: "text", placeholder: "France" },
     { key: "is_aefe_network", label: "Réseau AEFE", type: "checkbox" },
   ],
@@ -33,7 +42,13 @@ const FIELDS: Record<TaxonomyType, FieldDef[]> = {
     { key: "name", label: "Nom", type: "text", placeholder: "TSA" },
   ],
   languages: [
-    { key: "code", label: "Code", type: "text", maxLength: 5, placeholder: "fr" },
+    {
+      key: "code",
+      label: "Code",
+      type: "text",
+      maxLength: 5,
+      placeholder: "fr",
+    },
     { key: "name", label: "Nom", type: "text", placeholder: "Français" },
   ],
   "school-levels": [
@@ -75,6 +90,8 @@ function recordToForm(
 export function TaxonomyManager({ meta }: { meta: TaxonomyMeta }) {
   const [items, setItems] = useState<TaxonomyRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [form, setForm] = useState<Record<string, string | boolean>>(() => emptyForm(meta.type));
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -84,10 +101,11 @@ export function TaxonomyManager({ meta }: { meta: TaxonomyMeta }) {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       setItems(await listTaxonomy(meta.type));
     } catch {
-      setGlobalError("Impossible de charger les données.");
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -154,18 +172,20 @@ export function TaxonomyManager({ meta }: { meta: TaxonomyMeta }) {
   }
 
   async function handleDelete(id: number) {
-    if (!window.confirm("Supprimer cette entrée ?")) return;
+    setConfirmId(null);
     setGlobalError("");
+    setSuccess("");
     try {
-      await deleteTaxonomy(meta.type, id);
+      const result = await deleteTaxonomy(meta.type, id);
       if (editingId === id) resetForm();
+      setSuccess(result.message);
       await load();
     } catch (err) {
       setGlobalError((err as Error).message);
     }
   }
 
-  const columns = FIELDS[meta.type].map((f) => f.key);
+  const columns = FIELDS[meta.type];
 
   return (
     <div>
@@ -180,10 +200,14 @@ export function TaxonomyManager({ meta }: { meta: TaxonomyMeta }) {
       </div>
 
       {globalError && (
-        <div className="mb-4 p-3 bg-danger/10 text-danger text-sm rounded-lg">{globalError}</div>
+        <div role="alert" className="mb-4 p-3 bg-danger/10 text-danger text-sm rounded-lg">
+          {globalError}
+        </div>
       )}
       {success && (
-        <div className="mb-4 p-3 bg-primary-light text-primary text-sm rounded-lg">{success}</div>
+        <div role="status" className="mb-4 p-3 bg-primary-light text-primary text-sm rounded-lg">
+          {success}
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -249,19 +273,22 @@ export function TaxonomyManager({ meta }: { meta: TaxonomyMeta }) {
 
         <div className="lg:col-span-2 bg-card border border-line rounded-2xl overflow-hidden">
           {loading ? (
-            <div className="p-12 flex justify-center">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
+            <Spinner label="Chargement des entrées…" />
+          ) : loadError ? (
+            <ErrorState message="Impossible de charger les données." onRetry={load} />
           ) : items.length === 0 ? (
-            <p className="p-8 text-sm text-subtle text-center">Aucune entrée pour le moment.</p>
+            <EmptyState
+              title="Aucune entrée pour le moment."
+              hint="Ajoutez la première avec le formulaire."
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line bg-cream/50">
                     {columns.map((col) => (
-                      <th key={col} className="text-left px-4 py-3 font-medium text-subtle">
-                        {col}
+                      <th key={col.key} className="text-left px-4 py-3 font-medium text-subtle">
+                        {col.label}
                       </th>
                     ))}
                     <th className="px-4 py-3" />
@@ -270,30 +297,52 @@ export function TaxonomyManager({ meta }: { meta: TaxonomyMeta }) {
                 <tbody>
                   {items.map((item) => (
                     <tr key={item.id} className="border-b border-line last:border-0">
-                      {columns.map((col) => (
-                        <td key={col} className="px-4 py-3 text-ink">
-                          {typeof item[col] === "boolean"
-                            ? item[col]
+                      {columns.map(({ key }) => (
+                        <td key={key} className="px-4 py-3 text-ink">
+                          {typeof item[key] === "boolean"
+                            ? item[key]
                               ? "Oui"
                               : "Non"
-                            : String(item[col] ?? "—")}
+                            : String(item[key] ?? "—")}
                         </td>
                       ))}
                       <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(item)}
-                          className="text-primary text-xs font-medium hover:underline mr-3"
-                        >
-                          Modifier
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(item.id)}
-                          className="text-danger text-xs font-medium hover:underline"
-                        >
-                          Supprimer
-                        </button>
+                        {confirmId === item.id ? (
+                          <>
+                            <span className="text-xs text-subtle mr-3">Supprimer ?</span>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id)}
+                              className="text-danger text-xs font-semibold hover:underline mr-3"
+                            >
+                              Confirmer la suppression
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmId(null)}
+                              className="text-subtle text-xs font-medium hover:underline"
+                            >
+                              Annuler
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEdit(item)}
+                              className="text-primary text-xs font-medium hover:underline mr-3"
+                            >
+                              Modifier
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmId(item.id)}
+                              className="text-danger text-xs font-medium hover:underline"
+                            >
+                              Supprimer
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}

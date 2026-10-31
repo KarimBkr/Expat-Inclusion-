@@ -93,12 +93,12 @@ class AeshCsvImportService
             'school_level_slugs' => ['nullable', 'string'],
         ])->validate();
 
-        $specializationIds = $this->resolveTaxonomyIds(Specialization::class, 'slug', $validated['specialization_slugs']);
-        $languageIds = $this->resolveTaxonomyIds(Language::class, 'code', $validated['language_codes']);
-        $modalityIds = $this->resolveTaxonomyIds(Modality::class, 'slug', $validated['modality_slugs']);
-        $countryIds = $this->resolveTaxonomyIds(Country::class, 'code', $validated['country_codes']);
+        $specializationIds = $this->resolveTaxonomyIds(Specialization::class, 'slug', 'specialization_slugs', $validated['specialization_slugs']);
+        $languageIds = $this->resolveTaxonomyIds(Language::class, 'code', 'language_codes', $validated['language_codes']);
+        $modalityIds = $this->resolveTaxonomyIds(Modality::class, 'slug', 'modality_slugs', $validated['modality_slugs']);
+        $countryIds = $this->resolveTaxonomyIds(Country::class, 'code', 'country_codes', $validated['country_codes']);
         $schoolLevelIds = filled($validated['school_level_slugs'] ?? null)
-            ? $this->resolveTaxonomyIds(SchoolLevel::class, 'slug', $validated['school_level_slugs'])
+            ? $this->resolveTaxonomyIds(SchoolLevel::class, 'slug', 'school_level_slugs', $validated['school_level_slugs'])
             : [];
 
         $user = User::create([
@@ -133,12 +133,12 @@ class AeshCsvImportService
      * @param  class-string<Model>  $model
      * @return list<int>
      */
-    private function resolveTaxonomyIds(string $model, string $column, string $rawValue): array
+    private function resolveTaxonomyIds(string $model, string $column, string $csvColumn, string $rawValue): array
     {
         $values = array_values(array_filter(array_map('trim', explode(self::LIST_SEPARATOR, $rawValue))));
 
         if ($values === []) {
-            throw ValidationException::withMessages([$column => ["Aucune valeur fournie pour {$column}."]]);
+            throw ValidationException::withMessages([$csvColumn => ["Aucune valeur fournie pour {$csvColumn}."]]);
         }
 
         $found = $model::whereIn($column, $values)->pluck($column, 'id');
@@ -146,7 +146,7 @@ class AeshCsvImportService
 
         if ($unknown !== []) {
             throw ValidationException::withMessages([
-                $column => [sprintf('Valeurs inconnues pour %s : %s', $column, implode(', ', $unknown))],
+                $csvColumn => [sprintf('Valeurs inconnues pour %s : %s', $csvColumn, implode(', ', $unknown))],
             ]);
         }
 

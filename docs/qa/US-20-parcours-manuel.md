@@ -28,8 +28,8 @@ Thomas Leroy,thomas.qa@example.com,"Spécialisé dans l'accompagnement des troub
 | # | Écran | Action | Attendu |
 |---|-------|--------|---------|
 | 1 | `/dashboard/admin` | Ouvrir | Carte « Import CSV — profils AESH » visible dans la section Sourcing |
-| 2 | `/dashboard/admin/aesh-import` | Consulter le tableau des colonnes | Correspond exactement aux colonnes du CSV d'exemple |
-| 3 | Formulaire | Importer le CSV d'exemple (2 lignes valides) | Rapport : « 2 profil(s) importé(s), 0 ligne(s) en erreur » |
+| 2 | `/dashboard/admin/aesh-import` | Consulter le tableau des colonnes, cliquer « Télécharger le modèle CSV » | Correspond exactement aux colonnes du CSV d'exemple ; le modèle contient la ligne d'en-tête ; message « Aucun import lancé pour le moment » |
+| 3 | Formulaire | Importer le CSV d'exemple (2 lignes valides) | Rapport : compteurs « 2 profil(s) importé(s) » et « 0 ligne(s) en erreur », liste des emails importés, lien « les vérifier » |
 | 4 | `/dashboard/admin/aesh` | Filtrer par « En attente » | Les deux profils importés apparaissent |
 | 5 | Fiche AESH importée | Approuver puis publier | Passe par le même circuit qu'un profil auto-créé (US-08) |
 | 6 | `/dashboard/parent/recherche` | Rechercher | Le profil publié apparaît, comme n'importe quel profil |
@@ -41,13 +41,15 @@ Thomas Leroy,thomas.qa@example.com,"Spécialisé dans l'accompagnement des troub
 | Test | Attendu |
 |------|---------|
 | Réimporter le même fichier (emails déjà en base) | 0 importé, 2 en erreur, message « déjà utilisée » |
-| Ligne avec `specialization_slugs=inexistant` | Cette ligne rejetée, message citant le slug inconnu ; les autres lignes du fichier importées normalement |
+| Ligne avec `specialization_slugs=inexistant` | Cette ligne rejetée, message « Valeurs inconnues pour specialization_slugs : inexistant » ; les autres lignes du fichier importées normalement |
 | Ligne avec `bio` de moins de 50 caractères | Rejetée avec message de validation explicite |
 | En-tête sans `country_codes` | `422` immédiat, aucune ligne traitée |
 | Fichier `.pdf` renommé en `.csv` | Rejeté (`422`, format invalide) |
 | Parent ou AESH tente d'accéder à `/dashboard/admin/aesh-import` | Redirection hors de la page |
 | `POST /api/admin/aesh-import` avec un compte parent | `403` |
 | `POST /api/admin/aesh-import` sans session | `401` |
+| Taxonomie : cliquer « Supprimer » sur une entrée | Demande « Confirmer la suppression » / « Annuler » avant toute suppression |
+| Taxonomie : supprimer une entrée utilisée par des profils | Refusé, message « Impossible de supprimer : cette entrée est utilisée par des profils. » |
 
 ## Points de vigilance métier
 
