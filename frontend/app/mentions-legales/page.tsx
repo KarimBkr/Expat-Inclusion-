@@ -41,7 +41,7 @@ export default function MentionsLegalesPage() {
             </p>
           </section>
 
-          <section>
+          <section id="donnees">
             <h2 className="text-lg font-bold mb-3 text-ink">
               4. Protection des données personnelles (RGPD)
             </h2>

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -191,5 +192,49 @@ class AuthTest extends TestCase
         $this->get('/api/bookings')
             ->assertStatus(401)
             ->assertJsonPath('message', 'Unauthenticated.');
+    }
+
+    // ── Emails d'authentification ─────────────────────────────────────────────
+
+    /** Un seul bouton d'action, le pied de page RGPD, aucune mention de paiement. */
+    private function assertEmailConforme(string $html, string $ctaUrl): void
+    {
+        $this->assertSame(1, substr_count($html, 'border-radius:10px;">'), 'un seul CTA attendu');
+        $this->assertStringContainsString('href="'.e($ctaUrl).'"', $html);
+        $this->assertStringContainsString('RGPD', $html);
+        $this->assertStringContainsString('/mentions-legales#donnees', $html);
+        $this->assertDoesNotMatchRegularExpression('/paiement|stripe|€/i', $html);
+    }
+
+    public function test_email_de_verification_rendu_en_francais_avec_un_cta(): void
+    {
+        config(['app.frontend_url' => 'http://front.test']);
+        $user = User::factory()->unverified()->create();
+
+        $mail = (new VerifyEmailNotification())->toMail($user);
+        $html = $mail->render();
+        preg_match('#href="(http://front\.test/verifier-email/confirmer/[^"]+)"#', $html, $m);
+
+        $this->assertSame('[Expat Inclusion] Vérifiez votre adresse email', $mail->envelope()->subject);
+        $this->assertTrue($mail->hasTo($user->email));
+        $this->assertNotEmpty($m, 'lien de vérification vers le frontend');
+        $this->assertStringContainsString("/{$user->id}/".sha1($user->email), $m[1]);
+        $this->assertStringContainsString('Vérifier mon adresse email', $html);
+        $this->assertEmailConforme($html, html_entity_decode($m[1]));
+    }
+
+    public function test_email_de_reinitialisation_rendu_en_francais_avec_un_cta(): void
+    {
+        config(['app.frontend_url' => 'http://front.test']);
+        $user = User::factory()->create(['email' => 'marie@exemple.com']);
+
+        $mail = (new ResetPasswordNotification('jeton123'))->toMail($user);
+        $html = $mail->render();
+        $url = 'http://front.test/reinitialiser-mot-de-passe?token=jeton123&email=marie%40exemple.com';
+
+        $this->assertSame('[Expat Inclusion] Réinitialisation de votre mot de passe', $mail->envelope()->subject);
+        $this->assertTrue($mail->hasTo('marie@exemple.com'));
+        $this->assertStringContainsString('Choisir un nouveau mot de passe', $html);
+        $this->assertEmailConforme($html, $url);
     }
 }

@@ -49,7 +49,7 @@ export default function MotDePasseOubliePage() {
           <h1 className="text-2xl font-bold text-ink mb-3">Email envoyé</h1>
           <p className="text-subtle mb-6">
             Si un compte existe avec cette adresse, vous recevrez un lien de réinitialisation dans
-            quelques minutes.
+            quelques minutes. Pensez à vérifier vos courriers indésirables.
           </p>
           <Link href="/connexion" className="text-primary font-medium hover:underline text-sm">
             Retour à la connexion

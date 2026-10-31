@@ -23,8 +23,13 @@
     </div>
 
     <div style="padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#9ca3af;">
+      <p style="margin:0 0 8px;font-size:11px;color:#9ca3af;">
         Expat Inclusion &mdash; contact@expat-inclusion.com
+      </p>
+      <p style="margin:0;font-size:11px;line-height:1.6;color:#9ca3af;">
+        Vous recevez cet email car une action a été effectuée avec votre adresse sur Expat Inclusion.
+        Vos données sont traitées conformément au RGPD&nbsp;: vous pouvez y accéder, les corriger
+        ou les supprimer à tout moment (<a href="{{ rtrim(config('app.frontend_url'), '/') }}/mentions-legales#donnees" style="color:#9ca3af;">vos données personnelles</a>).
       </p>
     </div>
   </div>
