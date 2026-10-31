@@ -107,7 +107,7 @@ Interrupteur de configuration, réversible sans changement de code.
 | # | Écran | Action | Attendu |
 |---|-------|--------|---------|
 | 1 | `.env` | `STRIPE_PLATFORM_FEE_ENABLED=false`, relancer `serve` | — |
-| 2 | `/dashboard/parent/reservations` | Demande **acceptée**, cliquer « Confirmer la réservation » | Aucune redirection Stripe — retour direct sur `/dashboard/parent/paiement/succes`, statut déjà `confirmed` |
+| 2 | `/dashboard/parent/reservations` | Demande **acceptée**, cliquer « Confirmer la mise en relation » | Aucune redirection Stripe — confirmation sur place (« Mise en relation confirmée »), la liste se recharge, statut `confirmed`, le bouton disparaît |
 | 3 | Base de données | Consulter `payments` | Ligne `amount = 0`, `status = paid`, `stripe_checkout_session_id` préfixé `free_` (pas un identifiant Stripe) |
 | 4 | Re-tenter un paiement sur la même demande | `POST /api/bookings/{id}/pay` | `422` — déjà payée, même garde-fou qu'en mode payant |
 | 5 | `.env` | Repasser à `true`, relancer `serve` | Parcours payant normal restauré sans rien d'autre à changer |
@@ -149,3 +149,15 @@ seul `StripeClient` était pointé sur le mock le temps du test.
 **Reste à faire avant mise en production**, avec un vrai compte Stripe test :
 le parcours complet ci-dessus (carte de test sur la page Checkout hébergée,
 webhook envoyé par les serveurs Stripe et non fabriqué localement).
+
+## Repassage du 31 octobre 2026 — mode frais désactivé
+
+Pile locale sans port réseau : backend Laravel sur SQLite appelé en processus, build de production Next.js, navigateur Playwright (suite e2e de recette), `STRIPE_PLATFORM_FEE_ENABLED=false`. Suite backend : 221 tests verts. **Parcours payant (nominal, abandon, CLI Stripe) non rejoué** : mode frais désactivé pour la V1, aucun compte Stripe.
+
+| Étapes (parcours frais désactivé) | Résultat (31/10/2026) | Rejoué par |
+|--------|------------------------|------------|
+| 1 | OK — interrupteur à `false` dans l'environnement de test | `backend.env` de la recette |
+| 2 | OK — confirmation sur place, aucune redirection Stripe, aucun mot « paiement » affiché | e2e parent-confirm (« confirms… in place when fees are disabled ») |
+| 3 | OK — ligne `amount = 0`, `free_…`, même avec une clé Stripe vide | `test_frais_desactive_confirme_directement_sans_stripe`, `test_frais_desactive_fonctionne_meme_avec_une_cle_stripe_reellement_vide` |
+| 4 | OK — `422` sur une demande déjà confirmée | `test_frais_desactive_refuse_si_deja_paye` |
+| 5 | Non rejoué — retour au mode payant hors périmètre V1 (code conservé, couvert par `PaymentTest`) | — |

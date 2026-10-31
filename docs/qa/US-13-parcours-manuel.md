@@ -158,3 +158,16 @@ réelles contre `expat-inclusion` avec un scénario reproduisant exactement le
 bug : `ensure()` appelé une seconde fois après qu'un message a été envoyé —
 `last_message_preview` reste intact. Security Rules déjà déployées la veille
 inchangées par ce correctif (aucune rule ne dépendait du GET préalable).
+
+## Repassage du 31 octobre 2026
+
+Pile locale sans port réseau : backend Laravel sur SQLite appelé en processus, build de production Next.js, navigateur Playwright (suite e2e de recette), `STRIPE_PLATFORM_FEE_ENABLED=false`, sans Mailpit, sans projet Firebase ni compte Stripe. Suite backend : 221 tests verts.
+
+| Étapes | Résultat (31/10/2026) | Rejoué par |
+|--------|------------------------|------------|
+| 1–2 | OK — « Ouvrir la conversation » visible des deux côtés une fois acceptée, absent avant | e2e parent, e2e AESH (« messaging gate ») |
+| 3 | OK sans Firebase — le thread s'ouvre sur un message « messagerie indisponible » propre, sans erreur console | e2e parent (étape 9), e2e states (« chat without Firebase ») |
+| 4–10 | **Non rejoué** — temps réel, badge non-lu et limite de 2000 caractères nécessitent le projet Firebase réel (pas d'émulateur dans cet environnement) ; à rejouer par l'équipe avec le projet `expat-inclusion` | — |
+| 11–13 | OK — accès conservé après annulation d'une demande acceptée, refusé si jamais acceptée | `test_conversation_reste_accessible_apres_annulation_dune_demande_acceptee`, `test_conversation_refusee_si_*` |
+| Contrôles API (6) | OK | `MessagingTest` (15 tests), `RouteCoverageTest` |
+| Contrôles Security Rules (5) | **Non rejoué** — relus à la main (`firebase/firestore.rules`), aucun test automatisé possible sans émulateur | — |

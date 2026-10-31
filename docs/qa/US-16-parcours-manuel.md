@@ -78,3 +78,14 @@ Sanctum documentée dans le parcours US-11/US-12).
 Exécuté le 26 août 2026 en local — suite automatisée verte (137 tests
 backend, tsc/lint/build frontend propres). Parcours manuel Mailpit à
 rejouer et cocher avant le prochain merge en `dev`.
+
+## Repassage du 31 octobre 2026
+
+Pile locale sans port réseau : backend Laravel sur SQLite appelé en processus, build de production Next.js, navigateur Playwright (suite e2e de recette), `STRIPE_PLATFORM_FEE_ENABLED=false`, sans Mailpit, sans projet Firebase ni compte Stripe. Suite backend : 221 tests verts.
+
+| Étapes | Résultat (31/10/2026) | Rejoué par |
+|--------|------------------------|------------|
+| Emails 1–10 | OK sur le contenu — chaque email part au bon destinataire (jamais à l'acteur), sans mention de paiement ni donnée médicale | `test_chaque_email_transactionnel_est_conforme_frais_desactives`, `test_approbation_et_rejet_previennent_laesh`, `*_notifie_*` (BookingRequestTest) |
+| Emails 1–10, rendu visuel | **Non rejoué** — pas de Mailpit ici ; à vérifier par l'équipe dans Mailpit (`localhost:8025`) | — |
+| Notifications 9–12 | OK — compteur, liste, marquage lu | `NotificationTest` ; page affichée sans erreur : e2e a11y |
+| Contrôles d'accès (3) | OK — 401, 404 sur la notification d'un autre, isolation | `test_visiteur_non_authentifie_refuse`, `test_ne_peut_pas_marquer_comme_lue_la_notification_dun_autre`, `test_ne_liste_pas_les_notifications_dun_autre_utilisateur` |

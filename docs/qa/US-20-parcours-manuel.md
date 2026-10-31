@@ -71,3 +71,18 @@ Exécuté le 26 août 2026 : 10 tests API verts (import valide, mot de passe non
 exposé, import partiel, doublon en base, doublon dans le même fichier,
 taxonomie inconnue, colonnes manquantes, fichier non-CSV, accès refusé parent,
 accès refusé non authentifié). Typecheck, lint et build front verts.
+
+## Repassage du 31 octobre 2026
+
+Pile locale sans port réseau : backend Laravel sur SQLite appelé en processus, build de production Next.js, navigateur Playwright (suite e2e de recette), `STRIPE_PLATFORM_FEE_ENABLED=false`, sans Mailpit, sans projet Firebase ni compte Stripe. Suite backend : 221 tests verts.
+
+| Étapes | Résultat (31/10/2026) | Rejoué par |
+|--------|------------------------|------------|
+| 1–3 | OK — carte d'import, modèle CSV, rapport par ligne | e2e admin (« import CSV and taxonomies ») |
+| 4–5 | OK — profils importés en attente, même circuit de validation | `admin_importe_un_profil_valide`, e2e admin (« verification ») |
+| 6 | OK — un profil publié apparaît dans la recherche | `AeshSearchTest` |
+| 7 | OK — le mot de passe généré n'est jamais exposé | `le_mot_de_passe_genere_nest_jamais_expose` |
+| 8 | **Non rejoué** — réception de l'email de réinitialisation dans Mailpit (contenu couvert par `AuthTest`) | — |
+| Contrôles d'erreur 1–8 | OK — doublons, slug inconnu, colonnes manquantes, non-CSV, 401/403, redirection | `AeshCsvImportTest` (11 tests), e2e nav |
+| Taxonomie : confirmation avant suppression | OK | e2e admin |
+| Taxonomie : entrée utilisée par des profils | **Non couvert** par un test automatisé ; à vérifier à la main | — |

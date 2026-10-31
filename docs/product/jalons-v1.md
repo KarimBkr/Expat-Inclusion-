@@ -35,8 +35,8 @@ Chaque jalon se termine par : `pnpm lint && pnpm build` (frontend), `php artisan
 ## Jalon 5 — Sécurité et recette
 
 - [x] Rôle / ownership / accès refusé testés sur chaque endpoint
-- [ ] Parcours QA rejoués : `docs/qa/*.md` (US-11/12, 13, 14/15 en mode frais désactivé, 16, 20)
-- [ ] Parcours manuels à écrire pour les US sans fichier QA
+- [x] Parcours QA rejoués : `docs/qa/*.md` (US-11/12, 13, 14/15 en mode frais désactivé, 16, 20)
+- [x] Parcours manuels à écrire pour les US sans fichier QA
 
 ## Jalon 6 — Déploiement (actions de l'équipe)
 

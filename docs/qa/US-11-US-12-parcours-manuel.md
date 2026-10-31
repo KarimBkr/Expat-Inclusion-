@@ -86,3 +86,19 @@ Un profil non publié n'est ni cherchable ni consultable : c'est volontaire.
 Exécuté le 6 août 2026 sur MySQL 8.0 local (`expat_inclusion`), backend
 `php artisan serve` — parcours complet vert, y compris les 5 contrôles d'accès
 et les 4 transitions interdites.
+
+## Repassage du 31 octobre 2026
+
+Pile locale sans port réseau : backend Laravel sur SQLite appelé en processus, build de production Next.js, navigateur Playwright (suite e2e de recette), `STRIPE_PLATFORM_FEE_ENABLED=false`, sans Mailpit, sans projet Firebase ni compte Stripe. Suite backend : 221 tests verts.
+
+| Étapes | Résultat (31/10/2026) | Rejoué par |
+|--------|------------------------|------------|
+| 1–3 | OK — recherche filtrée, fiche avec badges, formulaire sans montant (le bouton s'appelle désormais « Envoyer une demande ») | e2e parent (« searches… sends a request ») |
+| 4–5 | OK — message trop court et date passée refusés avec erreur de champ | e2e parent + `champs_requis_valides`, `date_de_debut_dans_le_passe_refusee` |
+| 6 | OK — écran de confirmation « Demande envoyée » avec lien « Suivre mes demandes », statut « En attente de réponse » (remplace la redirection directe) | e2e parent (« sign-up to conversation ») |
+| 7 | OK — seconde demande en attente refusée | `pas_deux_demandes_en_attente_sur_le_meme_aesh` |
+| 8–10 | OK — demande visible côté AESH, acceptation, historique | e2e AESH (« accept, decline… ») + `le_detail_expose_l_historique` |
+| 11–13 | OK — annulation avec motif, motif et historique visibles | `parent_annule_une_demande_acceptee`, `aesh_annule_une_demande_acceptee` |
+| Contrôles d'accès (5) | OK — 403 / redirections | `RouteCoverageTest`, `un_autre_parent_ne_voit_pas_la_demande`, e2e nav |
+| Machine à états (4) | OK — 422 sur les transitions interdites | `une_demande_*_ne_peut_plus_etre_*`, `nouvelle_demande_possible_apres_un_refus` |
+| Vigilance : aucun montant, aucune coordonnée | OK | e2e AESH (« no price shown »), `aucun_montant_dans_la_demande` |
