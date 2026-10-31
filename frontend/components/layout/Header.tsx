@@ -8,8 +8,8 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 
 const navLinks = [
-  { label: "Concept", href: "/#concept" },
   { label: "Comment ça marche", href: "/#comment-ca-marche" },
+  { label: "Confiance", href: "/#confiance" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];

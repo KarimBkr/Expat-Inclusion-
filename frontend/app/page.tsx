@@ -1,15 +1,16 @@
 import {
   Briefcase,
-  CalendarCheck,
   ChevronRight,
-  Euro,
   Globe,
+  HeartHandshake,
+  Inbox,
+  Lock,
   MessageCircle,
   Search,
   Shield,
+  ShieldCheck,
   User,
   UserPlus,
-  Video,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -18,45 +19,57 @@ import { ButtonLink } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "AESH qualifiés pour familles expatriées — Réseau AEFE mondial",
+  description:
+    "Un pont entre l'accompagnement spécialisé et les familles expatriées : AESH vérifiés dans le réseau AEFE, mise en relation gratuite.",
 };
 
-const steps = [
+const parentSteps = [
   {
     icon: UserPlus,
-    step: "01",
-    title: "Créez votre profil",
-    description:
-      "Décrivez le profil de votre enfant, ses besoins spécifiques et vos disponibilités.",
+    title: "Créer son compte",
+    description: "Inscrivez-vous en quelques minutes et indiquez votre pays d'expatriation.",
   },
   {
     icon: Search,
-    step: "02",
-    title: "Trouvez votre AESH",
+    title: "Trouver un AESH vérifié",
     description:
-      "Parcourez les profils examinés par notre équipe et filtrez selon le pays, le trouble et la modalité.",
+      "Filtrez les profils examinés par notre équipe selon le pays, le besoin et la modalité.",
   },
   {
-    icon: CalendarCheck,
-    step: "03",
-    title: "Démarrez l'accompagnement",
+    icon: MessageCircle,
+    title: "Échanger et convenir ensemble",
     description:
-      "Échangez via la messagerie sécurisée et convenez directement du tarif avec l'accompagnant.",
+      "Une fois votre demande acceptée, échangez via la messagerie et organisez l'accompagnement.",
   },
 ];
 
-const familyPoints = [
-  { icon: Shield, text: "Candidatures examinées une à une par notre équipe" },
-  { icon: Globe, text: "Disponibles dans 30+ pays du réseau AEFE" },
-  { icon: MessageCircle, text: "Messagerie directe et sécurisée" },
-  { icon: Euro, text: "Mise en relation gratuite, tarif fixé directement avec l'AESH" },
+const aeshSteps = [
+  {
+    icon: UserPlus,
+    title: "S'inscrire",
+    description: "Créez votre compte et décrivez vos spécialisations, langues et modalités.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Faire vérifier son profil",
+    description:
+      "Déposez votre CV et votre lettre de motivation : notre équipe examine votre candidature.",
+  },
+  {
+    icon: Inbox,
+    title: "Recevoir des demandes",
+    description: "Votre profil publié, les familles vous contactent ; vous acceptez ou refusez.",
+  },
 ];
 
-const aeshPoints = [
-  { icon: User, text: "Profil professionnel mis en valeur" },
-  { icon: Globe, text: "Familles qualifiées du réseau AEFE" },
-  { icon: Video, text: "Présentiel, distanciel ou hybride" },
-  { icon: Euro, text: "Vous convenez librement de vos conditions" },
+const trustPoints = [
+  { icon: ShieldCheck, text: "Profils vérifiés par l'équipe avant publication" },
+  { icon: HeartHandshake, text: "Aucune donnée médicale demandée ni stockée" },
+  { icon: Lock, text: "Messagerie réservée aux participants de chaque échange" },
 ];
+
+const MONEY_LINE =
+  "Mise en relation gratuite — le tarif se convient directement entre la famille et l'AESH, hors plateforme.";
 
 const stats = [
   { value: "30+", label: "Pays du réseau AEFE" },
@@ -92,22 +105,22 @@ export default function HomePage() {
               Réseau AEFE — 30+ pays
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-ink mb-6 leading-tight">
-              Un AESH qualifié pour votre enfant,{" "}
-              <span className="text-primary">partout dans le monde</span>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-ink mb-6 leading-tight">
+              Un pont entre l&apos;accompagnement spécialisé et{" "}
+              <span className="text-primary">les familles expatriées</span>
             </h1>
 
             <p className="text-lg text-subtle mb-10 leading-relaxed max-w-lg">
-              Expat Inclusion connecte les familles francophones du réseau AEFE avec des
+              Expat Inclusion connecte les familles francophones du réseau AEFE avec des AESH
               accompagnants spécialisés — TSA, TDA/H, troubles Dys, EIP — quel que soit votre pays
               d&apos;expatriation.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <ButtonLink href="/inscription" size="lg">
-                Trouver un AESH
+              <ButtonLink href="/inscription?role=parent" size="lg">
+                Je suis parent
               </ButtonLink>
-              <ButtonLink href="/inscription" variant="outline" size="lg">
+              <ButtonLink href="/inscription?role=aesh" variant="outline" size="lg">
                 Je suis AESH
               </ButtonLink>
             </div>
@@ -122,7 +135,7 @@ export default function HomePage() {
                 30+ pays AEFE
               </span>
               <span className="flex items-center gap-1.5">
-                <Euro size={15} className="text-primary shrink-0" />
+                <HeartHandshake size={15} className="text-primary shrink-0" />
                 Mise en relation gratuite
               </span>
             </div>
@@ -147,84 +160,81 @@ export default function HomePage() {
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-ink mb-4">Comment ça marche</h2>
             <p className="text-subtle text-lg max-w-xl mx-auto">
-              Un accompagnement spécialisé en 3 étapes simples
+              Trois étapes, que vous soyez famille ou AESH
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {steps.map(({ icon: Icon, step, title, description }) => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {[
+              {
+                id: "parent",
+                title: "Pour les familles",
+                icon: User,
+                items: parentSteps,
+                href: "/inscription?role=parent",
+                cta: "Je suis parent",
+              },
+              {
+                id: "aesh",
+                title: "Pour les AESH",
+                icon: Briefcase,
+                items: aeshSteps,
+                href: "/inscription?role=aesh",
+                cta: "Je suis AESH",
+              },
+            ].map(({ id, title, icon: RoleIcon, items, href, cta }) => (
               <div
-                key={step}
-                className="bg-card rounded-2xl p-8 border border-line hover:shadow-md transition-shadow duration-200"
+                key={id}
+                data-testid={`steps-${id}`}
+                className="bg-card rounded-2xl p-8 border border-line"
               >
-                <div className="flex items-start gap-4 mb-5">
-                  <div className="w-11 h-11 bg-primary-light rounded-xl flex items-center justify-center shrink-0">
-                    <Icon size={20} className="text-primary" />
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-11 h-11 bg-primary rounded-xl flex items-center justify-center shrink-0">
+                    <RoleIcon size={20} className="text-white" />
                   </div>
-                  <span className="text-5xl font-bold text-line leading-none pt-0.5 font-heading">
-                    {step}
-                  </span>
+                  <h3 className="text-2xl font-bold text-ink">{title}</h3>
                 </div>
-                <h3 className="text-xl font-bold text-ink mb-2">{title}</h3>
-                <p className="text-subtle text-sm leading-relaxed">{description}</p>
+                <ol className="flex flex-col gap-5 mb-8">
+                  {items.map(({ icon: Icon, title: stepTitle, description }, i) => (
+                    <li key={stepTitle} className="flex items-start gap-4">
+                      <div className="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center shrink-0">
+                        <Icon size={18} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-ink">
+                          <span className="text-subtle font-heading mr-2">{i + 1}.</span>
+                          {stepTitle}
+                        </p>
+                        <p className="text-subtle text-sm leading-relaxed">{description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <ButtonLink href={href} variant="outline">
+                  {cta}
+                  <ChevronRight size={16} className="ml-1" />
+                </ButtonLink>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Pour les familles & Pour les AESH ───────────────────── */}
-      <section id="concept" className="py-20 px-4 bg-card">
+      {/* ── Confiance ────────────────────────────────────────────── */}
+      <section id="confiance" className="py-20 px-4 bg-primary-900 text-white">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Familles */}
-            <div className="bg-cream rounded-2xl p-8 border border-line">
-              <div className="w-11 h-11 bg-primary rounded-xl flex items-center justify-center mb-6">
-                <User size={20} className="text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-ink mb-3">Pour les familles expatriées</h2>
-              <p className="text-subtle text-sm leading-relaxed mb-7">
-                Votre enfant a des besoins spécifiques et vous êtes à l&apos;étranger ? Accédez à un
-                réseau d&apos;AESH qualifiés dans votre pays d&apos;expatriation.
-              </p>
-              <ul className="flex flex-col gap-3.5 mb-8">
-                {familyPoints.map(({ icon: Icon, text }) => (
-                  <li key={text} className="flex items-center gap-3 text-sm text-ink">
-                    <Icon size={16} className="text-primary shrink-0" />
-                    {text}
-                  </li>
-                ))}
-              </ul>
-              <ButtonLink href="/inscription">
-                Trouver un AESH
-                <ChevronRight size={16} className="ml-1" />
-              </ButtonLink>
-            </div>
-
-            {/* AESH */}
-            <div className="bg-primary-900 rounded-2xl p-8 text-white">
-              <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center mb-6">
-                <Briefcase size={20} className="text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-3">Pour les AESH expatriés</h2>
-              <p className="text-white/70 text-sm leading-relaxed mb-7">
-                Vous accompagnez des élèves à l&apos;étranger et souhaitez valoriser votre expertise
-                ? Rejoignez notre réseau et accédez aux familles qui ont besoin de vous.
-              </p>
-              <ul className="flex flex-col gap-3.5 mb-8">
-                {aeshPoints.map(({ icon: Icon, text }) => (
-                  <li key={text} className="flex items-center gap-3 text-sm text-white/90">
-                    <Icon size={16} className="text-white/50 shrink-0" />
-                    {text}
-                  </li>
-                ))}
-              </ul>
-              <ButtonLink href="/inscription" variant="outline-white">
-                Proposer mes services
-                <ChevronRight size={16} className="ml-1" />
-              </ButtonLink>
-            </div>
-          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-center">
+            Une mise en relation de confiance
+          </h2>
+          <ul className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {trustPoints.map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-start gap-3 bg-white/10 rounded-2xl p-6">
+                <Icon size={20} className="text-white shrink-0 mt-0.5" />
+                <span className="text-white/90 leading-relaxed">{text}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-center text-white/80 max-w-2xl mx-auto">{MONEY_LINE}</p>
         </div>
       </section>
 
@@ -287,11 +297,11 @@ export default function HomePage() {
             souhaitant valoriser votre expertise, nous sommes là pour vous.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <ButtonLink href="/inscription" size="lg">
-              Trouver un AESH
+            <ButtonLink href="/inscription?role=parent" size="lg">
+              Je suis parent
             </ButtonLink>
-            <ButtonLink href="/inscription" variant="outline" size="lg">
-              Proposer mes services
+            <ButtonLink href="/inscription?role=aesh" variant="outline" size="lg">
+              Je suis AESH
             </ButtonLink>
           </div>
         </div>

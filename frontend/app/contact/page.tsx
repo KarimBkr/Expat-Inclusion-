@@ -159,7 +159,10 @@ export default function ContactPage() {
           </div>
 
           {status === "error" && (
-            <div className="flex items-start gap-3 px-4 py-3 bg-danger/10 border border-danger/20 rounded-xl text-sm text-danger">
+            <div
+              role="alert"
+              className="flex items-start gap-3 px-4 py-3 bg-danger/10 border border-danger/20 rounded-xl text-sm text-danger"
+            >
               <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
               {errorMsg}
             </div>

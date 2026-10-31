@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 const links = [
-  { label: "Concept", href: "/#concept" },
   { label: "Comment ça marche", href: "/#comment-ca-marche" },
+  { label: "Confiance", href: "/#confiance" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
   { label: "Mentions légales", href: "/mentions-legales" },

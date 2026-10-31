@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "FAQ — Questions fréquentes",
   description:
-    "Toutes les réponses à vos questions sur Expat Inclusion : comment ça marche, profils AESH, tarifs, sécurité des données.",
+    "Toutes les réponses à vos questions sur Expat Inclusion : comment ça marche, profils AESH, gratuité, sécurité des données.",
 };
 
 const categories = [
@@ -64,11 +64,11 @@ const categories = [
     ],
   },
   {
-    title: "Tarifs & sécurité",
+    title: "Gratuité & sécurité",
     items: [
       {
-        q: "Combien coûte la plateforme et comment fixe-t-on le tarif ?",
-        a: "La mise en relation est gratuite pendant la phase de lancement. Le tarif de l'accompagnement est fixé librement entre la famille et l'AESH, via la messagerie. Expat Inclusion ne gère aucun paiement et ne stocke aucune donnée bancaire.",
+        q: "Combien coûte la plateforme ?",
+        a: "Mise en relation gratuite — le tarif se convient directement entre la famille et l'AESH, hors plateforme. Expat Inclusion n'intervient pas dans cet accord et ne stocke aucune donnée bancaire.",
       },
       {
         q: "Mes données personnelles sont-elles sécurisées ?",

@@ -16,6 +16,11 @@ export default function InscriptionPage() {
   const [globalError, setGlobalError] = useState("");
 
   useEffect(() => {
+    // Read once on mount: useSearchParams would force a Suspense boundary on this page.
+    if (new URLSearchParams(window.location.search).get("role") === "aesh") setRole("aesh");
+  }, []);
+
+  useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
   }, [user, loading, router]);
 
@@ -71,6 +76,7 @@ export default function InscriptionPage() {
           <div className="grid grid-cols-2 gap-3 mb-6">
             <button
               type="button"
+              aria-pressed={role === "parent"}
               onClick={() => setRole("parent")}
               className={`p-4 rounded-xl border-2 text-left transition-colors ${
                 role === "parent"
@@ -83,6 +89,7 @@ export default function InscriptionPage() {
             </button>
             <button
               type="button"
+              aria-pressed={role === "aesh"}
               onClick={() => setRole("aesh")}
               className={`p-4 rounded-xl border-2 text-left transition-colors ${
                 role === "aesh"
